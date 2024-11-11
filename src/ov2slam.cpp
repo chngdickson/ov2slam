@@ -111,6 +111,10 @@ SlamManager::SlamManager(std::shared_ptr<SlamParams> pstate, std::shared_ptr<Ros
     // Mapper thread handles Keyframes' processing
     // (i.e. triangulation, local map tracking, BA, LC)
     pmapper_.reset( new Mapper(pslamstate_, pmap_, pcurframe_) );
+
+    // Wheel Encoder
+    pwheelenc_.reset( new WheelEncoder() );
+    pwheelenc_->setParams(pstate->left_wheel_radius_, pstate->right_wheel_radius_, pstate->wheelbase_, pstate->encoder_resolution_, pstate->use_wheel_enc_);
 }
 
 void SlamManager::run()
@@ -121,6 +125,8 @@ void SlamManager::run()
 
     cv::Mat img_left, img_right;
 
+    WheelEncoder::EncoderData enc_data;
+
     double time = -1.; // Current image timestamp
     double cam_delay = -1.; // Delay between two successive images
     double last_img_time = -1.; // Last received image time
@@ -130,7 +136,7 @@ void SlamManager::run()
 
         // 0. Get New Images
         // =============================================
-        if( getNewImage(img_left, img_right, time) )
+        if( getNewImage(img_left, img_right, time, enc_data) )
         {
             // Update current frame
             frame_id_++;
@@ -153,7 +159,7 @@ void SlamManager::run()
             if( pslamstate_->debug_ )
                 std::cout << "\n \t >>> [SLAM Node] New image send to Front-End\n";
 
-            bool is_kf_req = pvisualfrontend_->visualTracking(img_left, time);
+            bool is_kf_req = pvisualfrontend_->visualTracking(img_left, time, enc_data);
 
             // Save current pose
             Logger::addSE3Pose(time, pcurframe_->getTwc(), is_kf_req);
@@ -236,7 +242,7 @@ void SlamManager::run()
     bis_on_ = false;
 }
 
-void SlamManager::addNewMonoImage(const double time, cv::Mat &im0)
+void SlamManager::addNewMonoImage(const double time, cv::Mat &im0, WheelEncoder::EncoderData &enc)
 {
     if( pslamstate_->bdo_undist_ ) {
         pcalib_model_left_->rectifyImage(im0, im0);
@@ -246,10 +252,13 @@ void SlamManager::addNewMonoImage(const double time, cv::Mat &im0)
     qimg_left_.push(im0);
     qimg_time_.push(time);
 
+    std::lock_guard<std::mutex> lock_(enc_mutex_);
+    qenc_.push(enc);
+
     bnew_img_available_ = true;
 }
 
-void SlamManager::addNewStereoImages(const double time, cv::Mat &im0, cv::Mat &im1) 
+void SlamManager::addNewStereoImages(const double time, cv::Mat &im0, cv::Mat &im1, WheelEncoder::EncoderData &enc) 
 {
     if( pslamstate_->bdo_stereo_rect_ || pslamstate_->bdo_undist_ ) {
         pcalib_model_left_->rectifyImage(im0, im0);
@@ -261,10 +270,13 @@ void SlamManager::addNewStereoImages(const double time, cv::Mat &im0, cv::Mat &i
     qimg_right_.push(im1);
     qimg_time_.push(time);
 
+    std::lock_guard<std::mutex> lock_(enc_mutex_);
+    qenc_.push(enc);
+
     bnew_img_available_ = true;
 }
 
-bool SlamManager::getNewImage(cv::Mat &iml, cv::Mat &imr, double &time)
+bool SlamManager::getNewImage(cv::Mat &iml, cv::Mat &imr, double &time, WheelEncoder::EncoderData &enc)
 {
     std::lock_guard<std::mutex> lock(img_mutex_);
 
@@ -286,6 +298,12 @@ bool SlamManager::getNewImage(cv::Mat &iml, cv::Mat &imr, double &time)
         if( pslamstate_->stereo_ ) {
             imr = qimg_right_.front();
             qimg_right_.pop();
+        }
+
+        if(pslamstate_->use_wheel_enc_) {
+            std::lock_guard<std::mutex> lock(enc_mutex_);
+            enc = qenc_.front();
+            qenc_.pop();
         }
 
         if( !pslamstate_->bforce_realtime_ )
@@ -313,6 +331,7 @@ void SlamManager::setupCalibration()
                         pslamstate_->fxl_, pslamstate_->fyl_, 
                         pslamstate_->cxl_, pslamstate_->cyl_,
                         pslamstate_->k1l_, pslamstate_->k2l_, 
+                        pslamstate_->k3l_, 
                         pslamstate_->p1l_, pslamstate_->p2l_,
                         pslamstate_->img_left_w_, 
                         pslamstate_->img_left_h_
@@ -327,6 +346,7 @@ void SlamManager::setupCalibration()
                             pslamstate_->fxr_, pslamstate_->fyr_, 
                             pslamstate_->cxr_, pslamstate_->cyr_,
                             pslamstate_->k1r_, pslamstate_->k2r_, 
+                            pslamstate_->k3r_, 
                             pslamstate_->p1r_, pslamstate_->p2r_,
                             pslamstate_->img_right_w_, 
                             pslamstate_->img_right_h_

@@ -529,7 +529,7 @@ bool MultiViewGeometry::ceresPnP(
                     fx, fy, cx, cy, vwpts.at(i),
                     std::pow(2.,vscales[i]));
 
-        ceres::ResidualBlockId rid = problem.AddResidualBlock(f, loss_function, posepar.values());
+        ceres::ResidualBlockId rid = problem.AddResidualBlock(f, loss_function, posepar.values()); // kezdeti ertek posepar.values()
 
         verrors_.push_back(f);
         vrids_.push_back(rid);

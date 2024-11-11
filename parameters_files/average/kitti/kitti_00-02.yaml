@@ -5,8 +5,8 @@
 # Camera Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
 
-Camera.topic_left: /cam0/image_raw
-Camera.topic_right: /cam1/image_raw
+Camera.topic_left: /kitti/camera_color_left/image
+Camera.topic_right: /kitti/camera_color_right/image
 
 Camera.model_left: pinhole
 Camera.model_right: pinhole

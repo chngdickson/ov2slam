@@ -71,10 +71,10 @@ public:
     std::string cam_left_model_, cam_right_model_;
 
     double fxl_, fyl_, cxl_, cyl_;
-    double k1l_, k2l_, p1l_, p2l_;
+    double k1l_, k2l_, k3l_, p1l_, p2l_;
 
     double fxr_, fyr_, cxr_, cyr_;
-    double k1r_, k2r_, p1r_, p2r_;
+    double k1r_, k2r_, k3r_, p1r_, p2r_;
 
     double img_left_w_, img_left_h_;
     double img_right_w_, img_right_h_;
@@ -160,4 +160,16 @@ public:
 
     // Final BA
     bool do_full_ba_;
+
+    //=====================================================
+    // Variables relative to the wheel encoder
+    //=====================================================
+
+    // Calibration parameters (TODO: Get Ready to store all of these in a vector to handle N camera)
+    std::string wheel_enc_topic_;
+    bool use_wheel_enc_;
+
+    double left_wheel_radius_, right_wheel_radius_;
+    double wheelbase_;
+    int encoder_resolution_;
 };

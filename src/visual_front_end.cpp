@@ -37,14 +37,14 @@ VisualFrontEnd::VisualFrontEnd(std::shared_ptr<SlamParams> pstate, std::shared_p
     : pslamstate_(pstate), pcurframe_(pframe), pmap_(pmap), ptracker_(ptracker)
 {}
 
-bool VisualFrontEnd::visualTracking(cv::Mat &iml, double time)
+bool VisualFrontEnd::visualTracking(cv::Mat &iml, double time, WheelEncoder::EncoderData &enc_data)
 {
     std::lock_guard<std::mutex> lock(pmap_->map_mutex_);
     
     if( pslamstate_->debug_ || pslamstate_->log_timings_ )
         Profiler::Start("0.Full-Front_End");
 
-    bool iskfreq = trackMono(iml, time);
+    bool iskfreq = trackMono(iml, time, enc_data);
 
     if( iskfreq ) {
         pmap_->createKeyframe(cur_img_, iml);
@@ -62,7 +62,7 @@ bool VisualFrontEnd::visualTracking(cv::Mat &iml, double time)
 
 
 // Perform tracking in one image, update kps and MP obs, return true if a new KF is req.
-bool VisualFrontEnd::trackMono(cv::Mat &im, double time)
+bool VisualFrontEnd::trackMono(cv::Mat &im, double time, WheelEncoder::EncoderData &enc_data)
 {
     if( pslamstate_->debug_ )
         std::cout << "\n\n - [Visual-Front-End]: Track Mono Image\n";
@@ -80,7 +80,7 @@ bool VisualFrontEnd::trackMono(cv::Mat &im, double time)
     
     // Apply Motion model to predict cur Frame pose
     Sophus::SE3d Twc = pcurframe_->getTwc();
-    motion_model_.applyMotionModel(Twc, time);
+    motion_model_.applyMotionModel(Twc, time, enc_data);
     pcurframe_->setTwc(Twc);
     
     // Track the new image

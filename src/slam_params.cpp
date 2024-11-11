@@ -55,6 +55,7 @@ SlamParams::SlamParams(const cv::FileStorage &fsSettings) {
 
     k1l_ = fsSettings["Camera.k1l"];
     k2l_ = fsSettings["Camera.k2l"];
+    k3l_ = fsSettings["Camera.k3l"];
     p1l_ = fsSettings["Camera.p1l"];
     p2l_ = fsSettings["Camera.p2l"];
 
@@ -72,6 +73,7 @@ SlamParams::SlamParams(const cv::FileStorage &fsSettings) {
 
         k1r_ = fsSettings["Camera.k1r"];
         k2r_ = fsSettings["Camera.k2r"];
+        k3r_ = fsSettings["Camera.k3r"];
         p1r_ = fsSettings["Camera.p1r"];
         p2r_ = fsSettings["Camera.p2r"];
 
@@ -164,6 +166,15 @@ SlamParams::SlamParams(const cv::FileStorage &fsSettings) {
 
     // Apply Full BA?
     do_full_ba_ = static_cast<int>(fsSettings["do_full_ba"]);
+
+    // Wheel encoder
+    use_wheel_enc_ = static_cast<int>(fsSettings["use_wheel_enc"]);
+    wheel_enc_topic_.assign(fsSettings["wheel_enc_topic"]);
+    left_wheel_radius_ = fsSettings["left_wheel_radius"];
+    right_wheel_radius_ = fsSettings["right_wheel_radius"];
+    wheelbase_  = fsSettings["wheelbase"];
+    encoder_resolution_ = static_cast<int>(fsSettings["encoder_resolution"]);
+    
 }
 
 void SlamParams::reset() {

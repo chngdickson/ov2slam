@@ -9,7 +9,7 @@ endif()
 # NOTE!
 #######
 # Set to OFF if you did not compile OpenCV w. opencv_contrib
-set(WITH_OPENCV_CONTRIB ON)
+set(WITH_OPENCV_CONTRIB OFF)
 
 if( ${CMAKE_VERSION} VERSION_LESS "3.8.2" )
     set(CMAKE_CXX_STANDARD 14)
@@ -51,6 +51,7 @@ find_package(catkin REQUIRED
         image_transport
         tf
         pcl_ros
+        irp_sen_msgs
 )
 
 # iBOW-LCD
@@ -144,6 +145,7 @@ add_library(${PROJECT_NAME}
   src/optimizer.cpp
   src/estimator.cpp
   src/loop_closer.cpp
+  src/wheel_encoder.cpp
 )
 
 
@@ -162,7 +164,7 @@ target_link_libraries(${PROJECT_NAME}
       Sophus::Sophus
     PRIVATE
       ${OpenCV_LIBS}
-      Ceres::ceres
+      ${CERES_LIBRARIES}
 )
 
 
@@ -194,6 +196,7 @@ endif (opengv_FOUND)
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(irp_sen_msgs ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context

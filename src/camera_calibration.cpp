@@ -28,8 +28,8 @@
 
 
 CameraCalibration::CameraCalibration(const std::string &model, double fx, double fy, double cx, double cy,
-                        double k1, double k2, double p1, double p2, double img_w, double img_h)
-    : fx_(fx), fy_(fy), cx_(cx), cy_(cy), k1_(k1), k2_(k2), p1_(p1), p2_(p2)
+                        double k1, double k2, double k3, double p1, double p2, double img_w, double img_h)
+    : fx_(fx), fy_(fy), cx_(cx), cy_(cy), k1_(k1), k2_(k2), k3_(k3), p1_(p1), p2_(p2)
     , img_w_(img_w), img_h_(img_h), img_size_(img_w, img_h)
 {
     std::cout << "\n Setting up camera, model selected : " << model << "\n";
@@ -49,7 +49,7 @@ CameraCalibration::CameraCalibration(const std::string &model, double fx, double
     }
 
     K_ << fx_, 0., cx_, 0., fy_, cy_, 0., 0., 1.;
-    D_ << k1_, k2_, p1_, p2_;
+    D_ << k1_, k2_, p1_, p2_, k3_;
 
     cv::eigen2cv(K_, Kcv_);
     cv::eigen2cv(D_, Dcv_);
@@ -107,7 +107,7 @@ void CameraCalibration::setUndistMap(const double alpha)
     Dcv_.release();
     D_.setZero();
 
-    k1_ = 0.; k2_ = 0.;
+    k1_ = 0.; k2_ = 0.; k3_ = 0.;
     p1_ = 0.; p2_ = 0.;
 
     fx_ = K_(0,0);
@@ -161,7 +161,7 @@ void CameraCalibration::setUndistStereoMap(const cv::Mat &R, const cv::Mat &P, c
     Dcv_.release();
     D_.setZero();
 
-    k1_ = 0.; k2_ = 0.;
+    k1_ = 0.; k2_ = 0.; k3_ = 0.;
     p1_ = 0.; p2_ = 0.;
     
     iK_ = K_.inverse();
@@ -375,11 +375,11 @@ void CameraCalibration::updateIntrinsic(const double fx, const double fy, const 
     icy_ = iK_(1,2);
 }
 
-void CameraCalibration::updateDistCoefs(const double k1, const double k2, 
+void CameraCalibration::updateDistCoefs(const double k1, const double k2, const double k3,
         const double p1, const double p2)
 {
-    k1_ = k1; k2_ = k2;
+    k1_ = k1; k2_ = k2; k3_ = k3;
     p1_ = p1; p2_ = p2;
-    D_ << k1_, k2_, p1_, p2_;
+    D_ << k1_, k2_, p1_, p2_ , k3_;
     cv::eigen2cv(D_, Dcv_);
 }

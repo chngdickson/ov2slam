@@ -40,12 +40,15 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Imu.h>
+#include <irp_sen_msgs/encoder.h>
 
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core.hpp>
 
 #include "ov2slam.hpp"
 #include "slam_params.hpp"
+
+#include "wheel_encoder.hpp"
 
 
 class SensorsGrabber {
@@ -63,6 +66,11 @@ public:
     void subRightImage(const sensor_msgs::ImageConstPtr &image) {
         std::lock_guard<std::mutex> lock(img_mutex);
         img1_buf.push(image);
+    }
+
+    void subWheelEncoder(const irp_sen_msgs::encoder &encoder_data) {
+        std::lock_guard<std::mutex> lock(enc_mutex);
+        enc_buf.push(encoder_data);
     }
 
     cv::Mat getGrayImageFromMsg(const sensor_msgs::ImageConstPtr &img_msg)
@@ -117,8 +125,23 @@ public:
                         img0_buf.pop();
                         img1_buf.pop();
 
+                        WheelEncoder::EncoderData encoder_data;
+
+                        if((pslam_->pslamstate_->use_wheel_enc_) && !(enc_buf.empty())){
+                            double enc_time = enc_buf.front().header.stamp.toSec();
+
+                            while ((enc_time + 0.015) < time0){
+                                enc_buf.pop();
+                                enc_time = enc_buf.front().header.stamp.toSec();
+                            }
+
+                            encoder_data = WheelEncoder::getWheelTravel(enc_buf.front().left_count, enc_buf.front().right_count);
+                            enc_buf.pop();
+                        }
+
+
                         if( !image0.empty() && !image1.empty() ) {
-                            pslam_->addNewStereoImages(time0, image0, image1);
+                            pslam_->addNewStereoImages(time0, image0, image1, encoder_data);
                         }
                     }
                 }
@@ -135,8 +158,22 @@ public:
                     image0 = getGrayImageFromMsg(img0_buf.front());
                     img0_buf.pop();
 
+                    WheelEncoder::EncoderData encoder_data;
+
+                    if((pslam_->pslamstate_->use_wheel_enc_) && !(enc_buf.empty())){
+                        double enc_time = enc_buf.front().header.stamp.toSec();
+
+                        while ((enc_time + 0.015) < time){
+                            enc_buf.pop();
+                            enc_time = enc_buf.front().header.stamp.toSec();
+                        }
+
+                        encoder_data = WheelEncoder::getWheelTravel(enc_buf.front().left_count, enc_buf.front().right_count);
+                        enc_buf.pop();
+                    }
+
                     if( !image0.empty()) {
-                        pslam_->addNewMonoImage(time, image0);
+                        pslam_->addNewMonoImage(time, image0, encoder_data);
                     }
                 }
             }
@@ -150,7 +187,12 @@ public:
 
     std::queue<sensor_msgs::ImageConstPtr> img0_buf;
     std::queue<sensor_msgs::ImageConstPtr> img1_buf;
+
+    std::queue<irp_sen_msgs::encoder> enc_buf;
+
     std::mutex img_mutex;
+
+    std::mutex enc_mutex;
     
     SlamManager *pslam_;
 };
@@ -203,6 +245,8 @@ int main(int argc, char** argv)
     // Create callbacks according to the topics set in the parameters file
     ros::Subscriber subleft = nh.subscribe(fsSettings["Camera.topic_left"], 2, &SensorsGrabber::subLeftImage, &sb);
     ros::Subscriber subright = nh.subscribe(fsSettings["Camera.topic_right"], 2, &SensorsGrabber::subRightImage, &sb);
+
+    ros::Subscriber subenc = nh.subscribe(fsSettings["wheel_enc_topic"], 2, &SensorsGrabber::subWheelEncoder, &sb);
 
     // Start a thread for providing new measurements to the SLAM
     std::thread sync_thread(&SensorsGrabber::sync_process, &sb);

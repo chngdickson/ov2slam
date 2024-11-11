@@ -45,6 +45,8 @@
 #include "mapper.hpp"
 #include "estimator.hpp"
 
+#include "wheel_encoder.hpp"
+
 class SlamManager {
 
 public:
@@ -54,10 +56,10 @@ public:
 
     void run();
 
-    bool getNewImage(cv::Mat &iml, cv::Mat &imr, double &time);
+    bool getNewImage(cv::Mat &iml, cv::Mat &imr, double &time, WheelEncoder::EncoderData &enc);
 
-    void addNewStereoImages(const double time, cv::Mat &im0, cv::Mat &im1);
-    void addNewMonoImage(const double time, cv::Mat &im0);
+    void addNewStereoImages(const double time, cv::Mat &im0, cv::Mat &im1, WheelEncoder::EncoderData &enc);
+    void addNewMonoImage(const double time, cv::Mat &im0, WheelEncoder::EncoderData &enc);
 
     void setupCalibration();
     void setupStereoCalibration();
@@ -103,8 +105,15 @@ public:
     std::shared_ptr<FeatureExtractor> pfeatextract_;
     std::shared_ptr<FeatureTracker> ptracker_;
 
+    std::shared_ptr<WheelEncoder> pwheelenc_;
+
     std::queue<cv::Mat> qimg_left_, qimg_right_;
+
+    std::queue<WheelEncoder::EncoderData> qenc_;
+
     std::queue<double> qimg_time_;
 
     std::mutex img_mutex_;
+
+    std::mutex enc_mutex_;
 };

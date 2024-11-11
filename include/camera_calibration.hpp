@@ -54,7 +54,7 @@ public:
     CameraCalibration() {}
 
     CameraCalibration(const std::string &model, double fx, double fy, double cx, double cy,
-        double k1, double k2, double p1, double p2, double img_w, double img_h);
+        double k1, double k2, double k3, double p1, double p2, double img_w, double img_h);
 
     void setUndistMap(const double alpha);
 
@@ -78,7 +78,7 @@ public:
 
     void updateExtrinsic(const Sophus::SE3d &Tc0ci);
     void updateIntrinsic(const double fx, const double fy, const double cx, const double cy);
-    void updateDistCoefs(const double k1, const double k2=0., const double p1=0., const double p2=0.);
+    void updateDistCoefs(const double k1, const double k2=0., const double p1=0., const double p2=0., const double k3=0.);
 
     void displayCalib() {
         std::cout.precision(8);
@@ -87,7 +87,7 @@ public:
 
     void displayDist() {
         std::cout.precision(8);
-        std::cout << "\n k1 : " << k1_ << " - k2 : " << k2_ << " - p1 : " << p1_ << " - p2 : " << p2_ << "\n";
+        std::cout << "\n k1 : " << k1_ << " - k2 : " << k2_ << " - k3 : " << k3_ << " - p1 : " << p1_ << " - p2 : " << p2_ << "\n";
     }
     
     // Model enum
@@ -95,10 +95,10 @@ public:
 
     // Calibration model
     double fx_, fy_, cx_, cy_;
-    double k1_, k2_, p1_, p2_;
+    double k1_, k2_, k3_, p1_, p2_;
     cv::Mat Kcv_, Dcv_;
     Eigen::Matrix3d K_;
-    Eigen::Vector4d D_;
+    Eigen::Matrix<double, 5, 1> D_;
 
     Eigen::Matrix3d iK_;
     double ifx_, ify_, icx_, icy_;

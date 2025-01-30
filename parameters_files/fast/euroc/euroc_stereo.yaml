@@ -39,7 +39,7 @@ Camera.p1r: -0.00010473
 Camera.p2r: -3.555907e-05
 
 # Camera Extrinsic parameters T_b_ci ( v_b = T_b_ci * v_ci )
-body_T_cam0: !!opencv-matrix
+body_T_cam0: opencv-matrix
    rows: 4
    cols: 4
    dt: d
@@ -48,7 +48,7 @@ body_T_cam0: !!opencv-matrix
            -0.0257744366974, 0.00375618835797, 0.999660727178, 0.00981073058949,
            0., 0., 0., 1.]
 
-body_T_cam1: !!opencv-matrix
+body_T_cam1: opencv-matrix
    rows: 4
    cols: 4
    dt: d

@@ -1,0 +1,14 @@
+<launch>
+  <arg name="play_bag" default="true" />
+  <arg name="bag_file" default="/root/bags/euroc/MH_04_difficult.bag"/>
+  <arg name="param_file" default="$(find ov2slam)/parameters_files/fast/euroc/euroc_stereo.yaml"/>
+
+  <!-- RUN bag file-->
+  <node name="player" pkg="rosbag" type="play" output="screen" args="-r 1.0 --clock $(arg bag_file)" if="$(arg play_bag)"/>
+  
+  <!--Node-->
+  <node name="ov2slam_node" pkg="ov2slam" output="screen" args="-alsologtostderr">
+    <rosparam file="$(arg param_file)"/>
+  </node>
+
+</launch>

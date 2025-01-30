@@ -8,7 +8,7 @@
   
   <!--Node-->
   <node name="ov2slam_node" pkg="ov2slam" type="ov2slam_node" output="screen" args="-alsologtostderr">
-    <rosparam file="$(arg param_file)"/>
+    <param name="parameters_file" type="string" value="$(arg param_file)"/>
   </node>
 
 </launch>

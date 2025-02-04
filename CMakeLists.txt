@@ -51,6 +51,7 @@ find_package(catkin REQUIRED
         image_transport
         tf
         pcl_ros
+        message_filters
 )
 
 # iBOW-LCD
@@ -117,7 +118,13 @@ if (Sophus_FOUND)
   message(STATUS "Found Sophus lib : ${Sophus_VERSION} - ${Sophus_DIR}")
 endif (Sophus_FOUND)
 
-catkin_package()
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES 
+  CATKIN_DEPENDS
+    roscpp
+    message_filters
+)
 
 ###########
 ## Build ##
@@ -144,6 +151,7 @@ add_library(${PROJECT_NAME}
   src/optimizer.cpp
   src/estimator.cpp
   src/loop_closer.cpp
+  src/my_publisher.cpp
 )
 
 
@@ -202,10 +210,17 @@ endif (opengv_FOUND)
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/ov2slam_node.cpp ${BACKWARD_ENABLE})
 add_backward(${PROJECT_NAME}_node)
+add_executable(sensor_node src/my_publisher.cpp ${BACKWARD_ENABLE})
+add_backward(sensor_node)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
     ${PROJECT_NAME}_node
+    PRIVATE
+      ${PROJECT_NAME}
+)
+target_link_libraries(
+    sensor_node
     PRIVATE
       ${PROJECT_NAME}
 )

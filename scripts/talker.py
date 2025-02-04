@@ -15,6 +15,7 @@ def imageCallback(img_data):
         pub_data.is_bigendian = img_data.is_bigendian
         pub_data.step = img_data.step
         img_pub.publish(pub_data)
+    I=I+1
     
 def talker():
     rospy.init_node('camera_listener')

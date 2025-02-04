@@ -165,7 +165,9 @@ target_link_libraries(${PROJECT_NAME}
       Ceres::ceres
 )
 
-
+catkin_install_python(PROGRAMS scripts/talker.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 # Add optional dependencies if they are found
 if (WITH_IBOW_LCD)
   target_include_directories(

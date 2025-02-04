@@ -59,7 +59,7 @@ body_T_cam1: !!opencv-matrix
 #--------------------------------------------------------------------------------------------
 # SLAM Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
-debug: 0
+debug: 1
 log_timings: 0
 
 mono: 1
@@ -148,4 +148,4 @@ nmin_covscore: 25 # Min co-obs for optimizing in SLAM mode BA
 fkf_filtering_ratio: 0.9
 
 # Final Pass
-do_full_ba: 0
+do_full_ba: 1

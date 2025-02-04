@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     message_filters::Subscriber<sensor_msgs::Image> cam_left_sub(nh, "/carla/ego_vehicle/depth_back/image", 5);
     message_filters::Subscriber<sensor_msgs::Image> cam_right_sub(nh, "/carla/ego_vehicle/depth_back_left/image", 5);
     message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
-        cam_left_sub, cam_right_sub, 1
+        cam_left_sub, cam_right_sub, 10
         );
     ros_sync.registerCallback(boost::bind(&cam_cb, _1, _2));
 

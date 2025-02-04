@@ -1,6 +1,6 @@
 <launch>
   <arg name="play_bag" default="true" />
-  <arg name="bag_file" default="/root/bags/euroc/MH_04_difficult.bag"/>
+  <arg name="bag_file" default="/root/bags/carla_bag_ros1/carla_bag_latest.bag"/>
   <arg name="param_file" default="$(find ov2slam)/parameters_files/accurate/carla/carla_mono.yaml"/>
 
   <!-- RUN bag file-->

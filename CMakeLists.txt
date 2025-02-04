@@ -208,12 +208,7 @@ add_backward(${PROJECT_NAME}_node)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
-    ${PROJECT_NAME}_node
-    PRIVATE
-      ${PROJECT_NAME}
-)
-target_link_libraries(
-    sensor_node
+    ${PROJECT_NAME}_node sensor_node
     PRIVATE
       ${PROJECT_NAME}
 )

@@ -37,7 +37,7 @@
 // 4. Subscribe to all the cameras and respective poses for pointcloud generation
 
 void cam_left_cb(const sensor_msgs::Image::ConstPtr& pcleft_msg){
-    ROS_INFO("hello x2")
+    ROS_INFO("hello x2");
 };
 void cam_cb(
   const sensor_msgs::Image::ConstPtr& pcleft_msg,

@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     //Normal subscribers
-    ros::Subscriber cam_left_info_sub = nh->subscribe("/carla/ego_vehicle/depth_back/image", 1, cam_left_cb);
+    ros::Subscriber cam_left_info_sub = nh.subscribe("/carla/ego_vehicle/depth_back/image", 1, cam_left_cb);
     // ros::Subscriber cam_right_info_sub = nh->subscribe("/carla/ego_vehicle/depth_back_left/image", 1, cam_right_cb);
 
     //Msg filter subscribers

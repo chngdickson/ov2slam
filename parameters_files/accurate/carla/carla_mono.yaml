@@ -6,7 +6,7 @@
 #--------------------------------------------------------------------------------------------
 
 Camera.topic_left: /carla/ego_vehicle/rgb_front/image
-Camera.topic_right: /carla/ego_vehicle/rgb_front/image
+Camera.topic_right: /carla/ego_vehicle/rgb_back_left/image
 
 Camera.model_left: pinhole
 Camera.model_right: pinhole
@@ -148,4 +148,4 @@ nmin_covscore: 25 # Min co-obs for optimizing in SLAM mode BA
 fkf_filtering_ratio: 0.9
 
 # Final Pass
-do_full_ba: 0
+do_full_ba: 1

@@ -36,7 +36,7 @@ This needs
 3. Publisher to voxblox in terms of pointcloud
 4. Subscribe to all the cameras and respective poses for pointcloud generation
 """
-
+ros::NodeHandle *nh;
 class SensorSync{
 
 public:

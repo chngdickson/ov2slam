@@ -204,13 +204,19 @@ endif (opengv_FOUND)
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/ov2slam_node.cpp ${BACKWARD_ENABLE})
-add_backward(${PROJECT_NAME}_node)
 add_executable(sensor_node src/my_publisher.cpp ${BACKWARD_ENABLE})
+add_backward(${PROJECT_NAME}_node)
 add_backward(sensor_node)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
-    ${PROJECT_NAME}_node sensor_node
+    ${PROJECT_NAME}_node 
+    PRIVATE
+      ${PROJECT_NAME}
+)
+
+target_link_libraries(
+    sensor_node
     PRIVATE
       ${PROJECT_NAME}
 )

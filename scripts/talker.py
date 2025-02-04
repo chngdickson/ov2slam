@@ -5,6 +5,7 @@ from sensor_msgs.msg import Image
 img_pub = rospy.Publisher('/cam0/image_raw', Image, queue_size=10)
 I = 0
 def imageCallback(img_data):
+    global I
     if I % 2:
         pub_data = Image()
         pub_data.data = img_data.data

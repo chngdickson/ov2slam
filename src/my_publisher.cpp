@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     // ros::Subscriber cam_right_info_sub = nh->subscribe("/carla/ego_vehicle/depth_back_left/image", 1, cam_right_cb);
 
     //Msg filter subscribers
-    message_filters::Subsriber<sensor_msgs::Image> cam_left_sub(*nh, "/carla/ego_vehicle/depth_back/image", 5);
+    message_filters::Subscriber<sensor_msgs::Image> cam_left_sub(*nh, "/carla/ego_vehicle/depth_back/image", 5);
     message_filters::Subscriber<sensor_msgs::Image> cam_right_sub(*nh, "/carla/ego_vehicle/depth_back_left/image", 5);
     message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
         cam_left_sub, cam_right_sub, 1

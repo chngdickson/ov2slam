@@ -119,11 +119,6 @@ if (Sophus_FOUND)
 endif (Sophus_FOUND)
 
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES 
-  CATKIN_DEPENDS
-    roscpp
-    message_filters
 )
 
 ###########

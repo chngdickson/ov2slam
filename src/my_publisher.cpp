@@ -64,7 +64,7 @@ void cam_cb(
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "filter_node");
-    nh = new ros::NodeHandle();
+    ros::NodeHandle nh = new ros::NodeHandle();
 
     //Normal subscribers
     // ros::Subscriber cam_left_info_sub = nh->subscribe("/carla/ego_vehicle/depth_back/image", 1, cam_left_cb);

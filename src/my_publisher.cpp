@@ -59,7 +59,7 @@ void cam_cb(
   const sensor_msgs::Image::ConstPtr& pcright_msg
 ){
     ROS_INFO("helo")
-}
+};
 
 int main(int argc, char** argv)
 {

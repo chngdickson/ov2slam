@@ -5,8 +5,8 @@
 # Camera Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
 
-Camera.topic_left: /carla/ego_vehicle/rgb_back_right/image
-Camera.topic_right: /carla/ego_vehicle/rgb_back_left/image
+Camera.topic_left: /cam0/image_raw
+Camera.topic_right: /cam0/image_raw
 
 Camera.model_left: pinhole
 Camera.model_right: pinhole

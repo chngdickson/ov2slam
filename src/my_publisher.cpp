@@ -36,21 +36,7 @@ This needs
 3. Publisher to voxblox in terms of pointcloud
 4. Subscribe to all the cameras and respective poses for pointcloud generation
 """
-ros::NodeHandle *nh;
-class SensorSync{
 
-public:
-    SensorSync()
-    {
-        sensor_msgs::Image img0;
-        ros::Subscriber sub; 
-    }
-
-    void subImage(const sensor_msgs::ImageConstPtr &image){
-        std::lock_guard<std::mutex> lock(img_mutex);
-    }
-
-};
 
 void cam_cb(
   const sensor_msgs::Image::ConstPtr& pcleft_msg,

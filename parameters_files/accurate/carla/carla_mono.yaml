@@ -65,7 +65,7 @@ log_timings: 0
 mono: 1
 stereo: 0
 
-force_realtime: 0
+force_realtime: 1
 
 # Estimator Mode
 slam_mode: 1
@@ -148,4 +148,4 @@ nmin_covscore: 25 # Min co-obs for optimizing in SLAM mode BA
 fkf_filtering_ratio: 0.9
 
 # Final Pass
-do_full_ba: 1
+do_full_ba: 0

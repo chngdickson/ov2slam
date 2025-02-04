@@ -146,7 +146,7 @@ add_library(${PROJECT_NAME}
   src/optimizer.cpp
   src/estimator.cpp
   src/loop_closer.cpp
-  src/my_publisher.cpp
+  # src/my_publisher.cpp
 )
 
 

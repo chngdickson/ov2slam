@@ -24,6 +24,19 @@
 #include "slam_params.hpp"
 
 
+// 1. TF sync
+// 2. Send 1 Camera to ov2slam for bundle adjustment of trajectories
+// 3. Subscribe a service callback of trajectory generated from ov2slam
+// 4. Get the sync TF from syncing the trajectories via the rosbag
+// 5. 
+
+// This needs
+// 1. Subscriber and publisher of a single camera for framerate reduction
+// 2. Service for ov2slam trajectory
+// 3. Publisher to voxblox in terms of pointcloud
+// 4. Subscribe to all the cameras and respective poses for pointcloud generation
+
+
 void cam_cb(
   const sensor_msgs::Image::ConstPtr& pcleft_msg,
   const sensor_msgs::Image::ConstPtr& pcright_msg

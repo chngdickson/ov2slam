@@ -47,7 +47,7 @@ public:
     }
 
     void subImage(const sensor_msgs::ImageConstPtr &image){
-        std::lockguard<std::mutex> lock(img_mutex);
+        std::lock_guard<std::mutex> lock(img_mutex);
     }
 
 };
@@ -78,6 +78,5 @@ int main(int argc, char** argv)
 
     // Spin and cleanup
     ros::spin();
-    delete nh;
     return 0;
 }

@@ -36,7 +36,6 @@
 // 3. Publisher to voxblox in terms of pointcloud
 // 4. Subscribe to all the cameras and respective poses for pointcloud generation
 
-
 void cam_left_cb(const sensor_msgs::Image::ConstPtr& pcleft_msg){
     ROS_INFO("hello x2")
 };
@@ -53,17 +52,14 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     //Normal subscribers
-    ros::Subscriber cam_left_info_sub = nh->subscribe("/carla/ego_vehicle/depth_back/image", 1, cam_left_cb);
+    // ros::Subscriber cam_left_info_sub = nh->subscribe("/carla/ego_vehicle/depth_back/image", 1, cam_left_cb);
     // ros::Subscriber cam_right_info_sub = nh->subscribe("/carla/ego_vehicle/depth_back_left/image", 1, cam_right_cb);
 
     //Msg filter subscribers
     message_filters::Subscriber<sensor_msgs::Image> cam_left_sub(nh, "/carla/ego_vehicle/depth_back/image", 5);
     message_filters::Subscriber<sensor_msgs::Image> cam_right_sub(nh, "/carla/ego_vehicle/depth_back_left/image", 5);
-    message_filters::ApproximateTimeSynchronizer \
-        <sensor_msgs::Image, sensor_msgs::Image> \
-        ros_sync
-        (
-            cam_left_sub, cam_right_sub, 10, 0.05
+    message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
+        cam_left_sub, cam_right_sub, 10
         );
     ros_sync.registerCallback(boost::bind(&cam_cb, _1, _2));
 

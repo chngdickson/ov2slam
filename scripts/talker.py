@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import String
 from sensor_msgs.msg import Image
 
 img_pub = rospy.Publisher('/cam0/image_raw', Image, queue_size=10)
 I = 0
-def imageCallback(img_data:Image):
+def imageCallback(img_data):
     if I % 2:
         pub_data = Image()
         pub_data.data = img_data.data

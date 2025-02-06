@@ -79,7 +79,7 @@ int main(int argc, char** argv)
     message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::CameraInfo> ros_sync(
         depth, cam_info, 10
         );
-    ros_sync.registerCallback(boost::bind(&convertdepth_cb, _1, _2));
+    ros_sync.registerCallback(boost::bind(&cam_cb, _1, _2));
 
     // Spin and cleanup
     ros::spin();

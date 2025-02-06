@@ -59,17 +59,17 @@ void convertdepth_cb(
   model_.fromCameraInfo(info_msg);
 
   // Convert Depth Image to Pointcloud
-  if (depth_msg->encoding == enc::TYPE_16UC1 || depth_msg->encoding == enc::MONO16) {
-    convertDepth<uint16_t>(depth_msg, *cloud_msg, model_, invalid_depth_);
-  } else if (depth_msg->encoding == enc::TYPE_32FC1) {
-    convertDepth<float>(depth_msg, *cloud_msg, model_, invalid_depth_);
-  } else {
-    RCLCPP_ERROR(
-      get_logger(), "Depth image has unsupported encoding [%s]", depth_msg->encoding.c_str());
-    return;
-  }
+//   if (depth_msg->encoding == enc::TYPE_16UC1 || depth_msg->encoding == enc::MONO16) {
+//     convertDepth<uint16_t>(depth_msg, *cloud_msg, model_, invalid_depth_);
+//   } else if (depth_msg->encoding == enc::TYPE_32FC1) {
+//     convertDepth<float>(depth_msg, *cloud_msg, model_, invalid_depth_);
+//   } else {
+//     ROS_ERROR(
+//       get_logger(), "Depth image has unsupported encoding [%s]", depth_msg->encoding.c_str());
+//     return;
+//   }
 
-  pub_point_cloud_->publish(std::move(cloud_msg));
+//   pub_point_cloud_->publish(std::move(cloud_msg));
 };
 
 void cam_cb(

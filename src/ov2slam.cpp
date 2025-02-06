@@ -556,7 +556,7 @@ void SlamManager::visualizeFullKFsTraj(const double time)
 void SlamManager::visualizeFinalKFsTraj()
 {
     if( prosviz_->pub_final_kfs_traj_.getNumSubscribers() == 0 ) {
-        ROS_WARN("Insufficient Number of subscriber to topic /final_kfs_traj")
+        ROS_WARN("Insufficient Number of subscriber to topic /final_kfs_traj");
         return;
     }
 

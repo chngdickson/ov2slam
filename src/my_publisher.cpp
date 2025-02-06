@@ -75,10 +75,10 @@ void convert(const sensor_msgs::ImageConstPtr& depth_msg,
     for (unsigned u = 0; u < depth_msg->width; ++u, ++raw_index)
     {
       T raw_depth = depth_row[u];
-      if (!DepthTraits<T>::valid(raw_depth))
+      if (!depth_image_proc::DepthTraits<T>::valid(raw_depth))
         continue;
       
-      double depth = DepthTraits<T>::toMeters(raw_depth);
+      double depth = depth_image_proc::DepthTraits<T>::toMeters(raw_depth);
 
       if (fill_upsampling_holes_ == false)
       {
@@ -103,9 +103,9 @@ void convert(const sensor_msgs::ImageConstPtr& depth_msg,
           continue;
       
         T& reg_depth = registered_data[v_rgb*registered_msg->width + u_rgb];
-        T  new_depth = DepthTraits<T>::fromMeters(xyz_rgb.z());
+        T  new_depth = depth_image_proc::DepthTraits<T>::fromMeters(xyz_rgb.z());
         // Validity and Z-buffer checks
-        if (!DepthTraits<T>::valid(reg_depth) || reg_depth > new_depth)
+        if (!depth_image_proc::DepthTraits<T>::valid(reg_depth) || reg_depth > new_depth)
           reg_depth = new_depth;
       }
       else
@@ -142,9 +142,9 @@ void convert(const sensor_msgs::ImageConstPtr& depth_msg,
           for (int nu=u_rgb_1; nu<=u_rgb_2; ++nu)
           {
             T& reg_depth = registered_data[nv*registered_msg->width + nu];
-            T  new_depth = DepthTraits<T>::fromMeters(0.5*(xyz_rgb_1.z()+xyz_rgb_2.z()));
+            T  new_depth = depth_image_proc::DepthTraits<T>::fromMeters(0.5*(xyz_rgb_1.z()+xyz_rgb_2.z()));
             // Validity and Z-buffer checks
-            if (!DepthTraits<T>::valid(reg_depth) || reg_depth > new_depth)
+            if (!depth_image_proc::DepthTraits<T>::valid(reg_depth) || reg_depth > new_depth)
               reg_depth = new_depth;
           }
         }

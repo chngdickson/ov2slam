@@ -18,6 +18,7 @@
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/PointCloud2Modifier.h>
+#include <sensor_msgs/point_cloud_iterator.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core.hpp>
 

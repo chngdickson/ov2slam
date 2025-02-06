@@ -61,6 +61,19 @@ void convertdepth_cb(
   image_geometry::PinholeCameraModel model_;
   model_.fromCameraInfo(info_msg);
 
+  if (depth_msg->encoding == enc::TYPE_16UC1 || depth_msg->encoding == enc::MONO16)
+  {
+    convert<uint16_t>(depth_msg, cloud_msg, model_);
+  }
+  else if (depth_msg->encoding == enc::TYPE_32FC1)
+  {
+    convert<float>(depth_msg, cloud_msg, model_);
+  }
+  else
+  {
+    NODELET_ERROR_THROTTLE(5, "Depth image has unsupported encoding [%s]", depth_msg->encoding.c_str());
+    return;
+  }
   // Convert Depth Image to Pointcloud
 //   if (depth_msg->encoding == enc::TYPE_16UC1 || depth_msg->encoding == enc::MONO16) {
 //     convertDepth<uint16_t>(depth_msg, *cloud_msg, model_, invalid_depth_);

@@ -220,6 +220,7 @@ void SlamManager::run()
                 pmapper_->bexit_required_ = true;
 
                 writeResults();
+                ROS_INFO("Publishing to Final KFS TRAJ");
 
                 // Notify exit to ROS
                 ros::requestShutdown();
@@ -555,6 +556,7 @@ void SlamManager::visualizeFullKFsTraj(const double time)
 void SlamManager::visualizeFinalKFsTraj()
 {
     if( prosviz_->pub_final_kfs_traj_.getNumSubscribers() == 0 ) {
+        ROS_WARNING("Insufficient Number of subscriber to topic /final_kfs_traj")
         return;
     }
 
@@ -592,7 +594,6 @@ void SlamManager::writeResults()
             Logger::addKfSE3Pose(pkf->img_time_, pkf->getTwc());
         }
     }
-    visualizeFinalKFsTraj();
     Logger::writeKfsTrajectory("ov2slam_kfs_traj.txt");
 
     // Apply full BA on KFs + 3D MPs if required + save

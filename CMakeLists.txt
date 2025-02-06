@@ -49,6 +49,7 @@ find_package(catkin REQUIRED
         sensor_msgs
         cv_bridge
         image_transport
+        image_geometry
         tf
         pcl_ros
         message_filters

@@ -42,8 +42,8 @@ void cam_left_cb(const sensor_msgs::Image::ConstPtr& pcleft_msg){
 };
 
 void convertdepth_cb(
-  const Image::ConstSharedPtr& depth_msg,
-  const CameraInfo::ConstSharedPtr& info_msg
+  const sensor_msgs::Image::ConstSharedPtr& depth_msg,
+  const sensor_msgs::CameraInfo::ConstSharedPtr& info_msg
 ){
 //   auto cloud_msg = std::make_unique<PointCloud2>();
 //   cloud_msg->header = depth_msg->header;

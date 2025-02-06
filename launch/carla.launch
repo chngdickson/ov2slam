@@ -11,19 +11,17 @@
   <node pkg="nodelet" type="nodelet" name="depth_image_proc" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">
     <!--remap from your specific sensors-->         
     <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_front/camera_info"/>
-    <!-- Input: Rectified color image. (sensor_msgs/Image) -->
     <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_front/image"/>
-    <!-- Input: Rectified depth image, registered to the RGB camera. (sensor_msgs/Image) -->
     <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_front/image"/>
     <!-- Output: XYZ point cloud. If using PCL, subscribe as PointCloud<PointXYZ>.  (sensor_msgs/PointCloud2)  -->
     <remap from="depth_registered/points" to="/point_cloud/points"/>
   </node>
-  
+
   <!-- <node name="player2" pkg="ov2slam" type="talker.py"/> -->
   <!-- <node name="player" pkg="rosbag" type="play" output="screen" args="-r 1.0 clock $(arg bag_file)" if="$(arg play_bag)"/> -->
   
   <!--Node-->
   <!-- <node name="ov2slam_node" pkg="ov2slam" type="ov2slam_node" output="screen" args="$(arg param_file)"> -->
-  </node>
+  <!-- </node> -->
 
 </launch>

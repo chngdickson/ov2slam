@@ -21,9 +21,7 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core.hpp>
-#include <Eigen/Geometry>
-#include <eigen_conversions/eigen_msg.h>
-#include <depth_image_proc/depth_traits.h>
+
 #include "ov2slam.hpp"
 #include "slam_params.hpp"
 /*

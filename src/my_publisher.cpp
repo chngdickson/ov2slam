@@ -16,6 +16,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Imu.h>
+#include <image_geometry/pinhole_camera_model.h>
 #include <sensor_msgs/PointCloud2.h>
 
 #include <sensor_msgs/point_cloud2_iterator.h>
@@ -57,6 +58,7 @@ void convertdepth_cb(
   pcd_modifier.setPointCloud2FieldsByString(1, "xyz");
 
   // Update camera model
+  image_geometry::PinholeCameraModel model_;
   model_.fromCameraInfo(info_msg);
 
   // Convert Depth Image to Pointcloud

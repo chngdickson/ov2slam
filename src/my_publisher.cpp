@@ -16,13 +16,13 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/PointCloud2.h>
 
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core.hpp>
 
 #include "ov2slam.hpp"
 #include "slam_params.hpp"
-#include <sensor_msgs/PointCloud2.h>
 /*
 1. TF sync
 2. Send 1 Camera to ov2slam for bundle adjustment of trajectories
@@ -41,9 +41,9 @@ void cam_left_cb(const sensor_msgs::Image::ConstPtr& pcleft_msg){
     ROS_INFO("hello x2");
 };
 
-void convert(
-  const Image::ConstSharedPtr & depth_msg,
-  const CameraInfo::ConstSharedPtr & info_msg
+void convertdepth_cb(
+  const Image::ConstSharedPtr& depth_msg,
+  const CameraInfo::ConstSharedPtr& info_msg
 ){
   auto cloud_msg = std::make_unique<PointCloud2>();
   cloud_msg->header = depth_msg->header;
@@ -69,7 +69,7 @@ void convert(
     return;
   }
 
-  pub_point_cloud_->publish(std::move(cloud_msg));
+//   pub_point_cloud_->publish(std::move(cloud_msg));
 };
 
 void cam_cb(
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::CameraInfo> ros_sync(
         depth, cam_info, 10
         );
-    ros_sync.registerCallback(boost::bind(&convert, _1, _2));
+    ros_sync.registerCallback(boost::bind(&convertdepth_cb, _1, _2));
 
     // Spin and cleanup
     ros::spin();

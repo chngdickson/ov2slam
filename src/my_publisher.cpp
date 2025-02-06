@@ -71,7 +71,7 @@ void convertdepth_cb(
   }
   else
   {
-    NODELET_ERROR_THROTTLE(5, "Depth image has unsupported encoding [%s]", depth_msg->encoding.c_str());
+    ROS_ERROR(5, "Depth image has unsupported encoding [%s]", depth_msg->encoding.c_str());
     return;
   }
   // Convert Depth Image to Pointcloud

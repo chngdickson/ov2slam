@@ -78,7 +78,7 @@ bdo_stereo_rect: 0
 alpha: 0.
 
 # Undist Image or not
-bdo_undist: 0
+bdo_undist: 1
 
 # Init / KF px th.
 finit_parallax: 20.
@@ -122,7 +122,7 @@ fmax_proj_pxdist: 2.
 
 # Randomize RANSAC?
 doepipolar: 1
-dop3p : 1
+dop3p : 0
 bdo_random: 1
 nransac_iter: 100
 fransac_err: 3.

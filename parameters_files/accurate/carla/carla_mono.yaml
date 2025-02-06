@@ -60,12 +60,12 @@ body_T_cam1: !!opencv-matrix
 # SLAM Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
 debug: 0
-log_timings: 1
+log_timings: 0
 
 mono: 1
 stereo: 0
 
-force_realtime: 1
+force_realtime: 0
 
 # Estimator Mode
 slam_mode: 1

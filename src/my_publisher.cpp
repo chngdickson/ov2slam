@@ -45,29 +45,29 @@ void convertdepth_cb(
   const Image::ConstSharedPtr& depth_msg,
   const CameraInfo::ConstSharedPtr& info_msg
 ){
-  auto cloud_msg = std::make_unique<PointCloud2>();
-  cloud_msg->header = depth_msg->header;
-  cloud_msg->height = depth_msg->height;
-  cloud_msg->width = depth_msg->width;
-  cloud_msg->is_dense = false;
-  cloud_msg->is_bigendian = false;
+//   auto cloud_msg = std::make_unique<PointCloud2>();
+//   cloud_msg->header = depth_msg->header;
+//   cloud_msg->height = depth_msg->height;
+//   cloud_msg->width = depth_msg->width;
+//   cloud_msg->is_dense = false;
+//   cloud_msg->is_bigendian = false;
 
-  sensor_msgs::PointCloud2Modifier pcd_modifier(*cloud_msg);
-  pcd_modifier.setPointCloud2FieldsByString(1, "xyz");
+//   sensor_msgs::PointCloud2Modifier pcd_modifier(*cloud_msg);
+//   pcd_modifier.setPointCloud2FieldsByString(1, "xyz");
 
-  // Update camera model
-  model_.fromCameraInfo(info_msg);
+//   // Update camera model
+//   model_.fromCameraInfo(info_msg);
 
-  // Convert Depth Image to Pointcloud
-  if (depth_msg->encoding == enc::TYPE_16UC1 || depth_msg->encoding == enc::MONO16) {
-    convertDepth<uint16_t>(depth_msg, *cloud_msg, model_, invalid_depth_);
-  } else if (depth_msg->encoding == enc::TYPE_32FC1) {
-    convertDepth<float>(depth_msg, *cloud_msg, model_, invalid_depth_);
-  } else {
-    RCLCPP_ERROR(
-      get_logger(), "Depth image has unsupported encoding [%s]", depth_msg->encoding.c_str());
-    return;
-  }
+//   // Convert Depth Image to Pointcloud
+//   if (depth_msg->encoding == enc::TYPE_16UC1 || depth_msg->encoding == enc::MONO16) {
+//     convertDepth<uint16_t>(depth_msg, *cloud_msg, model_, invalid_depth_);
+//   } else if (depth_msg->encoding == enc::TYPE_32FC1) {
+//     convertDepth<float>(depth_msg, *cloud_msg, model_, invalid_depth_);
+//   } else {
+//     RCLCPP_ERROR(
+//       get_logger(), "Depth image has unsupported encoding [%s]", depth_msg->encoding.c_str());
+//     return;
+//   }
 
 //   pub_point_cloud_->publish(std::move(cloud_msg));
 };
@@ -103,6 +103,7 @@ int main(int argc, char** argv)
     // message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
     //     cam1,cam2,cam3,cam4,cam5,cam6, 10
     //     );
+    // ros_sync.registerCallback(boost::bind(&cam_cb, _1, _2));
     message_filters::Subscriber<sensor_msgs::Image> depth(nh, "/carla/ego_vehicle/depth_back/image",5);
     message_filters::Subscriber<sensor_msgs::CameraInfo> cam_info(nh, "/carla/ego_vehicle/depth_back/camera_info", 5);
     message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::CameraInfo> ros_sync(

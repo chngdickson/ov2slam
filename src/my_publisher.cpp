@@ -42,11 +42,7 @@ This needs
 
 void cam_cb(
     const sensor_msgs::Image::ConstPtr& cam1,
-    const sensor_msgs::Image::ConstPtr& cam2,
-    const sensor_msgs::Image::ConstPtr& cam3,
-    const sensor_msgs::Image::ConstPtr& cam4,
-    const sensor_msgs::Image::ConstPtr& cam5,
-    const sensor_msgs::Image::ConstPtr& cam6
+    const sensor_msgs::CameraInfo::ConstPtr& cam2
 ){
     // auto cloud_msg =  std::make_unique<PointCloud2>();
     ROS_INFO("helo");

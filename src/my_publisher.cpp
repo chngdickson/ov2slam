@@ -22,7 +22,7 @@
 
 #include "ov2slam.hpp"
 #include "slam_params.hpp"
-#include <sensor_msgs/point_cloud2_iterator.hpp>
+#include <sensor_msgs/PointCloud2.hpp>
 /*
 1. TF sync
 2. Send 1 Camera to ov2slam for bundle adjustment of trajectories

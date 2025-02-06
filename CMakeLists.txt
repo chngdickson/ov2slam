@@ -157,6 +157,7 @@ target_include_directories(${PROJECT_NAME}
     ${PROJECT_SOURCE_DIR}/include
     ${catkin_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include/ceres_parametrization
+    ${PROJECT_SOURCE_DIR}/include/depth_image_proc
 )
 
 target_link_libraries(${PROJECT_NAME}

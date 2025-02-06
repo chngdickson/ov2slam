@@ -5,8 +5,8 @@
 # Camera Parameters. Adjust them!
 #--------------------------------------------------------------------------------------------
 
-Camera.topic_left: /cam0/image_raw
-Camera.topic_right: /cam0/image_raw
+Camera.topic_left: /carla/ego_vehicle/rgb_back/image
+Camera.topic_right: /carla/ego_vehicle/rgb_back/image
 
 Camera.model_left: pinhole
 Camera.model_right: pinhole
@@ -81,7 +81,7 @@ alpha: 0.
 bdo_undist: 0
 
 # Init / KF px th.
-finit_parallax: 30.
+finit_parallax: 5.
 
 # Features Extractor
 use_shi_tomasi: 0

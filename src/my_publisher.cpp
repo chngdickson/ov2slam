@@ -43,6 +43,7 @@ This needs
 void cam_left_cb(const sensor_msgs::Image::ConstPtr& pcleft_msg){
     ROS_INFO("hello x2");
 };
+
 template<typename T>
 void convert(const sensor_msgs::ImageConstPtr& depth_msg,
                               const sensor_msgs::ImagePtr& registered_msg,
@@ -52,7 +53,7 @@ void convert(const sensor_msgs::ImageConstPtr& depth_msg,
   registered_msg->step = registered_msg->width * sizeof(T);
   registered_msg->data.resize( registered_msg->height * registered_msg->step );
   // data is already zero-filled in the uint16 case, but for floats we want to initialize everything to NaN.
-  DepthTraits<T>::initializeBuffer(registered_msg->data);
+  depth_image_proc::DepthTraits<T>::initializeBuffer(registered_msg->data);
 
   // Extract all the parameters we need
   double inv_depth_fx = 1.0 / depth_model_.fx();

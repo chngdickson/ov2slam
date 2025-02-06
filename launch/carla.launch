@@ -8,7 +8,7 @@
   <node name="player" pkg="rosbag" type="play" args="$(arg bag_file)" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/>
 
   <!--Nodelet launch-->
-  <node name="update_frame_id" pkg="depth_image_proc" type="update_frame_id.py" output="screen" />
+  <!-- <node name="update_frame_id" pkg="depth_image_proc" type="update_frame_id.py" output="screen" /> -->
   <node pkg="nodelet" type="nodelet" args="manager" name="standalone_nodelet" output="screen"/>
   <node pkg="nodelet" type="nodelet" name="depth_image_proc" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">
     <!--remap from your specific sensors-->         

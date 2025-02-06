@@ -592,7 +592,7 @@ void SlamManager::writeResults()
             Logger::addKfSE3Pose(pkf->img_time_, pkf->getTwc());
         }
     }
-    visualizeFinalKFsTraj()
+    visualizeFinalKFsTraj();
     Logger::writeKfsTrajectory("ov2slam_kfs_traj.txt");
 
     // Apply full BA on KFs + 3D MPs if required + save

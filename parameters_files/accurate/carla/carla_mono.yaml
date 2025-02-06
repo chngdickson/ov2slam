@@ -81,7 +81,7 @@ alpha: 0.
 bdo_undist: 0
 
 # Init / KF px th.
-finit_parallax: 30.
+finit_parallax: 20.
 
 # Features Extractor
 use_shi_tomasi: 0

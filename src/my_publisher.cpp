@@ -80,7 +80,7 @@ void cam_cb(
     const sensor_msgs::Image::ConstPtr& cam5,
     const sensor_msgs::Image::ConstPtr& cam6,
 ){
-    auto cloud_msg =  std::make_unique<PointCloud2>();
+    // auto cloud_msg =  std::make_unique<PointCloud2>();
     ROS_INFO("helo");
 };
 

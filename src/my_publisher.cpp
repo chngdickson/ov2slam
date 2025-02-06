@@ -45,31 +45,31 @@ void convertdepth_cb(
   const sensor_msgs::Image::ConstPtr& depth_msg,
   const sensor_msgs::CameraInfo::ConstPtr& info_msg
 ){
-//   auto cloud_msg = std::make_unique<PointCloud2>();
-//   cloud_msg->header = depth_msg->header;
-//   cloud_msg->height = depth_msg->height;
-//   cloud_msg->width = depth_msg->width;
-//   cloud_msg->is_dense = false;
-//   cloud_msg->is_bigendian = false;
+  auto cloud_msg = std::make_unique<sensor_msgs::PointCloud2>();
+  cloud_msg->header = depth_msg->header;
+  cloud_msg->height = depth_msg->height;
+  cloud_msg->width = depth_msg->width;
+  cloud_msg->is_dense = false;
+  cloud_msg->is_bigendian = false;
 
-//   sensor_msgs::PointCloud2Modifier pcd_modifier(*cloud_msg);
-//   pcd_modifier.setPointCloud2FieldsByString(1, "xyz");
+  sensor_msgs::PointCloud2Modifier pcd_modifier(*cloud_msg);
+  pcd_modifier.setPointCloud2FieldsByString(1, "xyz");
 
-//   // Update camera model
-//   model_.fromCameraInfo(info_msg);
+  // Update camera model
+  model_.fromCameraInfo(info_msg);
 
-//   // Convert Depth Image to Pointcloud
-//   if (depth_msg->encoding == enc::TYPE_16UC1 || depth_msg->encoding == enc::MONO16) {
-//     convertDepth<uint16_t>(depth_msg, *cloud_msg, model_, invalid_depth_);
-//   } else if (depth_msg->encoding == enc::TYPE_32FC1) {
-//     convertDepth<float>(depth_msg, *cloud_msg, model_, invalid_depth_);
-//   } else {
-//     RCLCPP_ERROR(
-//       get_logger(), "Depth image has unsupported encoding [%s]", depth_msg->encoding.c_str());
-//     return;
-//   }
+  // Convert Depth Image to Pointcloud
+  if (depth_msg->encoding == enc::TYPE_16UC1 || depth_msg->encoding == enc::MONO16) {
+    convertDepth<uint16_t>(depth_msg, *cloud_msg, model_, invalid_depth_);
+  } else if (depth_msg->encoding == enc::TYPE_32FC1) {
+    convertDepth<float>(depth_msg, *cloud_msg, model_, invalid_depth_);
+  } else {
+    RCLCPP_ERROR(
+      get_logger(), "Depth image has unsupported encoding [%s]", depth_msg->encoding.c_str());
+    return;
+  }
 
-//   pub_point_cloud_->publish(std::move(cloud_msg));
+  pub_point_cloud_->publish(std::move(cloud_msg));
 };
 
 void cam_cb(

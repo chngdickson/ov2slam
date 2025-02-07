@@ -82,13 +82,7 @@ class TFHandler{
     private:
         ros::NodeHandle _nh;
         message_filters::Subscriber<sensor_msgs::PointCloud2> _pcd_front_sub, _pcd_front_left_sub, _pcd_front_right_sub, _pcd_back_sub,_pcd_back_left_sub, _pcd_back_right_sub; 
-        using ExactSyncPolicy = message_filters::sync_policies::ExactTime<
-            sensor_msgs::PointCloud2, 
-            sensor_msgs::PointCloud2,
-            sensor_msgs::PointCloud2,
-            sensor_msgs::PointCloud2,
-            sensor_msgs::PointCloud2
-            sensor_msgs::PointCloud2>;
+        using ExactSyncPolicy = message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2,sensor_msgs::PointCloud2,sensor_msgs::PointCloud2,sensor_msgs::PointCloud2,sensor_msgs::PointCloud2>;
         std::shared_ptr<message_filters::Synchronizer<ExactSyncPolicy>> _sync;
         ros::Publisher depth_new_pub;
     
@@ -96,7 +90,7 @@ class TFHandler{
         TFHandler(ros::NodeHandle* nodehandle):_nh(*nodehandle)
         { // constructor
             initializeSubscribers(); 
-            initializePublishers(depth_topicnew);
+            // initializePublishers(depth_topicnew);
         }
 
         void initializeSubscribers()
@@ -111,11 +105,11 @@ class TFHandler{
             _sync->connectInput(_pcd_front_sub, _pcd_front_left_sub, _pcd_front_right_sub, _pcd_back_sub,_pcd_back_left_sub, _pcd_back_right_sub);
             _sync->registerCallback(boost::bind(&TFHandler::subscriberCallback, this, _1, _2,_3,_4,_5,_6));
         } 
-        void initializePublishers(std::string depth_topic_new)
-        {
-            ROS_INFO("Initializing Publishers");
-            depth_new_pub = _nh.advertise<sensor_msgs::PointCloud2>(depth_topic_new, 1, true); 
-        }
+        // void initializePublishers(std::string depth_topic_new)
+        // {
+        //     ROS_INFO("Initializing Publishers");
+        //     depth_new_pub = _nh.advertise<sensor_msgs::PointCloud2>(depth_topic_new, 1, true); 
+        // }
         void subscriberCallback(
             const sensor_msgs::PointCloud2::ConstPtr& depth_cam,
             const sensor_msgs::PointCloud2::ConstPtr& rgb_cam)

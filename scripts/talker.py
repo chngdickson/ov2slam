@@ -9,11 +9,11 @@ import message_filters
 
 
 class CarlaSyncListener:
-    def __init__(self, topic_pose):
-        self.image_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/image", Image)
+    def __init__(self, topic_pose:str):
+        self.image_sub = message_filters.Subscriber(str(f"carla/ego_vehicle/rgb_{topic_pose}/image"), Image)
         self.info_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/camera_info", CameraInfo)
         self.depth_sub = message_filters.Subscriber(f"carla/ego_vehicle/depth_{topic_pose}/image", Image)
-        self.ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub, self.depth_sub], 10) 
+        self.ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub, self.depth_sub], 10)
         self.ts.registerCallback(self.callback)
         self.timestampedInfo = OrderedDict() #Timestamp:combined pointcloud
         # we need to know the quickest method for depth conversion

@@ -15,7 +15,7 @@
     <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_back2/image"/>
     <remap from="depth_registered/points" to="/point_cloud/points"/>
   </node>
-  <node pkg="nodelet" type="nodelet" name="depth_image_proc" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">        
+  <node pkg="nodelet" type="nodelet" name="depth_image_proc2" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">        
     <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_front/camera_info"/>
     <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_front/image"/>
     <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_front2/image"/>

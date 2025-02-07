@@ -41,7 +41,8 @@ This needs
 class ExampleRosClass{
     public:
         ros::NodeHandle nh_;
-        message_filters::Subscriber depth_sub; message_filters::Subscriber rgb_sub;
+        message_filters::Subscriber<sensor_msgs::Image> depth_sub; 
+        message_filters::Subscriber<sensor_msgs::CameraInfo> rgb_sub;
         message_filters::TimeSynchronizer ros_sync;
         ros::Publisher depth_new_pub;
 

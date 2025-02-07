@@ -8,16 +8,20 @@
   <node name="player" pkg="rosbag" type="play" args="$(arg bag_file)" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/>
 
   <!--Nodelet launch-->
-  <!-- <node name="update_frame_id" pkg="depth_image_proc" type="update_frame_id.py" output="screen" /> -->
   <node pkg="nodelet" type="nodelet" args="manager" name="standalone_nodelet" output="screen"/>
-  <node pkg="nodelet" type="nodelet" name="depth_image_proc" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">
-    <!--remap from your specific sensors-->         
+  <node pkg="nodelet" type="nodelet" name="depth_image_proc" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">      
     <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_back/camera_info"/>
     <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_back/image"/>
     <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_back2/image"/>
-    <!-- Output: XYZ point cloud. If using PCL, subscribe as PointCloud<PointXYZ>.  (sensor_msgs/PointCloud2)  -->
     <remap from="depth_registered/points" to="/point_cloud/points"/>
   </node>
+  <node pkg="nodelet" type="nodelet" name="depth_image_proc" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">        
+    <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_front/camera_info"/>
+    <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_front/image"/>
+    <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_front2/image"/>
+    <remap from="depth_registered/points" to="/point_cloud2/points"/>
+  </node>
+
   <node name="publisher_node" pkg="ov2slam" type="my_publisher" output="screen"/>
   <!-- <node name="player2" pkg="ov2slam" type="talker.py"/> -->
   <!-- <node name="player" pkg="rosbag" type="play" output="screen" args="-r 1.0 clock $(arg bag_file)" if="$(arg play_bag)"/> -->

@@ -43,33 +43,21 @@ class ExampleRosClass{
         ros::NodeHandle nh_;
         message_filters::Subscriber<sensor_msgs::Image> depth_sub; 
         message_filters::Subscriber<sensor_msgs::Image> rgb_sub;
-        typedef message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> ros_sync;
+        message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> ros_sync;
         ros::Publisher depth_new_pub;
     public:
         ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):nh_(*nodehandle)
         { // constructor
-            depth_sub = message_filters::Subscriber<sensor_msgs::Image>(this, depth_topic, 10);
-            rgb_sub   = message_filters::Subscriber<sensor_msgs::Image>(this, rgb_topic, 10);
-            message_filters::Synchronizer<message_filters::sync_policies::ExactTime>syncExact(ros_sync(10), depth_sub, rgb_sub); 
-            syncExact.registerCallback(&ExampleRosClass::subscriberCallback, this);
             initializeSubscribers(depth_topic, rgb_topic); 
             initializePublishers(depth_topicnew);
         }
 
         void initializeSubscribers(std::string depth_topic, std::string rgb_topic)
         {
-            // image_sub_=message_filters::Subscriber<sensor_msgs::msg::Image>(this, "/multi/left/image_color",qos);
-            // disparity_sub_= message_filters::Subscriber<sensor_msgs::msg::Image>(this, "/multi/left/disparity");
-            // typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Image, sensor_msgs::msg::Image> approximate_policy;
-            // message_filters::Synchronizer<approximate_policy>syncApproximate(approximate_policy(10), image_sub_, disparity_sub_);
-
-            // // register the exact time callback
-            // syncApproximate.registerCallback(&MultiSubscriber::disparityCb,this);
-
-            // depth_sub = message_filters::Subscriber<sensor_msgs::Image>(this, depth_topic, 10);
-            // rgb_sub   = message_filters::Subscriber<sensor_msgs::Image>(this, rgb_topic, 10);
-            // message_filters::Synchronizer<message_filters::sync_policies::ExactTime>syncExact(ros_sync(10), depth_sub, rgb_sub); 
-            // syncExact.registerCallback(&ExampleRosClass::subscriberCallback, this);
+            depth_sub.subscribe(nh_, depth_topic, 10);
+            rgb_sub.subscribe(nh_, rgb_topic, 10);
+            ros_sync(depth_sub, rgb_sub, 10); 
+            ros_sync.registerCallback(&ExampleRosClass::subscriberCallback, this);
         } 
         void initializePublishers(std::string depth_topic_new)
         {

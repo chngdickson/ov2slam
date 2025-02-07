@@ -43,6 +43,7 @@ class ExampleRosClass{
         ros::NodeHandle nh_;
         message_filters::Subscriber<sensor_msgs::Image> depth_sub; 
         message_filters::Subscriber<sensor_msgs::Image> rgb_sub;
+        message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync;
         ros::Publisher depth_new_pub;
     public:
         ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):nh_(*nodehandle)
@@ -55,9 +56,7 @@ class ExampleRosClass{
         {
             depth_sub.subscribe(nh_, depth_topic, 10);
             rgb_sub.subscribe(nh_, rgb_topic, 10);
-            message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
-                depth_sub, rgb_sub, 10
-                ); 
+            ros_sync(depth_sub, rgb_sub, 10); 
             ros_sync.registerCallback(&ExampleRosClass::subscriberCallback, this);
         } 
         void initializePublishers(std::string depth_topic_new)

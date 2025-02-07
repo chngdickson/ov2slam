@@ -43,7 +43,8 @@ class ExampleRosClass{
         ros::NodeHandle _nh;
         message_filters::Subscriber<sensor_msgs::Image> _depth_sub; 
         message_filters::Subscriber<sensor_msgs::Image> _rgb_sub;
-        using ExactSyncPolicy = message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image>;
+        // using mysyncpolicy = sync_policies::ApproximateTime<Image, CameraInfo>;
+        using ExactSyncPolicy = message_filters::ExactTime<sensor_msgs::Image, sensor_msgs::Image>;
         std::shared_ptr<message_filters::Synchronizer<ExactSyncPolicy> > _sync;
         ros::Publisher depth_new_pub;
     

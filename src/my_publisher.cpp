@@ -39,12 +39,12 @@ This needs
 */
 
 class ExampleRosClass{
-    public:
+    private:
         ros::NodeHandle nh_;
         message_filters::Subscriber<sensor_msgs::Image> depth_sub; 
         message_filters::Subscriber<sensor_msgs::Image> rgb_sub;
         ros::Publisher depth_new_pub;
-
+    public:
         ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):nh_(*nodehandle)
         { // constructor
             initializeSubscribers(depth_topic, rgb_topic); 

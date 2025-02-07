@@ -48,6 +48,10 @@ class ExampleRosClass{
     public:
         ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):nh_(*nodehandle)
         { // constructor
+            depth_sub = message_filters::Subscriber<sensor_msgs::Image>(this, depth_topic, 10);
+            rgb_sub   = message_filters::Subscriber<sensor_msgs::Image>(this, rgb_topic, 10);
+            message_filters::Synchronizer<message_filters::sync_policies::ExactTime>syncExact(ros_sync(10), depth_sub, rgb_sub); 
+            syncExact.registerCallback(&ExampleRosClass::subscriberCallback, this);
             initializeSubscribers(depth_topic, rgb_topic); 
             initializePublishers(depth_topicnew);
         }
@@ -62,10 +66,10 @@ class ExampleRosClass{
             // // register the exact time callback
             // syncApproximate.registerCallback(&MultiSubscriber::disparityCb,this);
 
-            depth_sub = message_filters::Subscriber<sensor_msgs::Image>(this, depth_topic, 10);
-            rgb_sub   = message_filters::Subscriber<sensor_msgs::Image>(this, rgb_topic, 10);
-            message_filters::Synchronizer<message_filters::sync_policies::ExactTime>syncExact(ros_sync(10), depth_sub, rgb_sub); 
-            syncExact.registerCallback(&ExampleRosClass::subscriberCallback, this);
+            // depth_sub = message_filters::Subscriber<sensor_msgs::Image>(this, depth_topic, 10);
+            // rgb_sub   = message_filters::Subscriber<sensor_msgs::Image>(this, rgb_topic, 10);
+            // message_filters::Synchronizer<message_filters::sync_policies::ExactTime>syncExact(ros_sync(10), depth_sub, rgb_sub); 
+            // syncExact.registerCallback(&ExampleRosClass::subscriberCallback, this);
         } 
         void initializePublishers(std::string depth_topic_new)
         {

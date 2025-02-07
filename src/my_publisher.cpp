@@ -116,7 +116,7 @@ class TFHandler{
             const sensor_msgs::PointCloud2::ConstPtr& c,
             const sensor_msgs::PointCloud2::ConstPtr& d,
             const sensor_msgs::PointCloud2::ConstPtr& e,
-            const sensor_msgs::PointCloud2::ConstPtr& f,
+            const sensor_msgs::PointCloud2::ConstPtr& f
             )
         {
             // sensor_msgs::PointCloud2 new_depth_msg = *depth_cam;

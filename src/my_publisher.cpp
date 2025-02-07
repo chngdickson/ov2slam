@@ -64,7 +64,7 @@ class ExampleRosClass{
 
             depth_sub = message_filters::Subscriber<sensor_msgs::msg::Image>(this, depth_topic, 10);
             rgb_sub=message_filters::Subscriber<sensor_msgs::msg::Image>(this, rgb_topic, 10);
-            message_filters::TimeSynchronizer ros_sync(depth_sub, rgb_sub, 10); 
+            message_filters::Synchronizer<message_filters::sync_policies::ExactTime>(ros_sync, depth_sub, rgb_sub, 10); 
             ros_sync.registerCallback(&ExampleRosClass::subscriberCallback, this);
         } 
         void initializePublishers(std::string depth_topic_new)

@@ -63,13 +63,13 @@ class ExampleRosClass{
         void initializePublishers(std::string depth_topic_new)
         {
             ROS_INFO("Initializing Publishers");
-            depth_new_pub = nh_.advertise<std_msgs::Float32>(depth_topic_new, 1, true); 
+            depth_new_pub = nh_.advertise<sensor_msgs::Image>(depth_topic_new, 1, true); 
         }
         void subscriberCallback(
-            const sensor_msgs::Image::ConstPtr& cam1,
-            const sensor_msgs::Image::ConstPtr& cam2)
+            const sensor_msgs::Image::ConstPtr& depth_cam,
+            const sensor_msgs::Image::ConstPtr& rgb_cam)
         {
-
+            sensor_msgs::Image depth_new = new sensor_msgs::Image;
         }
 };
 

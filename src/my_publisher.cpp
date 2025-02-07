@@ -45,10 +45,10 @@ class ExampleRosClass{
         message_filters::Subscriber<sensor_msgs::Image> rgb_sub;
         ros::Publisher depth_new_pub;
 
-        ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic):nh_(*nodehandle)
+        ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):nh_(*nodehandle)
         { // constructor
             initializeSubscribers(depth_topic, rgb_topic); 
-            initializePublishers(depth_topic);
+            initializePublishers(depth_topicnew);
         }
 
         void initializeSubscribers(std::string depth_topic, std::string rgb_topic)
@@ -63,7 +63,7 @@ class ExampleRosClass{
         void initializePublishers(std::string depth_topic_new)
         {
             ROS_INFO("Initializing Publishers");
-            depth_new_pub = nh_.advertise<std_msgs::Float32>("exampleMinimalPubTopic", 1, true); 
+            depth_new_pub = nh_.advertise<std_msgs::Float32>(depth_topic_new, 1, true); 
         }
         void subscriberCallback(
             const sensor_msgs::Image::ConstPtr& cam1,
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh; 
 
     ROS_INFO("main: instantiating an object of type ExampleRosClass");
-    ExampleRosClass exampleRosClass(&nh, "/carla/ego_vehicle/depth_back/image", "/carla/ego_vehicle/rgb_back/image");  
+    ExampleRosClass exampleRosClass(&nh, "/carla/ego_vehicle/depth_back/image", "/carla/ego_vehicle/rgb_back/image", "/carla/ego_vehicle/depth_back2/image");  
 
     ROS_INFO("main: going into spin; let the callbacks do all the work");
     ros::spin();

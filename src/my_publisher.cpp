@@ -78,6 +78,55 @@ class ExampleRosClass{
         }
 };
 
+class TFHandler{
+    private:
+        ros::NodeHandle _nh;
+        message_filters::Subscriber<sensor_msgs::PointCloud2> _pcd_front_sub, _pcd_front_left_sub, _pcd_front_right_sub, _pcd_back_sub,_pcd_back_left_sub, _pcd_back_right_sub; 
+        using ExactSyncPolicy = message_filters::sync_policies::ExactTime<
+            sensor_msgs::PointCloud2, 
+            sensor_msgs::PointCloud2,
+            sensor_msgs::PointCloud2,
+            sensor_msgs::PointCloud2,
+            sensor_msgs::PointCloud2
+            sensor_msgs::PointCloud2>;
+        std::shared_ptr<message_filters::Synchronizer<ExactSyncPolicy>> _sync;
+        ros::Publisher depth_new_pub;
+    
+    public:
+        TFHandler(ros::NodeHandle* nodehandle):_nh(*nodehandle)
+        { // constructor
+            initializeSubscribers(); 
+            initializePublishers(depth_topicnew);
+        }
+
+        void initializeSubscribers()
+        {
+            _pcd_front_sub.subscribe(_nh, "/pcd_front/points", 1);
+            _pcd_front_left_sub.subscribe(_nh, "/pcd_front_left/points", 1);
+            _pcd_front_right_sub.subscribe(_nh, "/pcd_front_right/points", 1);
+            _pcd_back_sub.subscribe(_nh, "/pcd_back/points", 1);
+            _pcd_back_left_sub.subscribe(_nh, "/pcd_back_left/points", 1);
+            _pcd_back_right_sub.subscribe(_nh, "/pcd_back_right/points", 1);
+            _sync = std::make_shared<message_filters::Synchronizer<ExactSyncPolicy>>(10);
+            _sync->connectInput(_pcd_front_sub, _pcd_front_left_sub, _pcd_front_right_sub, _pcd_back_sub,_pcd_back_left_sub, _pcd_back_right_sub);
+            _sync->registerCallback(boost::bind(&TFHandler::subscriberCallback, this, _1, _2,_3,_4,_5,_6));
+        } 
+        void initializePublishers(std::string depth_topic_new)
+        {
+            ROS_INFO("Initializing Publishers");
+            depth_new_pub = _nh.advertise<sensor_msgs::PointCloud2>(depth_topic_new, 1, true); 
+        }
+        void subscriberCallback(
+            const sensor_msgs::PointCloud2::ConstPtr& depth_cam,
+            const sensor_msgs::PointCloud2::ConstPtr& rgb_cam)
+        {
+            sensor_msgs::PointCloud2 new_depth_msg = *depth_cam;
+            // new_depth_msg.header = rgb_cam->header;
+
+            // depth_new_pub.publish(new_depth_msg);
+            ROS_INFO("did this sync?");
+        }
+};
 
 
 

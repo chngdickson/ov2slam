@@ -39,43 +39,50 @@ This needs
 */
 
 
+ExampleRosClass::ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic):nh_(*nodehandle)
+{ // constructor
+    initializeSubscribers(depth_topic, rgb_topic); 
+    initializePublishers(depth_topic);
+}
 
-void cam_cb(
-    const sensor_msgs::Image::ConstPtr& cam1,
-    const sensor_msgs::CameraInfo::ConstPtr& cam2
-){
-    // auto cloud_msg =  std::make_unique<PointCloud2>();
-    ROS_INFO("helo");
-};
-
-int main(int argc, char** argv)
+void ExampleRosClass::initializeSubscribers(std::string depth_topic, std::string rgb_topic)
 {
-    ros::init(argc, argv, "filter_node");
-    ros::NodeHandle nh;
+    message_filters::Subscriber<sensor_msgs::Image> depth(nh, depth_topic,5);
+    message_filters::Subscriber<sensor_msgs::CameraInfo> rgb(nh, rgb_topic, 5);
+    message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
+        depth, rgb, 10
+        ); 
+    ros_sync.registerCallback(boost::bind(&subscriberCallback, _1, _2));
+}
 
-    //Normal subscribers
-    // ros::Subscriber cam_left_info_sub = nh.subscribe("/carla/ego_vehicle/depth_back/image", 1, cam_left_cb);
-    // ros::Subscriber cam_right_info_sub = nh->subscribe("/carla/ego_vehicle/depth_back_left/image", 1, cam_right_cb);
+void ExampleRosClass::initializePublishers(std::string depth_topic_new)
+{
+    ROS_INFO("Initializing Publishers");
+    depth_new_pub = nh_.advertise<std_msgs::Float32>("exampleMinimalPubTopic", 1, true); 
+}
 
-    //Msg filter subscribers
-    // message_filters::Subscriber<sensor_msgs::Image> cam1(nh, "/carla/ego_vehicle/depth_back/image", 5);
-    // message_filters::Subscriber<sensor_msgs::Image> cam2(nh, "/carla/ego_vehicle/depth_back_left/image", 5);
-    // message_filters::Subscriber<sensor_msgs::Image> cam3(nh, "/carla/ego_vehicle/depth_back_right/image", 5);
-    // message_filters::Subscriber<sensor_msgs::Image> cam4(nh, "/carla/ego_vehicle/depth_front/image", 5);
-    // message_filters::Subscriber<sensor_msgs::Image> cam5(nh, "/carla/ego_vehicle/depth_front_left/image", 5);
-    // message_filters::Subscriber<sensor_msgs::Image> cam6(nh, "/carla/ego_vehicle/depth_front_right/image", 5);
-    // message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
-    //     cam1,cam2,cam3,cam4,cam5,cam6, 10
-    //     );
-    // ros_sync.registerCallback(boost::bind(&cam_cb, _1, _2));
-    message_filters::Subscriber<sensor_msgs::Image> depth(nh, "/carla/ego_vehicle/depth_back/image",5);
-    message_filters::Subscriber<sensor_msgs::CameraInfo> cam_info(nh, "/carla/ego_vehicle/depth_back/camera_info", 5);
-    message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::CameraInfo> ros_sync(
-        depth, cam_info, 10
-        );
-    ros_sync.registerCallback(boost::bind(&cam_cb, _1, _2));
 
-    // Spin and cleanup
+void ExampleRosClass::subscriberCallback(
+    const sensor_msgs::Image::ConstPtr& cam1,
+    const sensor_msgs::Image::ConstPtr& cam2
+) {
+
+}
+
+
+
+
+int main(int argc, char** argv) 
+{
+    // ROS set-ups:
+    ros::init(argc, argv, "exampleRosClass"); //node name
+
+    ros::NodeHandle nh; 
+
+    ROS_INFO("main: instantiating an object of type ExampleRosClass");
+    ExampleRosClass exampleRosClass(&nh, "/carla/ego_vehicle/depth_back/image", "/carla/ego_vehicle/rgb_back/image");  
+
+    ROS_INFO("main: going into spin; let the callbacks do all the work");
     ros::spin();
     return 0;
-}
+} 

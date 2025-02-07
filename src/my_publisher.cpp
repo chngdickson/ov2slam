@@ -53,8 +53,8 @@ class ExampleRosClass{
 
         void initializeSubscribers(std::string depth_topic, std::string rgb_topic)
         {
-            depth_sub.subscribe(this, depth_topic);
-            rgb_sub.subscribe(this, rgb_topic);
+            depth_sub.subscribe(nh_, depth_topic);
+            rgb_sub.subscribe(nh_, rgb_topic);
             message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
                 depth_sub, rgb_sub, 10
                 ); 

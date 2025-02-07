@@ -41,6 +41,10 @@ This needs
 class ExampleRosClass{
     public:
         ros::NodeHandle nh_;
+        message_filters::Subscriber depth_sub, message_filters::Subscriber rgb_sub;
+        message_filters::TimeSynchronizer ros_sync;
+        ros::Publisher depth_new_pub;
+
         ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic):nh_(*nodehandle)
         { // constructor
             initializeSubscribers(depth_topic, rgb_topic); 
@@ -49,8 +53,8 @@ class ExampleRosClass{
 
         void initializeSubscribers(std::string depth_topic, std::string rgb_topic)
         {
-            message_filters::Subscriber<sensor_msgs::Image> depth(nh_, depth_topic,5);
-            message_filters::Subscriber<sensor_msgs::CameraInfo> rgb(nh_, rgb_topic, 5);
+            message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh_, depth_topic,5);
+            message_filters::Subscriber<sensor_msgs::CameraInfo> rgb_sub(nh_, rgb_topic, 5);
             message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
                 depth, rgb, 10
                 ); 

@@ -10,9 +10,9 @@ import message_filters
 
 class CarlaSyncListener:
     def __init__(self, topic_pose):
-        self.image_sub = message_filters.Subscriber("carla/ego_vehicle/rgb_{topic_pose}/image", Image)
-        self.info_sub = message_filters.Subscriber("carla/ego_vehicle/rgb_{topic_pose}/camera_info", CameraInfo)
-        self.depth_sub = message_filters.Subscriber("carla/ego_vehicle/depth_{topic_pose}/image", Image)
+        self.image_sub = message_filters.Subscriber("carla/ego_vehicle/rgb_%s/image"%(topic_pose), Image)
+        self.info_sub = message_filters.Subscriber("carla/ego_vehicle/rgb_%s/camera_info"%(topic_pose), CameraInfo)
+        self.depth_sub = message_filters.Subscriber("carla/ego_vehicle/depth_%s/image"%(topic_pose), Image)
         self.ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub, self.depth_sub], 10)
         self.ts.registerCallback(self.callback)
         self.timestampedInfo = OrderedDict() #Timestamp:combined pointcloud

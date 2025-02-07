@@ -8,7 +8,7 @@
 #include <ros/console.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-
+#include <message_filters/sync_policies/exact_time.h>
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
 
@@ -43,7 +43,8 @@ class ExampleRosClass{
         ros::NodeHandle nh_;
         message_filters::Subscriber<sensor_msgs::Image> depth_sub; 
         message_filters::Subscriber<sensor_msgs::Image> rgb_sub;
-        message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> ros_sync;
+        using ExactSyncPolicy = message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image>;
+        std::shared_ptr<message_filters::Synchronizer<MySyncPolicy> > _sync;
         ros::Publisher depth_new_pub;
     public:
         ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):nh_(*nodehandle)
@@ -56,8 +57,9 @@ class ExampleRosClass{
         {
             depth_sub.subscribe(nh_, depth_topic, 10);
             rgb_sub.subscribe(nh_, rgb_topic, 10);
-            ros_sync(depth_sub, rgb_sub, 10); 
-            ros_sync.registerCallback(&ExampleRosClass::subscriberCallback, this);
+            _sync = std::make_shared<message_filters::Synchronizer<ExactSyncPolicy> >(10);
+            _sync->connectInput(_rgb_sub, _camera_info_sub);
+            _sync->registerCallback(boost::bind(&&ExampleRosClass::subscriberCallback, this, _1, _2));
         } 
         void initializePublishers(std::string depth_topic_new)
         {

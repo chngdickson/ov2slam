@@ -62,6 +62,7 @@ class ExampleRosClass{
             depth_new_pub = nh_.advertise<std_msgs::Float32>("exampleMinimalPubTopic", 1, true); 
         }
         void subscriberCallback(
+            ExampleRosClass *this,
             const sensor_msgs::Image::ConstPtr& cam1,
             const sensor_msgs::Image::ConstPtr& cam2)
         {

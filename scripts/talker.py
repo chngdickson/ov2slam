@@ -17,12 +17,13 @@ class CarlaSyncListener:
         self.ts.registerCallback(self.callback)
         self.timestampedInfo = OrderedDict() #Timestamp:combined pointcloud
         # we need to know the quickest method for depth conversion
-    def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
+    def callback(self, image, camera_info, depth_img):
         timestamp = image.header.stamp
         self.timestampedInfo[timestamp] = [image, camera_info.k, depth_img]
         
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
+    callback.__annotations__= {'image':Image, "camera_info": CameraInfo, "depth_img": Image}
 
 class ManySyncListener:
     def __init__(self):

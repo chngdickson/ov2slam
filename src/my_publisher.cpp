@@ -44,8 +44,9 @@ class ExampleRosClass{
         message_filters::Subscriber<sensor_msgs::Image> depth_sub; 
         message_filters::Subscriber<sensor_msgs::Image> rgb_sub;
         using ExactSyncPolicy = message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image>;
-        std::shared_ptr<message_filters::Synchronizer<MySyncPolicy> > _sync;
+        std::shared_ptr<message_filters::Synchronizer<ExactSyncPolicy> > _sync;
         ros::Publisher depth_new_pub;
+    
     public:
         ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):nh_(*nodehandle)
         { // constructor

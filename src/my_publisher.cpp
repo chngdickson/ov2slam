@@ -72,7 +72,13 @@ class ExampleRosClass{
             auto depthnew = new sensor_msgs::Image;
             depthnew->header = rgb_cam->header;
             depthnew->height = depth_cam->height;
-            
+            depthnew->width = depth_cam->width; 
+            depthnew->encoding = depth_cam->encoding;
+            depthnew->is_bigendian = depth_cam->is_bigendian;
+            depthnew->step = depth_cam->step;
+            depthnew->data = depth_cam->data;
+
+            depth_new_pub.publish(depthnew);
             
         }
 };

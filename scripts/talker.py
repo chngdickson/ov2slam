@@ -19,7 +19,7 @@ class CarlaSyncListener:
         # we need to know the quickest method for depth conversion
     def callback(self, image, camera_info, depth_img):
         timestamp = image.header.stamp
-        self.timestampedInfo[timestamp] = [image, camera_info.k, depth_img]
+        self.timestampedInfo[timestamp] = [image, camera_info._k, depth_img]
         
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)

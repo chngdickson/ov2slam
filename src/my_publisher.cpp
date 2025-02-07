@@ -56,7 +56,7 @@ class ExampleRosClass{
             message_filters::Subscriber<sensor_msgs::Image> depth_sub(nh_, depth_topic,5);
             message_filters::Subscriber<sensor_msgs::CameraInfo> rgb_sub(nh_, rgb_topic, 5);
             message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
-                depth, rgb, 10
+                depth_sub, rgb_sub, 10
                 ); 
             ros_sync.registerCallback(boost::bind(&ExampleRosClass::subscriberCallback, this,  _1, _2));
         } 

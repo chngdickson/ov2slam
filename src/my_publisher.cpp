@@ -70,6 +70,8 @@ class ExampleRosClass{
             const sensor_msgs::Image::ConstPtr& rgb_cam)
         {
             auto depthnew = new sensor_msgs::Image;
+            depthnew.header = rgb_cam.header;
+            depthnew.height = depth_cam.height;
             // depth_cam->header.frame_id = *rgb_cam->header.frame_id;
         }
 };

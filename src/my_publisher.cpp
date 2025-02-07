@@ -59,8 +59,8 @@ class ExampleRosClass{
             _depth_sub.subscribe(_nh, depth_topic, 1);
             _rgb_sub.subscribe(_nh, rgb_topic, 1);
             _sync = std::make_shared<message_filters::Synchronizer<ExactSyncPolicy>>(10);
-            _sync.connectInput(_depth_sub, _rgb_sub);
-            _sync.registerCallback(boost::bind(&ExampleRosClass::subscriberCallback, this, _1, _2));
+            _sync->connectInput(_depth_sub, _rgb_sub);
+            _sync->registerCallback(boost::bind(&ExampleRosClass::subscriberCallback, this, _1, _2));
         } 
         void initializePublishers(std::string depth_topic_new)
         {

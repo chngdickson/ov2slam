@@ -54,7 +54,7 @@ class ExampleRosClass{
             message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
                 depth, rgb, 10
                 ); 
-            ros_sync.registerCallback(boost::bind(&subscriberCallback, _1, _2));
+            ros_sync.registerCallback(boost::bind(&ExampleRosClass::subscriberCallback, this,  _1, _2));
         } 
         void initializePublishers(std::string depth_topic_new)
         {
@@ -62,7 +62,6 @@ class ExampleRosClass{
             depth_new_pub = nh_.advertise<std_msgs::Float32>("exampleMinimalPubTopic", 1, true); 
         }
         void subscriberCallback(
-            ExampleRosClass *this,
             const sensor_msgs::Image::ConstPtr& cam1,
             const sensor_msgs::Image::ConstPtr& cam2)
         {

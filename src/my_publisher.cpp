@@ -44,7 +44,7 @@ class ExampleRosClass{
         message_filters::Subscriber<sensor_msgs::Image> _depth_sub; 
         message_filters::Subscriber<sensor_msgs::Image> _rgb_sub;
         // using mysyncpolicy = sync_policies::ApproximateTime<Image, CameraInfo>;
-        using ExactSyncPolicy = message_filters::ExactTime<sensor_msgs::Image, sensor_msgs::Image>;
+        using ExactSyncPolicy = sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image>;
         std::shared_ptr<message_filters::Synchronizer<ExactSyncPolicy> > _sync;
         ros::Publisher depth_new_pub;
     
@@ -60,7 +60,7 @@ class ExampleRosClass{
             _depth_sub.subscribe(_nh, depth_topic, 1);
             _rgb_sub.subscribe(_nh, rgb_topic, 1);
             _sync = std::make_shared<message_filters::Synchronizer<ExactSyncPolicy>>(10);
-            _sync->connectInput(depth_sub, rgb_sub);
+            _sync->connectInput(_depth_sub, _rgb_sub);
             _sync->registerCallback(boost::bind(&ExampleRosClass::subscriberCallback, this, _1, _2));
         } 
         void initializePublishers(std::string depth_topic_new)

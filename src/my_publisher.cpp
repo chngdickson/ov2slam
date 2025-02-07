@@ -111,10 +111,15 @@ class TFHandler{
         //     depth_new_pub = _nh.advertise<sensor_msgs::PointCloud2>(depth_topic_new, 1, true); 
         // }
         void subscriberCallback(
-            const sensor_msgs::PointCloud2::ConstPtr& depth_cam,
-            const sensor_msgs::PointCloud2::ConstPtr& rgb_cam)
+            const sensor_msgs::PointCloud2::ConstPtr& a,
+            const sensor_msgs::PointCloud2::ConstPtr& b,
+            const sensor_msgs::PointCloud2::ConstPtr& c,
+            const sensor_msgs::PointCloud2::ConstPtr& d,
+            const sensor_msgs::PointCloud2::ConstPtr& e,
+            const sensor_msgs::PointCloud2::ConstPtr& f,
+            )
         {
-            sensor_msgs::PointCloud2 new_depth_msg = *depth_cam;
+            // sensor_msgs::PointCloud2 new_depth_msg = *depth_cam;
             // new_depth_msg.header = rgb_cam->header;
 
             // depth_new_pub.publish(new_depth_msg);

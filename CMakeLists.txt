@@ -44,6 +44,7 @@ endif()
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
     COMPONENTS
+        rospy
         roscpp
         std_msgs
         sensor_msgs

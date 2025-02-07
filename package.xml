@@ -16,7 +16,7 @@
   <url type="website">https://github.com/ov2slam/ov2slam</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-
+  <depend> rospy </depend>
   <depend> roscpp </depend>
   <depend> std_msgs </depend>
   <depend> sensor_msgs </depend>

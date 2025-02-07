@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import rospy
+import torch
 from sensor_msgs.msg import Image
 
 img_pub = rospy.Publisher('/cam0/image_raw', Image, queue_size=10)
@@ -24,6 +25,7 @@ def talker():
     rospy.spin()
 
 if __name__ == '__main__':
+    print(torch.cuda.is_available())
     try:
         talker()
     except rospy.ROSInterruptException:

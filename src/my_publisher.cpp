@@ -71,7 +71,7 @@ class ExampleRosClass{
             const sensor_msgs::Image::ConstPtr& rgb_cam)
         {
             new_depth_msg = depth_cam;
-            new_depth_msg->header = rgb_cam->header;
+            new_depth_msg.header = rgb_cam->header;
 
             depth_new_pub.publish(new_depth_msg);
             

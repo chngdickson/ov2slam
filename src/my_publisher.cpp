@@ -44,6 +44,7 @@ class ExampleRosClass{
         message_filters::Subscriber<sensor_msgs::Image> depth_sub; 
         message_filters::Subscriber<sensor_msgs::Image> rgb_sub;
         ros::Publisher depth_new_pub;
+        sensor_msgs::Image new_depth_msg;
 
         ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):nh_(*nodehandle)
         { // constructor
@@ -69,16 +70,10 @@ class ExampleRosClass{
             const sensor_msgs::Image::ConstPtr& depth_cam,
             const sensor_msgs::Image::ConstPtr& rgb_cam)
         {
-            auto depthnew = new sensor_msgs::Image;
-            depthnew->header = rgb_cam->header;
-            depthnew->height = depth_cam->height;
-            depthnew->width = depth_cam->width; 
-            depthnew->encoding = depth_cam->encoding;
-            depthnew->is_bigendian = depth_cam->is_bigendian;
-            depthnew->step = depth_cam->step;
-            depthnew->data = depth_cam->data;
+            new_depth_msg = depth_cam;
+            new_depth_msg->header = rgb_cam->header;
 
-            depth_new_pub.publish(depthnew);
+            depth_new_pub.publish(new_depth_msg);
             
         }
 };

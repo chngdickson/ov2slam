@@ -38,36 +38,35 @@ This needs
 4. Subscribe to all the cameras and respective poses for pointcloud generation
 */
 
+class ExampleRosClass{
+    public:
+        ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic):nh_(*nodehandle)
+        { // constructor
+            initializeSubscribers(depth_topic, rgb_topic); 
+            initializePublishers(depth_topic);
+        }
 
-ExampleRosClass::ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic):nh_(*nodehandle)
-{ // constructor
-    initializeSubscribers(depth_topic, rgb_topic); 
-    initializePublishers(depth_topic);
-}
+        void initializeSubscribers(std::string depth_topic, std::string rgb_topic)
+        {
+            message_filters::Subscriber<sensor_msgs::Image> depth(nh, depth_topic,5);
+            message_filters::Subscriber<sensor_msgs::CameraInfo> rgb(nh, rgb_topic, 5);
+            message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
+                depth, rgb, 10
+                ); 
+            ros_sync.registerCallback(boost::bind(&subscriberCallback, _1, _2));
+        } 
+        void initializePublishers(std::string depth_topic_new)
+        {
+            ROS_INFO("Initializing Publishers");
+            depth_new_pub = nh_.advertise<std_msgs::Float32>("exampleMinimalPubTopic", 1, true); 
+        }
+        void subscriberCallback(
+            const sensor_msgs::Image::ConstPtr& cam1,
+            const sensor_msgs::Image::ConstPtr& cam2)
+        {
 
-void ExampleRosClass::initializeSubscribers(std::string depth_topic, std::string rgb_topic)
-{
-    message_filters::Subscriber<sensor_msgs::Image> depth(nh, depth_topic,5);
-    message_filters::Subscriber<sensor_msgs::CameraInfo> rgb(nh, rgb_topic, 5);
-    message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
-        depth, rgb, 10
-        ); 
-    ros_sync.registerCallback(boost::bind(&subscriberCallback, _1, _2));
-}
-
-void ExampleRosClass::initializePublishers(std::string depth_topic_new)
-{
-    ROS_INFO("Initializing Publishers");
-    depth_new_pub = nh_.advertise<std_msgs::Float32>("exampleMinimalPubTopic", 1, true); 
-}
-
-
-void ExampleRosClass::subscriberCallback(
-    const sensor_msgs::Image::ConstPtr& cam1,
-    const sensor_msgs::Image::ConstPtr& cam2
-) {
-
-}
+        }
+};
 
 
 

@@ -69,7 +69,7 @@ class ExampleRosClass{
             const sensor_msgs::Image::ConstPtr& depth_cam,
             const sensor_msgs::Image::ConstPtr& rgb_cam)
         {
-            sensor_msgs::Image depth_new = new sensor_msgs::Image;
+            depth_new = new sensor_msgs::Image;
         }
 };
 

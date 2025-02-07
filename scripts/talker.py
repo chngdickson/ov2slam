@@ -2,7 +2,7 @@
 import rospy
 import torch
 import tf
-from typing import List
+# from typing import List
 from collections import OrderedDict
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2
 import message_filters

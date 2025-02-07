@@ -40,9 +40,9 @@ This needs
 
 class ExampleRosClass{
     public:
+        ros::NodeHandle nh_;
         ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic):nh_(*nodehandle)
         { // constructor
-            nh_ = nodehandle
             initializeSubscribers(depth_topic, rgb_topic); 
             initializePublishers(depth_topic);
         }

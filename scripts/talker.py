@@ -27,7 +27,7 @@ class CarlaSyncListener:
 
 class ManySyncListener:
     def __init__(self):
-        img_depth_lists:List[CarlaSyncListener] = [
+        img_depth_lists = [
             CarlaSyncListener("back"),
             CarlaSyncListener("front")
         ]

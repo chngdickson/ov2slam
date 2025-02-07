@@ -18,12 +18,10 @@
     <!-- Output: XYZ point cloud. If using PCL, subscribe as PointCloud<PointXYZ>.  (sensor_msgs/PointCloud2)  -->
     <remap from="depth_registered/points" to="/point_cloud/points"/>
   </node>
-
+  <node name="publisher_node" pkg="ov2slam" type="my_publisher" output="screen"/>
   <!-- <node name="player2" pkg="ov2slam" type="talker.py"/> -->
   <!-- <node name="player" pkg="rosbag" type="play" output="screen" args="-r 1.0 clock $(arg bag_file)" if="$(arg play_bag)"/> -->
   
-  <!--Node-->
-  <!-- <node name="ov2slam_node" pkg="ov2slam" type="ov2slam_node" output="screen" args="$(arg param_file)"> -->
-  <!-- </node> -->
+  <!-- <node name="ov2slam_node" pkg="ov2slam" type="ov2slam_node" output="screen" args="$(arg param_file)"/> -->
 
 </launch>

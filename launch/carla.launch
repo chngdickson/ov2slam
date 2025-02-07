@@ -9,17 +9,41 @@
 
   <!--Nodelet launch-->
   <node pkg="nodelet" type="nodelet" args="manager" name="standalone_nodelet" output="screen"/>
-  <node pkg="nodelet" type="nodelet" name="depth_image_proc" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">      
+  <node pkg="nodelet" type="nodelet" name="depth_back" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">      
     <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_back/camera_info"/>
     <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_back/image"/>
     <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_back2/image"/>
-    <remap from="depth_registered/points" to="/point_cloud/points"/>
+    <remap from="depth_registered/points" to="/pcd_back/points"/>
   </node>
-  <node pkg="nodelet" type="nodelet" name="depth_image_proc2" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">        
+  <node pkg="nodelet" type="nodelet" name="depth_back_left" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">      
+    <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_back_left/camera_info"/>
+    <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_back_left/image"/>
+    <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_back_left2/image"/>
+    <remap from="depth_registered/points" to="/pcd_back_left/points"/>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="depth_back_right" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">      
+    <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_back_right/camera_info"/>
+    <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_back_right/image"/>
+    <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_back_right2/image"/>
+    <remap from="depth_registered/points" to="/pcd_back_right/points"/>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="depth_front" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">        
     <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_front/camera_info"/>
     <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_front/image"/>
     <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_front2/image"/>
-    <remap from="depth_registered/points" to="/point_cloud2/points"/>
+    <remap from="depth_registered/points" to="/pcd_front/points"/>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="depth_front_right" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">        
+    <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_front_right/camera_info"/>
+    <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_front_right/image"/>
+    <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_front_right2/image"/>
+    <remap from="depth_registered/points" to="/pcd_front_right/points"/>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="depth_front_left" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">        
+    <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_front_left/camera_info"/>
+    <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_front_left/image"/>
+    <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_front_left2/image"/>
+    <remap from="depth_registered/points" to="/pcd_front_left/points"/>
   </node>
 
   <node name="publisher_node" pkg="ov2slam" type="my_publisher" output="screen"/>

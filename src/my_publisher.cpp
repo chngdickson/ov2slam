@@ -90,11 +90,11 @@ int main(int argc, char** argv)
 
     ROS_INFO("main: instantiating an object of type ExampleRosClass");
     ExampleRosClass exampleRosClass(&nh, "/carla/ego_vehicle/depth_back/image", "/carla/ego_vehicle/rgb_back/image", "/carla/ego_vehicle/depth_back2/image");  
-    ExampleRosClass exampleRosClass(&nh, "/carla/ego_vehicle/depth_back_left/image", "/carla/ego_vehicle/rgb_back_left/image", "/carla/ego_vehicle/depth_back_left2/image");
-    ExampleRosClass exampleRosClass(&nh, "/carla/ego_vehicle/depth_back_right/image", "/carla/ego_vehicle/rgb_back_right/image", "/carla/ego_vehicle/depth_back_right2/image");
-    ExampleRosClass exampleRosClass(&nh, "/carla/ego_vehicle/depth_front/image", "/carla/ego_vehicle/rgb_back/image", "/carla/ego_vehicle/depth_front2/image");
-    ExampleRosClass exampleRosClass(&nh, "/carla/ego_vehicle/depth_front_left/image", "/carla/ego_vehicle/rgb_back_left/image", "/carla/ego_vehicle/depth_front_left2/image");
-    ExampleRosClass exampleRosClass(&nh, "/carla/ego_vehicle/depth_front_right/image", "/carla/ego_vehicle/rgb_back_right/image", "/carla/ego_vehicle/depth_front_right2/image");
+    ExampleRosClass exampleRosClass2(&nh, "/carla/ego_vehicle/depth_back_left/image", "/carla/ego_vehicle/rgb_back_left/image", "/carla/ego_vehicle/depth_back_left2/image");
+    ExampleRosClass exampleRosClass3(&nh, "/carla/ego_vehicle/depth_back_right/image", "/carla/ego_vehicle/rgb_back_right/image", "/carla/ego_vehicle/depth_back_right2/image");
+    ExampleRosClass exampleRosClass4(&nh, "/carla/ego_vehicle/depth_front/image", "/carla/ego_vehicle/rgb_back/image", "/carla/ego_vehicle/depth_front2/image");
+    ExampleRosClass exampleRosClass5(&nh, "/carla/ego_vehicle/depth_front_left/image", "/carla/ego_vehicle/rgb_back_left/image", "/carla/ego_vehicle/depth_front_left2/image");
+    ExampleRosClass exampleRosClass6(&nh, "/carla/ego_vehicle/depth_front_right/image", "/carla/ego_vehicle/rgb_back_right/image", "/carla/ego_vehicle/depth_front_right2/image");
     ROS_INFO("main: going into spin; let the callbacks do all the work");
     ros::spin();
     return 0;

@@ -73,7 +73,7 @@ class ExampleRosClass{
             new_depth_msg.header = rgb_cam->header;
 
             depth_new_pub.publish(new_depth_msg);
-            
+            ROS_INFO("are u publishing")
         }
 };
 

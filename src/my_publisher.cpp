@@ -40,15 +40,15 @@ This needs
 
 class ExampleRosClass{
     private:
-        ros::NodeHandle nh_;
-        message_filters::Subscriber<sensor_msgs::Image> depth_sub; 
-        message_filters::Subscriber<sensor_msgs::Image> rgb_sub;
+        ros::NodeHandle _nh;
+        message_filters::Subscriber<sensor_msgs::Image> _depth_sub; 
+        message_filters::Subscriber<sensor_msgs::Image> _rgb_sub;
         using ExactSyncPolicy = message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image>;
         std::shared_ptr<message_filters::Synchronizer<ExactSyncPolicy> > _sync;
         ros::Publisher depth_new_pub;
     
     public:
-        ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):nh_(*nodehandle)
+        ExampleRosClass(ros::NodeHandle* nodehandle, std::string depth_topic, std::string rgb_topic, std::string depth_topicnew):_nh(*nodehandle)
         { // constructor
             initializeSubscribers(depth_topic, rgb_topic); 
             initializePublishers(depth_topicnew);
@@ -56,16 +56,16 @@ class ExampleRosClass{
 
         void initializeSubscribers(std::string depth_topic, std::string rgb_topic)
         {
-            depth_sub.subscribe(nh_, depth_topic, 10);
-            rgb_sub.subscribe(nh_, rgb_topic, 10);
-            _sync = std::make_shared<message_filters::Synchronizer<ExactSyncPolicy> >(10);
+            _depth_sub.subscribe(_nh, depth_topic, 1);
+            _rgb_sub.subscribe(_nh, rgb_topic, 1);
+            _sync = std::make_shared<message_filters::Synchronizer<ExactSyncPolicy>>(10);
             _sync->connectInput(depth_sub, rgb_sub);
             _sync->registerCallback(boost::bind(&ExampleRosClass::subscriberCallback, this, _1, _2));
         } 
         void initializePublishers(std::string depth_topic_new)
         {
             ROS_INFO("Initializing Publishers");
-            depth_new_pub = nh_.advertise<sensor_msgs::Image>(depth_topic_new, 1, true); 
+            depth_new_pub = _nh.advertise<sensor_msgs::Image>(depth_topic_new, 1, true); 
         }
         void subscriberCallback(
             const sensor_msgs::Image::ConstPtr& depth_cam,

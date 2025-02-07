@@ -49,8 +49,8 @@ class ExampleRosClass{
 
         void initializeSubscribers(std::string depth_topic, std::string rgb_topic)
         {
-            message_filters::Subscriber<sensor_msgs::Image> depth(nh, depth_topic,5);
-            message_filters::Subscriber<sensor_msgs::CameraInfo> rgb(nh, rgb_topic, 5);
+            message_filters::Subscriber<sensor_msgs::Image> depth(nh_, depth_topic,5);
+            message_filters::Subscriber<sensor_msgs::CameraInfo> rgb(nh_, rgb_topic, 5);
             message_filters::TimeSynchronizer <sensor_msgs::Image, sensor_msgs::Image> ros_sync(
                 depth, rgb, 10
                 ); 

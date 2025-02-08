@@ -138,11 +138,13 @@ class ManySyncListener:
         RGB color of an array.
         "max_depth" is used to omit the points that are far enough.
         """
-        dtype = torch.float32
         far = 1000.0  # max depth in meters.
-        w,h,K3x3 = int(w), int(h), torch.tensor(K_ros).reshape((3,3)).to(device)
-        K4x4 = self.K3x3to4x4(K3x3)
+        w,h = int(w), int(h)
         pixel_length = w*h
+        print(normalized_depth.shape)
+        normalized_depth = torch.tensor(normalized_depth).to(device).reshape(pixel_length)
+        dtype = normalized_depth.dtype
+        K4x4 = self.K3x3to4x4(torch.tensor(K_ros).reshape((3,3))).to(device=device, dtype=dtype)
         
         M_Basis_Cam2W = torch.tensor([
                             [ 0, 1, 0, 0],
@@ -152,7 +154,7 @@ class ManySyncListener:
         
         u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
-        normalized_depth = torch.tensor(normalized_depth).to(device).reshape(pixel_length)
+        
         # Search for pixels where the depth is greater than max_depth to
         # Make them = 0 to preserve the shape
         max_depth_indexes = torch.where(normalized_depth > max_depth)
@@ -163,6 +165,7 @@ class ManySyncListener:
 
         # p2d = [u,v,1]
         if ExtCam2Ego is not None:
+            ExtCam2Ego = torch.tensor(ExtCam2Ego).to(device=device, dtype=dtype)
             pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W @ torch.pinverse(ExtCam2Ego))
         else:
             pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W)
@@ -173,9 +176,9 @@ class ManySyncListener:
              torch.ones_like(u_coord)*normalized_depth, 
              torch.ones_like(u_coord)]
             ).to(dtype)
-        p3d = - (pixel2WorldProjection @ p3d)[:3,:]
+        p3d = (- (pixel2WorldProjection @ p3d)[:3,:]).reshape(3, w, h)
         print(p3d.shape)
-        del v_coord, u_coord, normalized_depth, max_depth_indexes
+        del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego
         torch.cuda.empty_cache()
         return p3d
 

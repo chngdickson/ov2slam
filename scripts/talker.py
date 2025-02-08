@@ -43,16 +43,19 @@ class CarlaSyncListener:
             self.timestampedInfo.popitem(False)
     
     def timeStampExist(self, timestamp):
-        return (timestamp in self.timestampedInfo, self.timestampedInfo.get(timestamp))
+        if timestamp in self.timestampedInfo:
+            data = self.timestampedInfo.get(timestamp)
+            self.timestampedInfo.pop(timestamp)
+            return (timestamp in self.timestampedInfo, data)
+        else:
+            return (False, None)
 
     def wait_tf_cb(self, event):
         if self.tf_rel_frame is None or self.tf_rel_frame2 is None:
             return
         else:
             self.check_tf_exists(self.tf_origin_frame, self.tf_rel_frame)
-            self.check_tf_exists(self.tf_origin_frame, self.tf_rel_frame2)
-        
-    
+
     def check_tf_exists(self, origin_frame, relative_frame):
         if self.tf_listener.frameExists(relative_frame):
             t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)

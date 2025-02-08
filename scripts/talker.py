@@ -113,15 +113,8 @@ class ManySyncListener:
         header = Header()
         header.frame_id = "ego_vehicle"
         header.stamp = stamp
-        msg.header = header
-        N = len(arr)
-        msg.width = N
-        msg.height = 1
-        msg.is_bigendian = False
-        msg.point_step = 24
-        msg.row_step = msg.point_step * N
-        msg.is_dense = True
-        msg.fields = [
+
+        fields = [
             PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
             PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
             PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
@@ -129,9 +122,9 @@ class ManySyncListener:
             PointField(name='g',offset=16, datatype=PointField.UINT32, count=1),
             PointField(name='b',offset=20, datatype=PointField.UINT32, count=1),
         ]
-        msg.data = arr.tostring()
-        # arr = arr.reshape(6,-1).T
-        # pc2 = point_cloud2.create_cloud(header, msg.fields, arr)
+
+        arr = arr.reshape(6,-1).T
+        pc2 = point_cloud2.create_cloud(header, fields, arr)
         self.pc2_pub.publish(msg)
 
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):

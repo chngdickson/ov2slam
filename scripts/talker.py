@@ -43,6 +43,7 @@ class CarlaSyncListener:
         if self.tf_rel_frame is None:
             return
         if self.tf_listener.frameExists(self.tf_rel_frame):
+            
             t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame)
             position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame, t)
             self.tf_received, self.pose, self.quat = True, position, quaternion

@@ -133,7 +133,7 @@ class ManySyncListener:
         p3d = torch.linalg.inv(K) @ p2d
         p3d *= depth_np_1d
 
-        lidar_np_3d = torch.transpose(p3d) 
+        lidar_np_3d = p3d.T
         py,pz,px = lidar_np_3d[:, 0], lidar_np_3d[:, 1], lidar_np_3d[:, 2]
 
         lidar_np_3d = torch.vstack((px,py,pz))

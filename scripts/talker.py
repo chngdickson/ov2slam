@@ -59,10 +59,7 @@ class CarlaSyncListener:
             position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
             quat = transformations.quaternion_matrix(quaternion)
             quat[0:3,3] = position
-            
-            print(quat)
             self.tf_received, self.extrinsic_to_origin = True, quat
-            
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
             
@@ -88,7 +85,7 @@ class ManySyncListener:
             for (rgb, info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # 1. Test Depth to pcd
                 # 2. Test 
-                self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)
+                self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=ext2_Origin)
             rospy.loginfo("message filter called, all infos exists")
     
         

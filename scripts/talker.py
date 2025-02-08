@@ -12,6 +12,8 @@ import message_filters
 import threading
 import gc
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 class CarlaSyncListener:
     def __init__(self, topic_pose, tf_origin_frame="ego_vehicle"):
         self.topic_pose = topic_pose
@@ -87,7 +89,6 @@ class ManySyncListener:
     
         
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):
-        # print(depthImg.data.shape)
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K=conf.K)
         pcd_np_3d = pcd_np_3d.detach().cpu()
         # Transform Lidar_np_3d from Camera To World Frame
@@ -101,42 +102,79 @@ class ManySyncListener:
         array = np.reshape(array, (ros_img.height, ros_img.width))
         array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
         return array
+
+    def K3x3to4x4(self,K:torch.Tensor)->torch.Tensor:
+        """Change the shape of K to 4x4 for easier matrix multiplication
+
+        Args:
+            K (torch.Tensor): _description_
+
+        Returns:
+            torch.Tensor: _description_
+        """
+        if len(K.shape) == 3:
+            B = K.shape[0]
+            K4x4 = torch.zeros(B, 4, 4, dtype=K.dtype, device=K.device)
+            K4x4[:,:3,:3] = K
+            K4x4[:,-1,-1] = 1.0
+        elif len(K.shape) == 4:
+            B, NCams, _, _ = K.shape
+            K4x4 = torch.zeros(B, NCams, 4, 4, dtype=K.dtype, device=K.device)
+            K4x4[:,:, :3,:3] = K
+            K4x4[:,:,-1,-1] = 1.0
+        elif len(K.shape) == 2:
+            K4x4 = torch.zeros(4, 4, dtype=K.dtype, device=K.device)
+            K4x4[:3,:3] = K
+            K4x4[-1,-1] = 1.0
+        else:
+            raise ValueError(f"K3x3to4x4: Invalid shape of K: {K.shape}")
+        return K4x4
     
-    def depthImg2Pcd(self, normalized_depth, w, h, K, max_depth=0.9):
+    def depthImg2Pcd(self, normalized_depth, w, h, K_ros, max_depth=0.9, ExtCam2Ego=None):
         """
         Convert an image containing CARLA encoded depth-map to a 2D array containing
         the 3D position (relative to the camera) of each pixel and its corresponding
         RGB color of an array.
         "max_depth" is used to omit the points that are far enough.
         """
-
+        dtype = torch.float64
         far = 1000.0  # max depth in meters.
-        w,h,K = int(w), int(h), torch.tensor(K).reshape((3,3)).cuda()
+        w,h,K3x3 = int(w), int(h), torch.tensor(K_ros).reshape((3,3)).to(device)
+        K4x4 = self.K3x3to4x4(K3x3)
         pixel_length = w*h
-        # u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],h, 1).reshape(pixel_length)
-        # v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],1, w).reshape(pixel_length)
         
-        u_coord = ((torch.arange(w-1, -1, -1).cuda().unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
-        v_coord = ((torch.arange(h-1, -1, -1).cuda().unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
-        normalized_depth = torch.tensor(normalized_depth).cuda().reshape(pixel_length)
+        M_Basis_Cam2W = torch.tensor([
+                            [ 0, 1, 0, 0],
+                            [ 0, 0, 1, 0],
+                            [ 1, 0, 0, 0],
+                            [ 0, 0, 0, 1]], dtype=dtype, device=device)
+        
+        u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
+        v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
+        normalized_depth = torch.tensor(normalized_depth).to(device).reshape(pixel_length)
         # Search for pixels where the depth is greater than max_depth to
         # Make them = 0 to preserve the shape
         max_depth_indexes = torch.where(normalized_depth > max_depth)
         normalized_depth[max_depth_indexes] = 0
         u_coord[max_depth_indexes] = 0
         v_coord[max_depth_indexes] = 0
-        depth_np_1d = normalized_depth *far
+        normalized_depth = normalized_depth *far
 
         # p2d = [u,v,1]
-        p2d = torch.vstack([u_coord, v_coord, torch.ones_like(u_coord)]).float()
-        # P = [X,Y,Z] # Pixel Space to Camera space
-        p3d = torch.linalg.inv(K) @ p2d
-        p3d *= depth_np_1d
-
-        p3d = p3d.T
-
-        p3d = torch.vstack((p3d[:, 0], p3d[:, 1], p3d[:, 2]))
-        del v_coord, u_coord, normalized_depth, max_depth_indexes, depth_np_1d
+        if ExtCam2Ego is not None:
+            pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W @ torch.pinverse(ExtCam2Ego))
+        else:
+            pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W)
+            
+        p3d = torch.vstack(
+            [u_coord*normalized_depth, 
+             v_coord*normalized_depth, 
+             torch.ones_like(u_coord)*normalized_depth, 
+             torch.ones_like(u_coord)]
+            ).to(dtype)
+        p3d = - (pixel2WorldProjection @ p3d)[:3,:]
+        print(p3d.shape)
+        del v_coord, u_coord, normalized_depth, max_depth_indexes
         torch.cuda.empty_cache()
         return p3d
 

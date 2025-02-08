@@ -27,11 +27,11 @@ class CarlaSyncListener:
         self.pose, self.quat = None, None
         self.timer = rospy.Timer(rospy.Duration(0.01), self.wait_tf_cb)
         
-    def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
+    def callback(self, rgb_img:Image, camera_info:CameraInfo, depth_img:Image):
         if not self.tf_received:
-            self.tf_rel_frame = depth_img.header.frame_id
+            self.tf_rel_frame = rgb_img.header.frame_id
             return
-        self.timestampedInfo[image.header.stamp] = [image, camera_info, depth_img]
+        self.timestampedInfo[rgb_img.header.stamp] = [rgb_img, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
     

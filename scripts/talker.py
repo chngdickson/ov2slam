@@ -23,13 +23,14 @@ class CarlaSyncListener:
         # TF's
         self.tf_received = False
         self.tf_listener = TransformListener()
-        self.tf_origin_frame, self.tf_rel_frame = tf_origin_frame, None
+        self.tf_origin_frame, self.tf_rel_frame, tf_rel_frame2 = tf_origin_frame, None, None
         self.pose, self.quat = None, None
         self.timer = rospy.Timer(rospy.Duration(0.01), self.wait_tf_cb)
         
     def callback(self, rgb_img:Image, camera_info:CameraInfo, depth_img:Image):
         if not self.tf_received:
             self.tf_rel_frame = rgb_img.header.frame_id
+            self.tf_rel_frame2 = depth_img.header.frame_id
             return
         self.timestampedInfo[rgb_img.header.stamp] = [rgb_img, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
@@ -47,7 +48,14 @@ class CarlaSyncListener:
             self.tf_received, self.pose, self.quat = True, position, quaternion
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
-
+        if self.tf_rel_frame2 is None:
+            return
+        if self.tf_listener.frameExists(self.tf_origin_frame) and self.tf_listener.frameExists(self.tf_rel_frame2):
+            t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame2)
+            position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame2, t)
+            self.tf_received, self.pose, self.quat = True, position, quaternion
+            rospy.loginfo(f"{self.topic_pose}")
+            self.timer.shutdown()
 class ManySyncListener:
     def __init__(self):
         topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]

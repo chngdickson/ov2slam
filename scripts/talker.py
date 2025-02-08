@@ -109,7 +109,6 @@ class ManySyncListener:
     
     
     def publish_pcd(self, arr, stamp):
-        msg = PointCloud2()
         header = Header()
         header.frame_id = "ego_vehicle"
         header.stamp = stamp
@@ -118,9 +117,9 @@ class ManySyncListener:
             PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
             PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
             PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-            PointField(name='r',offset=12, datatype=PointField.UINT32, count=1),
-            PointField(name='g',offset=16, datatype=PointField.UINT32, count=1),
-            PointField(name='b',offset=20, datatype=PointField.UINT32, count=1),
+            PointField(name='r',offset=12, datatype=PointField.FLOAT32, count=1),
+            PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
+            PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
         ]
 
         arr = arr.reshape(6,-1).T

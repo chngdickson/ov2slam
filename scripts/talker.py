@@ -25,13 +25,12 @@ class CarlaSyncListener:
         self.tf_listener = TransformListener()
         self.tf_origin_frame, self.tf_rel_frame = tf_origin_frame, None
         self.pose, self.quat = None, None
-        self.timer = rospy.Timer(rospy.Duration(0.2), self.wait_tf_cb)
+        self.timer = rospy.Timer(rospy.Duration(0.05), self.wait_tf_cb)
         
     def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
         if not self.tf_received:
             self.tf_rel_frame = image.header.frame_id
             return
-        rospy.loginfo(f"{self.topic_pose}")
         self.timestampedInfo[image.header.stamp] = [image, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
@@ -46,6 +45,7 @@ class CarlaSyncListener:
             t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame)
             position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame, t)
             self.tf_received, self.pose, self.quat = True, position, quaternion
+            rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
 
 class ManySyncListener:

@@ -141,7 +141,6 @@ class ManySyncListener:
         far = 1000.0  # max depth in meters.
         w,h = int(w), int(h)
         pixel_length = w*h
-        print(normalized_depth.shape)
         normalized_depth = torch.tensor(normalized_depth).to(device).reshape(pixel_length)
         dtype = normalized_depth.dtype
         K4x4 = self.K3x3to4x4(torch.tensor(K_ros).reshape((3,3))).to(device=device, dtype=dtype)
@@ -155,7 +154,7 @@ class ManySyncListener:
         u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
         
-        # Search for pixels where the depth is greater than max_depth to
+        # Search for pixels where the depth is greater than max_depth 
         # Make them = 0 to preserve the shape
         max_depth_indexes = torch.where(normalized_depth > max_depth)
         normalized_depth[max_depth_indexes], u_coord[max_depth_indexes], v_coord[max_depth_indexes] = 0,0,0
@@ -169,14 +168,13 @@ class ManySyncListener:
             pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W)
             
         p3d = torch.vstack(
-            [u_coord*normalized_depth, 
-             v_coord*normalized_depth, 
+            [u_coord*normalized_depth,
+             v_coord*normalized_depth,
              torch.ones_like(u_coord)*normalized_depth, 
              torch.ones_like(u_coord)]
             ).to(dtype)
         p3d = (- (pixel2WorldProjection @ p3d)[:3,:]).reshape(3, h, w)
-        print(p3d.shape)
-        del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego
+        del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d
 

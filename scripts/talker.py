@@ -37,7 +37,7 @@ class ManySyncListener:
         self.list_filters = [message_filters.Subscriber(f"carla/ego_vehicle/depth_{n}/image", Image) for n in topics_list]
         self.ts = message_filters.TimeSynchronizer(self.list_filters, 10)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
-        self.tf = TransformListener
+        self.tf = TransformListener()
         self.waitTf("ego_vehicle", "ego_vehicle/depth_front")
     
     def time_stamp_fuse_cb(self, 

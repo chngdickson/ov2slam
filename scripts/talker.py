@@ -112,7 +112,9 @@ class ManySyncListener:
 
     def ros_rgb_img2numpy(self, rgb_img: Image):
         im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width, -1)
-        im = cv2.cvtColor(im, cv2.COLOR_BGRA2RGB )
+        # BGRA to RGB
+        im = im[:,:,:3]
+        im = im[:,:,::-1]
         return im
     
     def ros_depth_img2numpy(self, ros_img: Image) -> np.ndarray:

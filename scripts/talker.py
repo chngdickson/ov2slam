@@ -60,6 +60,7 @@ class ManySyncListener:
         listener = tf.TransformListener()
         listener.waitForTransform(topic_frame, to_frame, rospy.Time(), rospy.Duration(4.0))
         (trans,rot) = listener.lookupTransform(topic_frame, to_frame, rospy.Time.now())
+        print(trans, rot)
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         # print(depthImg.data.shape)
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K=conf.K)

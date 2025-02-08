@@ -16,7 +16,7 @@ class CarlaSyncListener:
     def __init__(self, topic_pose, tf_origin_frame="ego_vehicle"):
         self.topic_pose = topic_pose
         self.image_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/image", Image)
-        self.info_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/camera_info", CameraInfo)
+        self.info_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgbd_{topic_pose}/camera_info", CameraInfo)
         self.depth_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgbd_{topic_pose}/image", Image)
         self.ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub, self.depth_sub], 10)
         self.ts.registerCallback(self.callback)

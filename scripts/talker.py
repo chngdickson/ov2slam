@@ -89,6 +89,7 @@ class ManySyncListener:
         # print(depthImg.data.shape)
         pcd_np_3 = self.depth_to_lidar(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K=conf.K)
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K=conf.K)
+        np.allclose(pcd_np_3, pcd_np_3d.numpy()), "error"
         # Transform Lidar_np_3d from Camera To World Frame
         # pcd_np_3d = np.dot(camExt2WorldRH, np.vstack([pcd_np_3d, np.ones(pcd_np_3d.shape[1])]))[:3]
         # rgbSemCombi = np.dstack((rgbImg, semImg))

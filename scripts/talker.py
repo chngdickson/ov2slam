@@ -132,7 +132,7 @@ class ManySyncListener:
         msg.data = arr.tostring()
         # arr = arr.reshape(6,-1).T
         # pc2 = point_cloud2.create_cloud(header, msg.fields, arr)
-        self.pc2_pub.publish(pc2)
+        self.pc2_pub.publish(msg)
 
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)

@@ -40,7 +40,7 @@ class CarlaSyncListener:
         return (timestamp in self.timestampedInfo, self.timestampedInfo.get(timestamp))
 
     def wait_tf_cb(self, event):
-        if self.tf_rel_frame is None:
+        if not self.tf_rel_frame is None:
             return
         if self.tf_listener.frameExists(self.tf_origin_frame) and self.tf_listener.frameExists(self.tf_rel_frame):
             t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame)

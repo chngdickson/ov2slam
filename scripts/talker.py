@@ -63,6 +63,7 @@ class ManySyncListener:
         if self.tf.frameExists(topic_frame) and self.tf.frameExists(to_frame):
             t = self.tf.getLatestCommonTime(topic_frame, to_frame)
             position, quaternion = self.tf.lookupTransform(topic_frame, to_frame, t)
+            print(to_frame,position, quaternion)
             return position, quaternion
         else:
             return None, None

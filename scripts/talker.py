@@ -30,7 +30,7 @@ class CarlaSyncListener:
         self.timer = rospy.Timer(rospy.Duration(0.01), self.wait_tf_cb)
         
     def callback(self, rgb_img:Image, camera_info:CameraInfo, depth_img:Image):
-        mutex.acquire(blocking=True)
+        mutex.acquire(blocking=False)
         if not self.tf_received:
             self.tf_rel_frame = rgb_img.header.frame_id
             self.tf_rel_frame2 = depth_img.header.frame_id
@@ -45,7 +45,7 @@ class CarlaSyncListener:
         return (timestamp in self.timestampedInfo, self.timestampedInfo.get(timestamp))
 
     def wait_tf_cb(self, event):
-        mutex.acquire(blocking=True)
+        mutex.acquire(blocking=False)
         if self.tf_rel_frame is None:
             mutex.release()
             return
@@ -79,7 +79,7 @@ class ManySyncListener:
         front:Image, front_left:Image, front_right:Image, 
         back:Image, back_left:Image, back_right:Image
         ):
-        mutex.acquire(blocking=True)
+        mutex.acquire(blocking=False)
         rospy.loginfo("message filter called")
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, pose_quat = [],[],[]

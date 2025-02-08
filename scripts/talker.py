@@ -54,7 +54,7 @@ class ManySyncListener:
             for rgb, info, depth in rgb_Rgbinfo_Depths:
                 # 1. Test Depth to pcd
                 # 2. Test 
-                pos, quat = self.waitTf("ego_vehicle", depth.header.frame_id)
+                pos, quat = self.waitTf("ego_vehicle", rgb.header.frame_id)
                 self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)
             rospy.loginfo("message filter called, all infos exists")
     
@@ -62,7 +62,6 @@ class ManySyncListener:
         if self.tf.frameExists(topic_frame) and self.tf.frameExists(to_frame):
             t = self.tf.getLatestCommonTime(topic_frame, to_frame)
             position, quaternion = self.tf.lookupTransform(topic_frame, to_frame, t)
-            print(to_frame, position)
             return position, quaternion
         
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):

@@ -29,7 +29,7 @@ class CarlaSyncListener:
         
     def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
         if not self.tf_received:
-            self.tf_rel_frame = image.header.frame_id
+            self.tf_rel_frame = depth_img.header.frame_id
             return
         self.timestampedInfo[image.header.stamp] = [image, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:

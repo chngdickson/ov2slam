@@ -78,7 +78,7 @@ class ManySyncListener:
         """
         K = np.array(K)
         print(K)
-        K.reshape((3,3))
+        K = K.reshape((3,3))
         print(K)
         far = 1000.0  # max depth in meters.
         w,h,K = int(w), int(h), np.array(K)

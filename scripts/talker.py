@@ -122,7 +122,7 @@ class ManySyncListener:
             # PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
         ]
 
-        arr = arr.reshape(6,-1).T
+        arr = arr.reshape(3,-1).T
         pc2 = point_cloud2.create_cloud(header, fields, arr)
         self.pc2_pub.publish(pc2)
 

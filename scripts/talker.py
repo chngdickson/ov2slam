@@ -25,7 +25,7 @@ class CarlaSyncListener:
         self.tf_listener = TransformListener()
         self.tf_origin_frame, self.tf_rel_frame = tf_origin_frame, None
         self.pose, self.quat = None, None
-        self.timer = rospy.Timer(rospy.Duration(0.05), self.wait_tf_cb)
+        self.timer = rospy.Timer(rospy.Duration(0.01), self.wait_tf_cb)
         
     def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
         if not self.tf_received:

@@ -30,7 +30,7 @@ class ManySyncListener:
         topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]
         img_depth_lists:List[CarlaSyncListener] = [CarlaSyncListener(n) for n in topics_list]
         self.list_filters = [message_filters.Subscriber(f"carla/ego_vehicle/depth_{n}/image", Image) for n in topics_list]
-        self.ts = message_filters.TimeSynchronizer([self.list_filters], 10)
+        self.ts = message_filters.TimeSynchronizer(self.list_filters, 10)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
     
     def time_stamp_fuse_cb(self, front, front_left, front_right, back, back_left, back_right):

@@ -52,7 +52,7 @@ class ManySyncListener:
             for rgb, info, depth in rgb_Rgbinfo_Depths:
                 # 1. Test Depth to pcd
                 # 2. 
-                self.process_depthRgbc(None, None, depthImg=depth.data, conf=info, camExt2WorldRH=None)
+                self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)
             rospy.loginfo("message filter called, all infos exists")
     
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):

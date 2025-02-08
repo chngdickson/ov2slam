@@ -15,8 +15,10 @@ import numpy.matlib as npm
 import rospy
 import message_filters
 from tf import TransformListener, transformations
+from std_msgs.msg import Header
 from sensor_msgs import point_cloud2
-from sensor_msgs.msg import Image, CameraInfo, PointCloud2
+from sensor_msgs.msg import Image, CameraInfo
+from sensor_msgs.msg import PointCloud2, PointField
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -76,10 +78,15 @@ class ManySyncListener:
     def __init__(self):
         topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]
         self.listenerDict:Dict[str,CarlaSyncListener] = {n:CarlaSyncListener(n) for n in topics_list}
+        
+        # message_filters Synchronizer
         self.list_filters = [message_filters.Subscriber(f"carla/ego_vehicle/rgbd_{n}/image", Image) for n in topics_list]
         self.ts = message_filters.TimeSynchronizer(self.list_filters, 10)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
 
+        # Publisher
+        self.pc2_pub = rospy.Publisher("ego_vehicle_pcd",PointCloud2, queue_size=10)
+        
     def time_stamp_fuse_cb(self, 
         front:Image, front_left:Image, front_right:Image, 
         back:Image, back_left:Image, back_right:Image
@@ -96,18 +103,30 @@ class ManySyncListener:
                 # 1. TODO: Test Depth to pcd
                 # 2. TODO: Test pointcloud visualization 
                 xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+            xyzrgb = np.dstack(xyzrgb_list)
+            self.publish_pcd(xyzrgb, timestamp)
             rospy.loginfo("message filter called, all infos exists")
     
     
-    def publish_pcd(self, arr):
-        return
+    def publish_pcd(self, arr, stamp):
+        header = Header()
+        header.frame_id = "ego_vehicle"
+        header.stamp = stamp
+        fields = [
+            PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
+            PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
+            PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
+            PointField(name='rgb',offset=12, datatype=PointField.UINT32, count=1),
+        ]
+        arr = arr.reshape(6,-1).T
+        pc2 = point_cloud2.create_cloud(header, fields, arr)
+        self.pc2_pub.publish(pc2)
+
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
         rgb = self.ros_rgb_img2numpy(rgbImg)
-        print(rgb.shape, pcd_np_3d.shape)
-        a = np.vstack((pcd_np_3d, rgb))
-        print(a.shape)
+        a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
         return a
 
     def ros_rgb_img2numpy(self, rgb_img: Image):

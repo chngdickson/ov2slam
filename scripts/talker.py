@@ -127,7 +127,7 @@ class ManySyncListener:
         depth_np_1d = normalized_depth *far
 
         # p2d = [u,v,1]
-        p2d = torch.vstack([u_coord, v_coord, torch.ones_like(u_coord)])
+        p2d = torch.vstack([u_coord, v_coord, torch.ones_like(u_coord)]).float()
         print(p2d.shape)
         # P = [X,Y,Z] # Pixel Space to Camera space
         p3d = torch.linalg.inv(K) @ p2d

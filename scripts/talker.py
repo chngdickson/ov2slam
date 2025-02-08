@@ -11,7 +11,6 @@ from sensor_msgs.msg import Image, CameraInfo, PointCloud2
 import message_filters
 import threading
 
-mutex = threading.Lock()
 class CarlaSyncListener:
     def __init__(self, topic_pose, tf_origin_frame="ego_vehicle"):
         self.topic_pose = topic_pose
@@ -30,24 +29,19 @@ class CarlaSyncListener:
         self.timer = rospy.Timer(rospy.Duration(0.01), self.wait_tf_cb)
         
     def callback(self, rgb_img:Image, camera_info:CameraInfo, depth_img:Image):
-        mutex.acquire(blocking=False)
         if not self.tf_received:
             self.tf_rel_frame = rgb_img.header.frame_id
             self.tf_rel_frame2 = depth_img.header.frame_id
-            mutex.release()
             return
         self.timestampedInfo[rgb_img.header.stamp] = [rgb_img, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
-        mutex.release()
     
     def timeStampExist(self, timestamp):
         return (timestamp in self.timestampedInfo, self.timestampedInfo.get(timestamp))
 
     def wait_tf_cb(self, event):
-        mutex.acquire(blocking=False)
         if self.tf_rel_frame is None:
-            mutex.release()
             return
         print(self.tf_rel_frame)
         if self.tf_listener.frameExists(self.tf_rel_frame):
@@ -57,7 +51,6 @@ class CarlaSyncListener:
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
         if self.tf_rel_frame2 is None:
-            mutex.release()
             return
         if self.tf_listener.frameExists(self.tf_rel_frame2):
             t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame2)
@@ -65,7 +58,6 @@ class CarlaSyncListener:
             self.tf_received, self.pose, self.quat = True, position, quaternion
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
-        mutex.release()
 class ManySyncListener:
     def __init__(self):
         topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]
@@ -79,7 +71,6 @@ class ManySyncListener:
         front:Image, front_left:Image, front_right:Image, 
         back:Image, back_left:Image, back_right:Image
         ):
-        mutex.acquire(blocking=False)
         rospy.loginfo("message filter called")
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, pose_quat = [],[],[]
@@ -93,7 +84,6 @@ class ManySyncListener:
                 print(pose, quat)
                 self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)
             rospy.loginfo("message filter called, all infos exists")
-        mutex.release()
     
         
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):

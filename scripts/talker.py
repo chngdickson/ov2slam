@@ -28,8 +28,10 @@ class CarlaSyncListener:
         self.tf_received = False
         self.tf_listener = TransformListener()
         self.tf_origin_frame, self.tf_rel_frame, self.tf_rel_frame2 = tf_origin_frame, None, None
-        self.pose, self.quat = None, None
         self.timer = rospy.Timer(rospy.Duration(0.01), self.wait_tf_cb)
+        
+        # Private vars
+        self.extrinsic_to_origin = None
         
     def callback(self, rgb_img:Image, camera_info:CameraInfo, depth_img:Image):
         if not self.tf_received:
@@ -44,23 +46,25 @@ class CarlaSyncListener:
         return (timestamp in self.timestampedInfo, self.timestampedInfo.get(timestamp))
 
     def wait_tf_cb(self, event):
-        if self.tf_rel_frame is None:
+        if self.tf_rel_frame is None or self.tf_rel_frame2 is None:
             return
-        print(self.tf_rel_frame)
-        if self.tf_listener.frameExists(self.tf_rel_frame):
-            t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame)
-            position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame, t)
-            self.tf_received, self.pose, self.quat = True, position, quaternion
+        else:
+            self.check_tf_exists(self.tf_origin_frame, self.tf_rel_frame)
+            self.check_tf_exists(self.tf_origin_frame, self.tf_rel_frame2)
+        
+    
+    def check_tf_exists(self, origin_frame, relative_frame):
+        if self.tf_listener.frameExists(relative_frame):
+            t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
+            position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
+            quat = transformations.quaternion_matrix(quaternion)
+            quat[3,:0:3] = position
+            print(quat)
+            self.tf_received, self.extrinsic_to_origin = True, quat
+            
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
-        if self.tf_rel_frame2 is None:
-            return
-        if self.tf_listener.frameExists(self.tf_rel_frame2):
-            t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame2)
-            position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame2, t)
-            self.tf_received, self.pose, self.quat = True, position, transformations.quaternion_matrix(quaternion)
-            rospy.loginfo(f"{self.topic_pose}")
-            self.timer.shutdown()
+            
 class ManySyncListener:
     def __init__(self):
         topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]
@@ -75,12 +79,12 @@ class ManySyncListener:
         ):
         rospy.loginfo("message filter called")
         timestamp = front.header.stamp
-        istrues, rgb_Rgbinfo_Depths, pose_quat = [],[],[]
+        istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
         for csl in self.listenerDict.values():
             trueFalse, data = csl.timeStampExist(timestamp)
-            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data), pose_quat.append([csl.pose, csl.quat])
+            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data), ext_list.append(csl.extrinsic_to_origin) # type: ignore 
         if all(istrues):
-            for (rgb, info, depth),(pose, quat) in zip(rgb_Rgbinfo_Depths, pose_quat):
+            for (rgb, info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # 1. Test Depth to pcd
                 # 2. Test 
                 self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)

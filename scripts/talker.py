@@ -10,6 +10,7 @@ from collections import OrderedDict
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2
 import message_filters
 import threading
+import gc
 
 class CarlaSyncListener:
     def __init__(self, topic_pose, tf_origin_frame="ego_vehicle"):
@@ -146,4 +147,8 @@ if __name__ == '__main__':
     try:
         rospy.spin()
     except rospy.ROSInterruptException:
+        del msl
+        torch.cuda.empty_cache()
+        gc.collect()
+        
         print("shutting_down")

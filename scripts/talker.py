@@ -56,6 +56,7 @@ class CarlaSyncListener:
             self.tf_received, self.pose, self.quat = True, position, quaternion
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
+
 class ManySyncListener:
     def __init__(self):
         topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]

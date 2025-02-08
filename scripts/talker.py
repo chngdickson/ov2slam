@@ -26,6 +26,7 @@ class CarlaSyncListener:
             self.timestampedInfo.popitem(False)
     
     def timeStampExist(self, timestamp):
+        a,b,c = self.timestampedInfo.get(timestamp)
         return (timestamp in self.timestampedInfo, self.timestampedInfo.get(timestamp))
 
 class ManySyncListener:

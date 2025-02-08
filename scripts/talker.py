@@ -42,10 +42,10 @@ class ManySyncListener:
         ):
         rospy.loginfo("message filter called")
         timestamp = front.header.stamp
-        istrue, rgb_Rgbinfo_Depths = map(list, zip([v.timeStampExist(timestamp)] for v in self.listenerDict.values()))
-
-        if all(istrue):
-            rospy.loginfo("message filter called, all infos exists")
+        a = map(list, zip([v.timeStampExist(timestamp)] for v in self.listenerDict.values()))
+        print(len(a))
+        # if all(istrue):
+        #     rospy.loginfo("message filter called, all infos exists")
             
         
     

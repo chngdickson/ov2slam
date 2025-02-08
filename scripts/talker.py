@@ -46,7 +46,7 @@ class CarlaSyncListener:
         if timestamp in self.timestampedInfo:
             data = self.timestampedInfo.get(timestamp)
             self.timestampedInfo.pop(timestamp)
-            return (timestamp in self.timestampedInfo, data)
+            return (True, data)
         else:
             return (False, None)
 

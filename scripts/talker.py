@@ -116,9 +116,9 @@ class ManySyncListener:
         return lidar_np_3d
     
 if __name__ == '__main__':
-    # csl = CarlaSyncListener("back")
-    msl = ManySyncListener()
     rospy.init_node("sample_message_filters", anonymous=True)
+    
+    msl = ManySyncListener()
     try:
         rospy.spin()
     except rospy.ROSInterruptException:

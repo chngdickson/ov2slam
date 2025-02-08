@@ -11,7 +11,7 @@ from sensor_msgs.msg import Image, CameraInfo, PointCloud2
 import message_filters
 
 class CarlaSyncListener:
-    def __init__(self, topic_pose):
+    def __init__(self, topic_pose, tf_origin_frame="ego_vehicle"):
         self.topic_pose = topic_pose
         self.image_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/image", Image)
         self.info_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/camera_info", CameraInfo)
@@ -19,16 +19,34 @@ class CarlaSyncListener:
         self.ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub, self.depth_sub], 10)
         self.ts.registerCallback(self.callback)
         self.timestampedInfo = OrderedDict() #Timestamp:combined pointcloud
-        # we need to know the quickest method for depth conversion
+        
+        # TF's
+        self.tf_received = False
+        self.tf_listener = TransformListener()
+        self.tf_origin_frame, self.tf_rel_frame = tf_origin_frame, None
+        self.pose, self.quat = None, None
+        self.timer = rospy.Timer(rospy.Duration(0.2), self.wait_tf_cb)
+        
     def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
-        timestamp = image.header.stamp
+        if not self.tf_received:
+            self.tf_rel_frame = image.header.frame_id
+            return
         rospy.loginfo(f"{self.topic_pose}")
-        self.timestampedInfo[timestamp] = [image, camera_info, depth_img]
+        self.timestampedInfo[image.header.stamp] = [image, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
     
     def timeStampExist(self, timestamp):
         return (timestamp in self.timestampedInfo, self.timestampedInfo.get(timestamp))
+
+    def wait_tf_cb(self, event):
+        if self.tf_rel_frame is None:
+            return
+        if self.tf_listener.frameExists(self.tf_origin_frame) and self.tf_listener.frameExists(self.tf_rel_frame):
+            t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame)
+            position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame, t)
+            self.tf_received, self.pose, self.quat = True, position, quaternion
+            self.timer.shutdown()
 
 class ManySyncListener:
     def __init__(self):
@@ -38,34 +56,25 @@ class ManySyncListener:
         self.ts = message_filters.TimeSynchronizer(self.list_filters, 10)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
         self.tf = TransformListener()
-    
+
     def time_stamp_fuse_cb(self, 
         front:Image, front_left:Image, front_right:Image, 
         back:Image, back_left:Image, back_right:Image
         ):
         rospy.loginfo("message filter called")
         timestamp = front.header.stamp
-        istrue, rgb_Rgbinfo_Depths = [],[]
+        istrue, rgb_Rgbinfo_Depths, pose_quat = [],[],[]
         for csl in self.listenerDict.values():
             k, val = csl.timeStampExist(timestamp)
-            istrue.append(k), rgb_Rgbinfo_Depths.append(val)
-        self.waitTf("ego_vehicle", "ego_vehicle/depth_front")
+            istrue.append(k), rgb_Rgbinfo_Depths.append(val), pose_quat.append([val.pose, val.quat])
         if all(istrue):
-            for rgb, info, depth in rgb_Rgbinfo_Depths:
+            for (rgb, info, depth),(pose, quat) in zip(rgb_Rgbinfo_Depths, pose_quat):
                 # 1. Test Depth to pcd
                 # 2. Test 
-                pos, quat = self.waitTf("ego_vehicle", rgb.header.frame_id)
+                print(pose, quat)
                 self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)
             rospy.loginfo("message filter called, all infos exists")
     
-    def waitTf(self, topic_frame, to_frame):
-        if self.tf.frameExists(topic_frame) and self.tf.frameExists(to_frame):
-            t = self.tf.getLatestCommonTime(topic_frame, to_frame)
-            position, quaternion = self.tf.lookupTransform(topic_frame, to_frame, t)
-            print(to_frame,position, quaternion)
-            return position, quaternion
-        else:
-            return None, None
         
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         # print(depthImg.data.shape)

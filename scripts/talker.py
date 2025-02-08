@@ -23,7 +23,7 @@ class CarlaSyncListener:
         # TF's
         self.tf_received = False
         self.tf_listener = TransformListener()
-        self.tf_origin_frame, self.tf_rel_frame, tf_rel_frame2 = tf_origin_frame, None, None
+        self.tf_origin_frame, self.tf_rel_frame, self.tf_rel_frame2 = tf_origin_frame, None, None
         self.pose, self.quat = None, None
         self.timer = rospy.Timer(rospy.Duration(0.01), self.wait_tf_cb)
         

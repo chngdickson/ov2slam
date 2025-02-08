@@ -58,7 +58,7 @@ class CarlaSyncListener:
         if self.tf_listener.frameExists(self.tf_rel_frame2):
             t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame2)
             position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame2, t)
-            self.tf_received, self.pose, self.quat = True, position, quaternion
+            self.tf_received, self.pose, self.quat = True, position, self.tf_listener.quaternion_matrix(quaternion)
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
 class ManySyncListener:
@@ -68,7 +68,6 @@ class ManySyncListener:
         self.list_filters = [message_filters.Subscriber(f"carla/ego_vehicle/rgbd_{n}/image", Image) for n in topics_list]
         self.ts = message_filters.TimeSynchronizer(self.list_filters, 10)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
-        self.tf = TransformListener()
 
     def time_stamp_fuse_cb(self, 
         front:Image, front_left:Image, front_right:Image, 
@@ -84,7 +83,6 @@ class ManySyncListener:
             for (rgb, info, depth),(pose, quat) in zip(rgb_Rgbinfo_Depths, pose_quat):
                 # 1. Test Depth to pcd
                 # 2. Test 
-                quat_mat = tf.quaternion_matrix(quat)
                 self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)
             rospy.loginfo("message filter called, all infos exists")
     

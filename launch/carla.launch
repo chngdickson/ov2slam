@@ -1,7 +1,7 @@
 <launch>
   <arg name="play_bag" default="true" />
   <arg name="node_start_delay" default="2.0"/>
-  <arg name="bag_file" default="/root/bags/carla_bag_ros1/carla_half_loop.bag"/>
+  <arg name="bag_file" default="/root/bags/carla_bag_ros1/loop_once.bag"/>
   <arg name="param_file" default="$(find ov2slam)/parameters_files/accurate/carla/carla_mono.yaml"/>
 
   <!-- RUN bag file-->

@@ -87,6 +87,7 @@ class ManySyncListener:
         
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         # print(depthImg.data.shape)
+        pcd_np_3 = self.depth_to_lidar(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K=conf.K)
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K=conf.K)
         # Transform Lidar_np_3d from Camera To World Frame
         # pcd_np_3d = np.dot(camExt2WorldRH, np.vstack([pcd_np_3d, np.ones(pcd_np_3d.shape[1])]))[:3]
@@ -127,7 +128,7 @@ class ManySyncListener:
 
         # p2d = [u,v,1]
         p2d = torch.hstack([u_coord, v_coord, torch.ones_like(u_coord)])
-
+        print(p2d.shape)
         # P = [X,Y,Z] # Pixel Space to Camera space
         p3d = torch.dot(torch.linalg.inv(K), p2d)
         p3d *= depth_np_1d
@@ -138,7 +139,46 @@ class ManySyncListener:
         lidar_np_3d = torch.vstack((px,py,pz))
         
         return lidar_np_3d
-    
+    def depth_to_lidar(self, normalized_depth, w, h, K, max_depth=0.9):
+        """
+        Convert an image containing CARLA encoded depth-map to a 2D array containing
+        the 3D position (relative to the camera) of each pixel and its corresponding
+        RGB color of an array.
+        "max_depth" is used to omit the points that are far enough.
+        """
+        far = 1000.0  # max depth in meters.
+        w,h,K = int(w), int(h), np.array(K).reshape((3,3))
+        pixel_length = w*h
+        u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
+                        h, 1).reshape(pixel_length)
+        v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
+                        1, w).reshape(pixel_length)
+        normalized_depth = np.reshape(normalized_depth, pixel_length)
+        # Search for pixels where the depth is greater than max_depth to
+        # Make them = 0 to preserve the shape
+        max_depth_indexes = np.where(normalized_depth > max_depth)
+        normalized_depth[max_depth_indexes] = 0
+        u_coord[max_depth_indexes] = 0
+        v_coord[max_depth_indexes] = 0
+        depth_np_1d = normalized_depth *far
+
+        # p2d = [u,v,1]
+        p2d = np.array([u_coord, v_coord, np.ones_like(u_coord)])
+        print(p2d.shape,"p2dshape")
+        # P = [X,Y,Z] # Pixel Space to Camera space
+        p3d = np.dot(np.linalg.inv(K), p2d)
+        p3d *= depth_np_1d
+
+        lidar_np_3d = np.transpose(p3d) 
+        py,pz,px = lidar_np_3d[:, 0], lidar_np_3d[:, 1], lidar_np_3d[:, 2]
+
+        lidar_np_3d = np.vstack((px,py,pz))
+        depth_np_1d = np.reshape(depth_np_1d, (h, w))
+        
+        # header = laspy.LasHeader(point_format=0, version="1.2")
+        # las = laspy.LasData(header)
+        # las.x, las.y, las.z = px, py, pz
+        return lidar_np_3d, depth_np_1d
 if __name__ == '__main__':
     rospy.init_node("sample_message_filters", anonymous=True)
     

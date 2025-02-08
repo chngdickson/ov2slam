@@ -63,11 +63,11 @@ class ManySyncListener:
         ):
         rospy.loginfo("message filter called")
         timestamp = front.header.stamp
-        istrue, rgb_Rgbinfo_Depths, pose_quat = [],[],[]
+        istrues, rgb_Rgbinfo_Depths, pose_quat = [],[],[]
         for csl in self.listenerDict.values():
-            k, val = csl.timeStampExist(timestamp)
-            istrue.append(k), rgb_Rgbinfo_Depths.append(val), pose_quat.append([val.pose, val.quat])
-        if all(istrue):
+            trueFalse, data = csl.timeStampExist(timestamp)
+            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data), pose_quat.append([csl.pose, csl.quat])
+        if all(istrues):
             for (rgb, info, depth),(pose, quat) in zip(rgb_Rgbinfo_Depths, pose_quat):
                 # 1. Test Depth to pcd
                 # 2. Test 

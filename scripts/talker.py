@@ -205,7 +205,7 @@ class ManySyncListener:
         # p2d = [u,v,1]
         if ExtCam2Ego is not None:
             ExtCam2Ego = torch.tensor(ExtCam2Ego).to(device=device, dtype=dtype)
-            pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W @ torch.pinverse(ExtCam2Ego))
+            pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W @ ExtCam2Ego)
         else:
             pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W)
             

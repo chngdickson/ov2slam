@@ -4,7 +4,7 @@ import torch
 import numpy as np
 import numpy.matlib as npm
 import cv2
-from tf import TransformListener
+from tf import TransformListener, transformations
 from typing import Dict
 from collections import OrderedDict
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2
@@ -84,6 +84,7 @@ class ManySyncListener:
             for (rgb, info, depth),(pose, quat) in zip(rgb_Rgbinfo_Depths, pose_quat):
                 # 1. Test Depth to pcd
                 # 2. Test 
+                quat_mat = tf.quaternion_matrix(quat)
                 self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)
             rospy.loginfo("message filter called, all infos exists")
     

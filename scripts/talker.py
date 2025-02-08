@@ -31,7 +31,7 @@ class ManySyncListener:
         self.ts = message_filters.TimeSynchronizer([self.list_filters], 10)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
     
-    def time_stamp_fuse_cb(self):
+    def time_stamp_fuse_cb(self, front, front_left, front_right, back, back_left, back_right):
         rospy.ros_info("message filter called")
         pass
     

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import rospy
 import torch
 import tf
@@ -15,6 +15,7 @@ class CarlaSyncListener:
         self.depth_sub = message_filters.Subscriber("carla/ego_vehicle/depth_%s/image"%(topic_pose), Image)
         self.ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub, self.depth_sub], 10)
         self.ts.registerCallback(self.callback)
+        stringtest = f"hello{topic_pose}"
         self.timestampedInfo = OrderedDict() #Timestamp:combined pointcloud
         # we need to know the quickest method for depth conversion
     def callback(self, image, camera_info, depth_img):

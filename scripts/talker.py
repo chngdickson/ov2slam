@@ -116,7 +116,7 @@ class ManySyncListener:
         u_coord = ((torch.arange(w-1, -1, -1).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
                         1, w).reshape(pixel_length)
-        v_coord_torch = ((torch.arange(h-1, -1, -1).unsqueeze(0)).repeat(1,w)).reshape(pixel_length)
+        v_coord_torch = ((torch.arange(h-1, -1, -1).unsqueeze(0)).repeat(w,1)).reshape(pixel_length)
         assert np.allclose(v_coord, v_coord_torch.numpy()), "errror"
         normalized_depth = np.reshape(normalized_depth, pixel_length)
         # Search for pixels where the depth is greater than max_depth to

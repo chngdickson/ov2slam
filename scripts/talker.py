@@ -116,7 +116,7 @@ class ManySyncListener:
         
         u_coord = ((torch.arange(w-1, -1, -1).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
-        normalized_depth = torch.reshape(torch.tensor(normalized_depth), pixel_length)
+        normalized_depth = torch.tensor(normalized_depth).reshape(pixel_length)
         # Search for pixels where the depth is greater than max_depth to
         # Make them = 0 to preserve the shape
         max_depth_indexes = torch.where(normalized_depth > max_depth)

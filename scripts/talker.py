@@ -111,12 +111,13 @@ class ManySyncListener:
         far = 1000.0  # max depth in meters.
         w,h,K = int(w), int(h), np.array(K).reshape((3,3))
         pixel_length = w*h
-        u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
-                        h, 1).reshape(pixel_length)
-        u_coord_torch = ((torch.arange(w-1, -1, -1).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
-        assert np.allclose(u_coord, u_coord_torch.numpy()), "errror"
+        # u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
+        #                 h, 1).reshape(pixel_length)
+        u_coord = ((torch.arange(w-1, -1, -1).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
                         1, w).reshape(pixel_length)
+        v_coord_torch = ((torch.arange(h-1, -1, -1).unsqueeze(0)).repeat(1,w)).reshape(pixel_length)
+        assert np.allclose(v_coord, v_coord_torch.numpy()), "errror"
         normalized_depth = np.reshape(normalized_depth, pixel_length)
         # Search for pixels where the depth is greater than max_depth to
         # Make them = 0 to preserve the shape

@@ -114,7 +114,7 @@ class ManySyncListener:
         u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
                         h, 1).reshape(pixel_length)
         u_coord_torch = ((torch.arange(w-1, -1, -1).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
-        assert np.all(u_coord, u_coord_torch.numpy()), "errror"
+        assert np.allclose(u_coord, u_coord_torch.numpy()), "errror"
         v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
                         1, w).reshape(pixel_length)
         normalized_depth = np.reshape(normalized_depth, pixel_length)

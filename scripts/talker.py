@@ -49,7 +49,7 @@ class ManySyncListener:
             k, val = csl.timeStampExist(timestamp)
             istrue.append(k), rgb_Rgbinfo_Depths.append(val)
         if all(istrue):
-            for rgb, info, depth in zip(rgb_Rgbinfo_Depths):
+            for rgb, info, depth in rgb_Rgbinfo_Depths:
                 print("")
             rospy.loginfo("message filter called, all infos exists")
             

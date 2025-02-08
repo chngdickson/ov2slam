@@ -158,10 +158,8 @@ class ManySyncListener:
         # Search for pixels where the depth is greater than max_depth to
         # Make them = 0 to preserve the shape
         max_depth_indexes = torch.where(normalized_depth > max_depth)
-        normalized_depth[max_depth_indexes] = 0
-        u_coord[max_depth_indexes] = 0
-        v_coord[max_depth_indexes] = 0
-        normalized_depth = normalized_depth *far
+        normalized_depth[max_depth_indexes], u_coord[max_depth_indexes], v_coord[max_depth_indexes] = 0,0,0
+        normalized_depth = normalized_depth * far
 
         # p2d = [u,v,1]
         if ExtCam2Ego is not None:

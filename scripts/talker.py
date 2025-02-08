@@ -4,7 +4,7 @@ import torch
 import numpy as np
 import numpy.matlib as npm
 import cv2
-import tf
+from tf import TransformListener
 from typing import Dict
 from collections import OrderedDict
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2
@@ -37,6 +37,7 @@ class ManySyncListener:
         self.list_filters = [message_filters.Subscriber(f"carla/ego_vehicle/depth_{n}/image", Image) for n in topics_list]
         self.ts = message_filters.TimeSynchronizer(self.list_filters, 10)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
+        self.tf = TransformListener
         self.waitTf("ego_vehicle", "ego_vehicle/depth_front")
     
     def time_stamp_fuse_cb(self, 
@@ -57,9 +58,8 @@ class ManySyncListener:
             rospy.loginfo("message filter called, all infos exists")
     
     def waitTf(self, topic_frame, to_frame):
-        listener = tf.TransformListener()
-        listener.waitForTransform(topic_frame, to_frame, rospy.Time(), rospy.Duration(4.0))
-        (trans,rot) = listener.lookupTransform(topic_frame, to_frame, rospy.Time.now())
+        self.tf.waitForTransform(topic_frame, to_frame, rospy.Time(), rospy.Duration(4.0))
+        (trans,rot) = self.tf.lookupTransform(topic_frame, to_frame, rospy.Time.now())
         print(trans, rot)
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         # print(depthImg.data.shape)

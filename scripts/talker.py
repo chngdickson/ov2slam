@@ -38,7 +38,8 @@ class ManySyncListener:
         pass
     
 if __name__ == '__main__':
-    csl = CarlaSyncListener("back")
+    # csl = CarlaSyncListener("back")
+    msl = ManySyncListener()
     rospy.init_node("sample_message_filters", anonymous=True)
     try:
         rospy.spin()

@@ -58,7 +58,7 @@ class CarlaSyncListener:
         if self.tf_listener.frameExists(self.tf_rel_frame2):
             t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame2)
             position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame2, t)
-            self.tf_received, self.pose, self.quat = True, position, self.tf_listener.quaternion_matrix(quaternion)
+            self.tf_received, self.pose, self.quat = True, position, transformations.quaternion_matrix(quaternion)
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
 class ManySyncListener:

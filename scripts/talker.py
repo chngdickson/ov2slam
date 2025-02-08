@@ -58,8 +58,9 @@ class CarlaSyncListener:
             t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
             position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
             quat = transformations.quaternion_matrix(quaternion)
-            print(quat)
+            print(quat[3,0:3])
             quat[3,0:3] = np.array(position)
+            
             print(quat)
             self.tf_received, self.extrinsic_to_origin = True, quat
             

@@ -28,7 +28,7 @@ class CarlaSyncListener:
         self.timer = rospy.Timer(rospy.Duration(0.2), self.wait_tf_cb)
         
     def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
-        if not self.tf_received:
+        if self.tf_received:
             self.tf_rel_frame = image.header.frame_id
             return
         rospy.loginfo(f"{self.topic_pose}")

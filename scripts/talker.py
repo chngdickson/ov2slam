@@ -42,7 +42,7 @@ class CarlaSyncListener:
     def wait_tf_cb(self, event):
         if self.tf_rel_frame is None:
             return
-        if self.tf_listener.frameExists(self.tf_origin_frame) and self.tf_listener.frameExists(self.tf_rel_frame):
+        if self.tf_listener.frameExists(self.tf_rel_frame):
             t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame)
             position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame, t)
             self.tf_received, self.pose, self.quat = True, position, quaternion
@@ -50,7 +50,7 @@ class CarlaSyncListener:
             self.timer.shutdown()
         if self.tf_rel_frame2 is None:
             return
-        if self.tf_listener.frameExists(self.tf_origin_frame) and self.tf_listener.frameExists(self.tf_rel_frame2):
+        if self.tf_listener.frameExists(self.tf_rel_frame2):
             t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame2)
             position, quaternion = self.tf_listener.lookupTransform(self.tf_origin_frame, self.tf_rel_frame2, t)
             self.tf_received, self.pose, self.quat = True, position, quaternion

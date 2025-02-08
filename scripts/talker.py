@@ -81,7 +81,6 @@ class ManySyncListener:
             for (rgb, info, depth),(pose, quat) in zip(rgb_Rgbinfo_Depths, pose_quat):
                 # 1. Test Depth to pcd
                 # 2. Test 
-                print(pose, quat)
                 self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)
             rospy.loginfo("message filter called, all infos exists")
     
@@ -114,6 +113,8 @@ class ManySyncListener:
         pixel_length = w*h
         u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
                         h, 1).reshape(pixel_length)
+        u_coord_torch = ((torch.arange(w-1, -1, -1).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
+        assert np.all(u_coord, u_coord_torch.numpy()), "errror"
         v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
                         1, w).reshape(pixel_length)
         normalized_depth = np.reshape(normalized_depth, pixel_length)

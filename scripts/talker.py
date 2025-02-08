@@ -89,7 +89,7 @@ class ManySyncListener:
     
         
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):
-        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K=conf.K)
+        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K)
         pcd_np_3d = pcd_np_3d.detach().cpu()
         # Transform Lidar_np_3d from Camera To World Frame
         # pcd_np_3d = np.dot(camExt2WorldRH, np.vstack([pcd_np_3d, np.ones(pcd_np_3d.shape[1])]))[:3]

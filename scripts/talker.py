@@ -19,19 +19,20 @@ class CarlaSyncListener:
         # we need to know the quickest method for depth conversion
     def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
         timestamp = image.header.stamp
-        self.timestampedInfo[timestamp] = [image, camera_info.K, depth_img]
-        rospy.loginfo("Print")
+        self.timestampedInfo[timestamp] = [image, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
 
 class ManySyncListener:
     def __init__(self):
-        img_depth_lists:List[CarlaSyncListener] = [
-            CarlaSyncListener("back"),
-            CarlaSyncListener("front")
-        ]
-        str_list = []
-    def time_stamp_fuse(self):
+        topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]
+        img_depth_lists:List[CarlaSyncListener] = [CarlaSyncListener(n) for n in topics_list]
+        self.list_filters = [message_filters.Subscriber(f"carla/ego_vehicle/depth_{n}/image", Image) for n in topics_list]
+        self.ts = message_filters.TimeSynchronizer([self.list_filters], 10)
+        self.ts.registerCallback(self.time_stamp_fuse_cb)
+    
+    def time_stamp_fuse_cb(self):
+        rospy.ros_info("message filter called")
         pass
     
 if __name__ == '__main__':

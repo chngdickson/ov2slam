@@ -10,6 +10,7 @@ import message_filters
 
 class CarlaSyncListener:
     def __init__(self, topic_pose):
+        self.topic_pose = topic_pose
         self.image_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/image", Image)
         self.info_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/camera_info", CameraInfo)
         self.depth_sub = message_filters.Subscriber(f"carla/ego_vehicle/depth_{topic_pose}/image", Image)
@@ -19,6 +20,7 @@ class CarlaSyncListener:
         # we need to know the quickest method for depth conversion
     def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
         timestamp = image.header.stamp
+        rospy.ros_info(f"{self.topic_pose}")
         self.timestampedInfo[timestamp] = [image, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)

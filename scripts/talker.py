@@ -2,6 +2,7 @@
 import rospy
 import torch
 import numpy as np
+import numpy.matlib as npm
 import tf
 from typing import Dict
 from collections import OrderedDict

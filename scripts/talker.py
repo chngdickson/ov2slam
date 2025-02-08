@@ -3,6 +3,7 @@ import rospy
 import torch
 import numpy as np
 import numpy.matlib as npm
+import cv2
 import tf
 from typing import Dict
 from collections import OrderedDict
@@ -55,13 +56,19 @@ class ManySyncListener:
             rospy.loginfo("message filter called, all infos exists")
     
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):
-        pcd_np_3d = self.depthImg2Pcd(depthImg, w=conf.width, h=conf.height, K=conf.K)
+        # print(depthImg.data.shape)
+        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K=conf.K)
         # Transform Lidar_np_3d from Camera To World Frame
         # pcd_np_3d = np.dot(camExt2WorldRH, np.vstack([pcd_np_3d, np.ones(pcd_np_3d.shape[1])]))[:3]
         # rgbSemCombi = np.dstack((rgbImg, semImg))
         # rgbSemCombi = np.reshape(rgbSemCombi, (rgbSemCombi.shape[0]*rgbSemCombi.shape[1], rgbSemCombi.shape[2]))
         # return np.hstack([pcd_np_3d.T, rgbSemCombi])
-    
+
+    def ros_depth_img2numpy(self, ros_img: Image) -> np.ndarray:
+        array = np.frombuffer(ros_img.data, dtype=np.float32)
+        array = np.reshape(array, (ros_img.height, ros_img.width))
+        array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
+        return array
     def depthImg2Pcd(self, normalized_depth, w, h, K, max_depth=0.9):
         """
         Convert an image containing CARLA encoded depth-map to a 2D array containing

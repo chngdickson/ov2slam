@@ -8,13 +8,13 @@
   <node name="player" pkg="rosbag" type="play" args="$(arg bag_file)" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/>
 
   <!--Nodelet launch-->
-  <node pkg="nodelet" type="nodelet" args="manager" name="standalone_nodelet" output="screen"/>
-  <node pkg="nodelet" type="nodelet" name="depth_back" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet --no-bond">      
+  <!-- <node pkg="nodelet" type="nodelet" args="manager" name="standalone_nodelet" output="screen"/>
+  <node pkg="nodelet" type="nodelet" name="depth_back" args="load depth_image_proc/point_cloud_xyzrgb standalone_nodelet no-bond">      
     <remap from="rgb/camera_info" to="/carla/ego_vehicle/rgb_back/camera_info"/>
     <remap from="rgb/image_rect_color" to="/carla/ego_vehicle/rgb_back/image"/>
     <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_back2/image"/>
     <remap from="depth_registered/points" to="/pcd_back/points"/>
-  </node>
+  </node> -->
 
   <!-- <node name="publisher_node" pkg="ov2slam" type="my_publisher" output="screen"/> -->
   <node name="test" pkg="ov2slam" type="talker.py" output="screen"/>

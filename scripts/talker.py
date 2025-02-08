@@ -37,6 +37,7 @@ class ManySyncListener:
         self.list_filters = [message_filters.Subscriber(f"carla/ego_vehicle/depth_{n}/image", Image) for n in topics_list]
         self.ts = message_filters.TimeSynchronizer(self.list_filters, 10)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
+        self.waitTf("ego_vehicle", "ego_vehicle/depth_front")
     
     def time_stamp_fuse_cb(self, 
         front:Image, front_left:Image, front_right:Image, 
@@ -51,10 +52,14 @@ class ManySyncListener:
         if all(istrue):
             for rgb, info, depth in rgb_Rgbinfo_Depths:
                 # 1. Test Depth to pcd
-                # 2. 
+                # 2. Test 
                 self.process_depthRgbc(None, None, depthImg=depth, conf=info, camExt2WorldRH=None)
             rospy.loginfo("message filter called, all infos exists")
     
+    def waitTf(self, topic_frame, to_frame):
+        listener = tf.TransformListener()
+        listener.waitForTransform(topic_frame, to_frame, rospy.Time(), rospy.Duration(4.0))
+        (trans,rot) = listener.lookupTransform(topic_frame, to_frame, rospy.Time.now())
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         # print(depthImg.data.shape)
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K=conf.K)
@@ -69,6 +74,7 @@ class ManySyncListener:
         array = np.reshape(array, (ros_img.height, ros_img.width))
         array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
         return array
+    
     def depthImg2Pcd(self, normalized_depth, w, h, K, max_depth=0.9):
         """
         Convert an image containing CARLA encoded depth-map to a 2D array containing

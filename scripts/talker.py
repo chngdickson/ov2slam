@@ -179,7 +179,7 @@ class ManySyncListener:
         # header = laspy.LasHeader(point_format=0, version="1.2")
         # las = laspy.LasData(header)
         # las.x, las.y, las.z = px, py, pz
-        return lidar_np_3d, depth_np_1d
+        return lidar_np_3d
 if __name__ == '__main__':
     rospy.init_node("sample_message_filters", anonymous=True)
     

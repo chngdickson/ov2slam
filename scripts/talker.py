@@ -50,6 +50,7 @@ class ManySyncListener:
         for csl in self.listenerDict.values():
             k, val = csl.timeStampExist(timestamp)
             istrue.append(k), rgb_Rgbinfo_Depths.append(val)
+        self.waitTf("ego_vehicle", "ego_vehicle/depth_front")
         if all(istrue):
             for rgb, info, depth in rgb_Rgbinfo_Depths:
                 # 1. Test Depth to pcd

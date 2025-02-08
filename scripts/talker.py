@@ -105,7 +105,8 @@ class ManySyncListener:
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu()
         rgb = self.ros_rgb_img2numpy(rgbImg)
-        a = np.vstack((pcd_np_3d, rgb))
+        print(rgb.shape, pcd_np_3d.shape)
+        a = np.hstack((pcd_np_3d, rgb))
         print(a.shape)
         return a
 

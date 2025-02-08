@@ -130,7 +130,7 @@ class ManySyncListener:
         p2d = torch.vstack([u_coord, v_coord, torch.ones_like(u_coord)])
         print(p2d.shape)
         # P = [X,Y,Z] # Pixel Space to Camera space
-        p3d = torch.dot(torch.linalg.inv(K), p2d)
+        p3d = torch.linalg.inv(K) @ p2d
         p3d *= depth_np_1d
 
         lidar_np_3d = torch.transpose(p3d) 

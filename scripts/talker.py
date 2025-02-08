@@ -64,6 +64,8 @@ class ManySyncListener:
             t = self.tf.getLatestCommonTime(topic_frame, to_frame)
             position, quaternion = self.tf.lookupTransform(topic_frame, to_frame, t)
             return position, quaternion
+        else:
+            return None, None
         
     def process_depthRgbc(self, rgbImg, semImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         # print(depthImg.data.shape)

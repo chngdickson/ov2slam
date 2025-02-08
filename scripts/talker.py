@@ -113,7 +113,7 @@ class ManySyncListener:
         pixel_length = w*h
         # u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
         #                 h, 1).reshape(pixel_length)
-        u_coord = ((torch.arange(w-1, -1, -1).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
+        u_coord = (((torch.arange(w-1, -1, -1).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)).numpy()
         v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
                         1, w).reshape(pixel_length)
         v_coord_torch = ((torch.arange(h-1, -1, -1).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)

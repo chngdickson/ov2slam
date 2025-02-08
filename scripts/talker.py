@@ -137,7 +137,7 @@ class ManySyncListener:
         RGB color of an array.
         "max_depth" is used to omit the points that are far enough.
         """
-        dtype = torch.float64
+        dtype = torch.float32
         far = 1000.0  # max depth in meters.
         w,h,K3x3 = int(w), int(h), torch.tensor(K_ros).reshape((3,3)).to(device)
         K4x4 = self.K3x3to4x4(K3x3)

@@ -1,16 +1,22 @@
 #!/usr/bin/env python
-import rospy
-import torch
-import numpy as np
-import numpy.matlib as npm
-import cv2
-from tf import TransformListener, transformations
+
+# Python 
+import threading
 from typing import Dict
 from collections import OrderedDict
-from sensor_msgs.msg import Image, CameraInfo, PointCloud2
+
+# Other libs
+import torch, gc
+import cv2
+import numpy as np
+import numpy.matlib as npm
+
+# ROS
+import rospy
 import message_filters
-import threading
-import gc
+from tf import TransformListener, transformations
+from sensor_msgs import point_cloud2
+from sensor_msgs.msg import Image, CameraInfo, PointCloud2
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -85,10 +91,11 @@ class ManySyncListener:
             trueFalse, data = csl.timeStampExist(timestamp)
             istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data), ext_list.append(csl.extrinsic_to_origin) # type: ignore 
         if all(istrues):
+            xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # 1. TODO: Test Depth to pcd
                 # 2. TODO: Test pointcloud visualization 
-                self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin)
+                xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
             rospy.loginfo("message filter called, all infos exists")
     
         
@@ -96,7 +103,9 @@ class ManySyncListener:
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu()
         rgb = self.ros_rgb_img2numpy(rgbImg)
-        print(rgb.shape)
+        a = np.vstack(pcd_np_3d, rgb)
+        print(a.shape)
+        return a
         # Transform Lidar_np_3d from Camera To World Frame
         # rgbSemCombi = np.dstack((rgbImg)
         # rgbSemCombi = np.reshape(rgbSemCombi, (rgbSemCombi.shape[0]*rgbSemCombi.shape[1], rgbSemCombi.shape[2]))

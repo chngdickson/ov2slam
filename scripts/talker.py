@@ -26,7 +26,7 @@ class CarlaSyncListener:
             self.timestampedInfo.popitem(False)
     
     def timeStampExist(self, timestamp):
-        return timestamp in self.timestampedInfo
+        return (timestamp in self.timestampedInfo, self.timestampedInfo.get(timestamp))
 
 class ManySyncListener:
     def __init__(self):
@@ -42,9 +42,11 @@ class ManySyncListener:
         ):
         rospy.loginfo("message filter called")
         timestamp = front.header.stamp
-        if all(v.timeStampExist(timestamp) for v in self.listenerDict.values()):
+        istrue, rgb_Rgbinfo_Depths = map(list, zip([v.timeStampExist(timestamp)] for v in self.listenerDict.values()))
+
+        if all(istrue):
             rospy.loginfo("message filter called, all infos exists")
-        
+            
         
     
 if __name__ == '__main__':

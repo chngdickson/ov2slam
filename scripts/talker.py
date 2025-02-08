@@ -98,18 +98,16 @@ class ManySyncListener:
                 xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
             rospy.loginfo("message filter called, all infos exists")
     
-        
+    
+    def publish_pcd(self, arr):
+        return
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu()
         rgb = self.ros_rgb_img2numpy(rgbImg)
-        a = np.vstack(pcd_np_3d, rgb)
+        a = np.vstack((pcd_np_3d, rgb))
         print(a.shape)
         return a
-        # Transform Lidar_np_3d from Camera To World Frame
-        # rgbSemCombi = np.dstack((rgbImg)
-        # rgbSemCombi = np.reshape(rgbSemCombi, (rgbSemCombi.shape[0]*rgbSemCombi.shape[1], rgbSemCombi.shape[2]))
-        # return np.hstack([pcd_np_3d.T, rgbSemCombi])
 
     def ros_rgb_img2numpy(self, rgb_img: Image):
         im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width, -1)

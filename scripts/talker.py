@@ -28,7 +28,7 @@ class CarlaSyncListener:
         self.timer = rospy.Timer(rospy.Duration(0.2), self.wait_tf_cb)
         
     def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
-        if self.tf_received:
+        if not self.tf_received:
             self.tf_rel_frame = image.header.frame_id
             return
         rospy.loginfo(f"{self.topic_pose}")
@@ -40,7 +40,7 @@ class CarlaSyncListener:
         return (timestamp in self.timestampedInfo, self.timestampedInfo.get(timestamp))
 
     def wait_tf_cb(self, event):
-        if not self.tf_rel_frame is None:
+        if self.tf_rel_frame is None:
             return
         if self.tf_listener.frameExists(self.tf_origin_frame) and self.tf_listener.frameExists(self.tf_rel_frame):
             t = self.tf_listener.getLatestCommonTime(self.tf_origin_frame, self.tf_rel_frame)

@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import rospy
 import torch
 import tf
-# from typing import List
+from typing import List
 from collections import OrderedDict
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2
 import message_filters
@@ -10,25 +10,23 @@ import message_filters
 
 class CarlaSyncListener:
     def __init__(self, topic_pose):
-        self.image_sub = message_filters.Subscriber("carla/ego_vehicle/rgb_%s/image"%(topic_pose), Image)
-        self.info_sub = message_filters.Subscriber("carla/ego_vehicle/rgb_%s/camera_info"%(topic_pose), CameraInfo)
-        self.depth_sub = message_filters.Subscriber("carla/ego_vehicle/depth_%s/image"%(topic_pose), Image)
+        self.image_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/image", Image)
+        self.info_sub = message_filters.Subscriber(f"carla/ego_vehicle/rgb_{topic_pose}/camera_info", CameraInfo)
+        self.depth_sub = message_filters.Subscriber(f"carla/ego_vehicle/depth_{topic_pose}/image", Image)
         self.ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub, self.depth_sub], 10)
         self.ts.registerCallback(self.callback)
-        stringtest = f"hello{topic_pose}"
         self.timestampedInfo = OrderedDict() #Timestamp:combined pointcloud
         # we need to know the quickest method for depth conversion
-    def callback(self, image, camera_info, depth_img):
+    def callback(self, image:Image, camera_info:CameraInfo, depth_img:Image):
         timestamp = image.header.stamp
-        self.timestampedInfo[timestamp] = [image, camera_info.K, depth_img]
-        
+        self.timestampedInfo[timestamp] = [image, camera_info.k, depth_img]
+        rospy.loginfo("Print")
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
-    callback.__annotations__= {'image':Image, "camera_info": CameraInfo, "depth_img": Image}
 
 class ManySyncListener:
     def __init__(self):
-        img_depth_lists = [
+        img_depth_lists:List[CarlaSyncListener] = [
             CarlaSyncListener("back"),
             CarlaSyncListener("front")
         ]

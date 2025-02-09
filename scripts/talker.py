@@ -184,6 +184,7 @@ class ManySyncListener:
                                                 [2*rx*ry + 2*rw*rz, rw**2 - rx**2 + ry**2 - rz**2, 2*ry*rz - 2*rw*rx],
                                                 [2*rx*rz - 2*rw*ry, 2*ry*rz + 2*rw*rx, rw**2 - rx**2 - ry**2 + rz**2]])
                 lidar_rotate[:, 1] *= -1
+                test_pcd = self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin)
                 print(lidar_rotate.shape)
                 self.publish_pcd(lidar_rotate, timestamp)
                 # depth2pc_msg1 = create_cloud(header=depth.header, fields=fields, points=lidar_rotate.tolist())
@@ -215,8 +216,8 @@ class ManySyncListener:
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
-        rgb = self.ros_rgb_img2numpy(rgbImg)
-        a = np.vstack((pcd_np_3d)).reshape(3,-1)
+        # rgb = self.ros_rgb_img2numpy(rgbImg)
+        a = np.vstack((pcd_np_3d)).reshape(3,-1).T
         return a
 
     def ros_rgb_img2numpy(self, rgb_img: Image):

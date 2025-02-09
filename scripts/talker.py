@@ -178,20 +178,20 @@ class ManySyncListener:
             for (rgb, cam_info, depth),(ext2_Origin, quat) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # 1. TODO: Test Depth to pcd
                 # 2. TODO: Test pointcloud visualization 
-                lidar_np, depth_np = self.depth_to_lidar(self.ros_depth_img2numpy(depth),w=cam_info.width, h=cam_info.height, K=np.array(cam_info.K).reshape((3,3)))
-                rx,ry,rz,rw = quat
-                lidar_rotate = np.dot(lidar_np.T, [[rw**2 + rx**2 - ry**2 - rz**2, 2*rx*ry - 2*rw*rz, 2*rx*rz + 2*rw*ry],
-                                                [2*rx*ry + 2*rw*rz, rw**2 - rx**2 + ry**2 - rz**2, 2*ry*rz - 2*rw*rx],
-                                                [2*rx*rz - 2*rw*ry, 2*ry*rz + 2*rw*rx, rw**2 - rx**2 - ry**2 + rz**2]])
-                lidar_rotate[:, 1] *= -1
+                # lidar_np, depth_np = self.depth_to_lidar(self.ros_depth_img2numpy(depth),w=cam_info.width, h=cam_info.height, K=np.array(cam_info.K).reshape((3,3)))
+                # rx,ry,rz,rw = quat
+                # lidar_rotate = np.dot(lidar_np.T, [[rw**2 + rx**2 - ry**2 - rz**2, 2*rx*ry - 2*rw*rz, 2*rx*rz + 2*rw*ry],
+                #                                 [2*rx*ry + 2*rw*rz, rw**2 - rx**2 + ry**2 - rz**2, 2*ry*rz - 2*rw*rx],
+                #                                 [2*rx*rz - 2*rw*ry, 2*ry*rz + 2*rw*rx, rw**2 - rx**2 - ry**2 + rz**2]])
+                # lidar_rotate[:, 1] *= -1
                 test_pcd = self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin)
-                print(lidar_rotate.shape)
+
                 self.publish_pcd(test_pcd, timestamp)
                 # depth2pc_msg1 = create_cloud(header=depth.header, fields=fields, points=lidar_rotate.tolist())
                 # self.pc2_pub.publish(depth2pc_msg1)
-            #     xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-            # xyzrgb = np.dstack(xyzrgb_list)
-            # self.publish_pcd(xyzrgb, timestamp)
+                xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+            xyzrgb = np.dstack(xyzrgb_list)
+            self.publish_pcd(xyzrgb, timestamp)
             rospy.loginfo("message filter called, all infos exists")
     
     

@@ -179,8 +179,8 @@ class ManySyncListener:
                 # depth2pc_msg1 = create_cloud(header=depth.header, fields=fields, points=lidar_rotate.tolist())
                 # self.pc2_pub.publish(depth2pc_msg1)
                 xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-            xyzrgb = np.stack(xyzrgb_list, axis=1)
-            print(xyzrgb.shape)
+            xyzrgb = np.stack(xyzrgb_list, axis=0)
+            print("ori", xyzrgb_list[0].shape,"new",xyzrgb.shape)
             self.publish_pcd(xyzrgb, timestamp)
             rospy.loginfo("message filter called, all infos exists")
     

@@ -37,7 +37,7 @@
     <param name="use_const_weight" value="false" />
     <param name="allow_clear" value="true" />
     <param name="verbose" value="true" />
-    <remap from="transform" to="/tf" />
+    <remap from="transform" to="/mytf" />
     <rosparam file="$(find ov2slam)/cfg/carla.yaml"/>
     <param name="mesh_filename" value="$(arg ply_save_file)" />
   </node>

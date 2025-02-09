@@ -25,7 +25,7 @@
   <arg name="ply_save_file" default="/root/bags/cow_eth_data/output.ply"/>
 
   <node name="voxblox_node" pkg="voxblox_ros" type="tsdf_server" output="screen" args="-alsologtostderr" clear_params="true">
-    <remap from="pointcloud" to="/ego_vehicle_pcd"/>
+    <remap from="freespace_pointcloud" to="/ego_vehicle_pcd"/>
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
     <param name="tsdf_voxels_per_side" value="16" />
     <param name="voxel_carving_enabled" value="true" />

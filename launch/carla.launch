@@ -30,7 +30,7 @@
     <param name="tsdf_voxels_per_side" value="16" />
     <param name="voxel_carving_enabled" value="true" />
     <param name="color_mode" value="color" />
-    <param name="use_tf_transforms" value="true" />
+    <param name="use_tf_transforms" value="false" />
     <param name="update_mesh_every_n_sec" value="2.0" />
     <param name="min_time_between_msgs_sec" value="0.0" />
     <param name="method" value="fast" />
@@ -38,7 +38,7 @@
     <param name="allow_clear" value="true" />
     <param name="verbose" value="true" />
     <remap from="transform" to="/tf" />
-    <rosparam file="$(find voxblox_ros)/cfg/cow_and_lady.yaml"/>
+    <!-- <rosparam file="$(find voxblox_ros)/cfg/cow_and_lady.yaml"/> -->
     <param name="mesh_filename" value="$(arg ply_save_file)" />
   </node>
   <!-- <node name="ov2slam_node" pkg="ov2slam" type="ov2slam_node" output="screen" args="$(arg param_file)"/> -->

@@ -2,6 +2,7 @@
 
 # Python 
 import threading
+import multiprocessing
 from typing import Dict
 from collections import OrderedDict
 import sys
@@ -165,12 +166,15 @@ class ManySyncListener:
         for csl in self.listenerDict.values():
             trueFalse, data = csl.timeStampExist(timestamp)
             istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
-            ext_list.append((csl.extrinsic_to_origin, csl.quat)) # type: ignore 
+            ext_list.append(csl.extrinsic_to_origin) # type: ignore 
         
         if all(istrues):
-            xyzrgb_list = []
-            for (rgb, cam_info, depth),(ext2_Origin, quat) in zip(rgb_Rgbinfo_Depths, ext_list):
-                xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+            pool = multiprocessing.Pool(6)
+            jobs = []
+            for (rgb, cam_info, depth),(ext2_Origin,) in zip(rgb_Rgbinfo_Depths, ext_list):
+                jobs.append(pool.apply_async(self.process_depthRgbc, (rgb, depth, cam_info, ext2_Origin)))
+                
+            xyzrgb_list = [job.get() for job in jobs]
             xyzrgb = np.hstack(xyzrgb_list)
             self.publish_pcd(xyzrgb, timestamp)
             rospy.loginfo("message filter called, all infos exists")
@@ -200,8 +204,7 @@ class ManySyncListener:
         ]
 
         arr = arr.reshape(6,-1).T # (307200, 3)
-        # pc2 = pc2.create_cloud(header, fields, arr)
-        self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr.to_list()))
+        self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr))
 
     def ros_rgb_img2numpy(self, rgb_img: Image):
         im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)

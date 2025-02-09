@@ -179,7 +179,6 @@ class ManySyncListener:
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
         rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
-        print(rgb.shape, pcd_np_3d.shape)
         a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
         return a
     
@@ -201,7 +200,7 @@ class ManySyncListener:
         ]
 
         arr = arr.reshape(6,-1).T # (307200, 3)
-        pc2 = create_cloud(header, fields, arr)
+        pc2 = pc2.create_cloud(header, fields, arr)
         self.pc2_pub.publish(pc2)
 
     def ros_rgb_img2numpy(self, rgb_img: Image):

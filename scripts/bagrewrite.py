@@ -20,12 +20,15 @@ if __name__=="__main__":
                 new_msg = deepcopy(msg)
                 for i,m in enumerate(msg.transforms): # go through each frame->frame tf within the msg.transforms
                     if m.header.frame_id == "/map":
+                        print(m.header.frame_id)
                         m.header.frame_id = "/world"
                         new_msg.transforms[i] = m
                     if m.child_frame_id == "/map":
+                        print(m.child_frame_id)
                         m.child_frame_id = "/world"
                         new_msg.transforms[i] = m
                     if m.header.frame_id == "map":
+                        print(m.header.frame_id)
                         m.header.frame_id = "world"
                         new_msg.transforms[i] = m
                 outbag.write(topic, new_msg, t)

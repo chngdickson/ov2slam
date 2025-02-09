@@ -302,7 +302,7 @@ class ManySyncListener:
              torch.ones_like(u_coord)*normalized_depth, 
              torch.ones_like(u_coord)]
             ).to(dtype)
-        p3d = (- (pixel2WorldProjection @ p3d)[:3,:]).reshape(3, h, w)
+        p3d = ( (pixel2WorldProjection @ p3d)[:3,:]).reshape(3, h, w)
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d

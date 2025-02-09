@@ -167,14 +167,6 @@ class ManySyncListener:
             ext_list.append((csl.extrinsic_to_origin, csl.quat)) # type: ignore 
         if all(istrues):
             xyzrgb_list = []
-            fields = [
-                PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
-                PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
-                PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-                # PointField(name='r',offset=12, datatype=PointField.FLOAT32, count=1),
-                # PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
-                # PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
-            ]
             for (rgb, cam_info, depth),(ext2_Origin, quat) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # 1. TODO: Test Depth to pcd
                 # 2. TODO: Test pointcloud visualization 
@@ -207,7 +199,7 @@ class ManySyncListener:
             # PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
         ]
 
-        arr = arr.reshape(3,-1) # (307200, 3)
+        arr = arr.reshape(3,-1).T # (307200, 3)
         pc2 = create_cloud(header, fields, arr)
         self.pc2_pub.publish(pc2)
 
@@ -215,7 +207,7 @@ class ManySyncListener:
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
         # rgb = self.ros_rgb_img2numpy(rgbImg)
-        a = np.vstack((pcd_np_3d)).reshape(3,-1).T
+        a = np.vstack((pcd_np_3d)).reshape(3,-1)
         return a
 
     def ros_rgb_img2numpy(self, rgb_img: Image):

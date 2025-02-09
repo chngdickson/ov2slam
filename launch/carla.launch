@@ -3,9 +3,10 @@
   <arg name="node_start_delay" default="2.0"/>
   <arg name="bag_file" default="/root/bags/carla_bag_ros1/loop_once.bag"/>
   <arg name="param_file" default="$(find ov2slam)/parameters_files/accurate/carla/carla_mono.yaml"/>
-
+  <arg name="rate" default="0.05"/>
   <!-- RUN bag file-->
-  <node name="player" pkg="rosbag" type="play" args="$(arg bag_file)" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/>
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock --r $(arg rate) $(arg bag_file).bag"/>
+  <!-- <node name="player" pkg="rosbag" type="play" args="$(arg bag_file)" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/> -->
 
   <!--Nodelet launch-->
   <!-- <node pkg="nodelet" type="nodelet" args="manager" name="standalone_nodelet" output="screen"/>

@@ -38,7 +38,7 @@
     <param name="allow_clear" value="true" />
     <param name="verbose" value="true" />
     <remap from="transform" to="/tf" />
-    <!-- <rosparam file="$(find voxblox_ros)/cfg/cow_and_lady.yaml"/> -->
+    <rosparam file="$(find ov2slam)/cfg/carla.yaml"/>
     <param name="mesh_filename" value="$(arg ply_save_file)" />
   </node>
   <!-- <node name="ov2slam_node" pkg="ov2slam" type="ov2slam_node" output="screen" args="$(arg param_file)"/> -->

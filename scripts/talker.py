@@ -186,7 +186,7 @@ class ManySyncListener:
                 lidar_rotate[:, 1] *= -1
                 test_pcd = self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin)
                 print(lidar_rotate.shape)
-                self.publish_pcd(lidar_rotate, timestamp)
+                self.publish_pcd(test_pcd, timestamp)
                 # depth2pc_msg1 = create_cloud(header=depth.header, fields=fields, points=lidar_rotate.tolist())
                 # self.pc2_pub.publish(depth2pc_msg1)
             #     xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))

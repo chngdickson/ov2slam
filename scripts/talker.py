@@ -173,7 +173,7 @@ class ManySyncListener:
             tf_msg.transform = tf_transform
             return True , tf_msg
         else:
-            rospy.loginfo(self.tf_listener.frameExists(origin_frame), self.tf_listener.frameExists(relative_frame))
+            rospy.loginfo(f"{self.tf_listener.frameExists(origin_frame)}, {self.tf_listener.frameExists(relative_frame)}")
             return False, tf_msg
     def time_stamp_fuse_cb(self, 
         front:Image, front_left:Image, front_right:Image, 

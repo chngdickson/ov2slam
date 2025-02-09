@@ -192,9 +192,8 @@ class ManySyncListener:
         if all(istrues) and tf_exist:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
-                xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-            xyzrgb = np.hstack(xyzrgb_list)
-            self.publish_pcd(xyzrgb, timestamp)
+            # xyzrgb = np.hstack(xyzrgb_list)
+                self.publish_pcd(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin), timestamp, rgb.header.frame_id)
             self.tf_pub.publish(tf_msg)
             rospy.loginfo("message filter called, all infos exists")
 
@@ -205,12 +204,12 @@ class ManySyncListener:
         a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
         return a
     
-    def publish_pcd(self, arr, stamp):
+    def publish_pcd(self, arr, stamp, frame_id):
         """
         Assumes an array has 3, N elements
         """
         header = Header()
-        header.frame_id = "ego_vehicle"
+        header.frame_id = frame_id
         header.stamp = stamp
 
         fields = [

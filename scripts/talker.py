@@ -180,13 +180,15 @@ class ManySyncListener:
         back:Image, back_left:Image, back_right:Image
         ):
         timestamp = front.header.stamp
+        tf_exist, tf_msg = self.check_tf_exists("map","ego_vehicle",timestamp)
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
+        
         
         for csl in self.listenerDict.values():
             trueFalse, data = csl.timeStampExist(timestamp)
             istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
             ext_list.append(csl.extrinsic_to_origin) # type: ignore 
-        tf_exist, tf_msg = self.check_tf_exists("map","ego_vehicle",timestamp)
+        
         if all(istrues) and tf_exist:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):

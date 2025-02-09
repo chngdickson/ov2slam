@@ -159,7 +159,7 @@ class ManySyncListener:
     
     def check_tf_exists(self, origin_frame, relative_frame, timestamp):
         tf_msg = TransformStamped()
-        if self.tf_listener.frameExists(origin_frame) and self.tf_listener.frameExists(relative_frame):
+        if self.tf_listener.frameExists(relative_frame):
             t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
             position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
             

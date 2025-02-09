@@ -159,7 +159,7 @@ class ManySyncListener:
     
     def check_tf_exists(self, origin_frame, relative_frame, timestamp):
         tf_msg = TransformStamped()
-        if self.tf_listener.frameExists(relative_frame):
+        if self.tf_listener.frameExists(origin_frame) and self.tf_listener.frameExists(relative_frame):
             t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
             position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
             
@@ -173,7 +173,7 @@ class ManySyncListener:
             tf_msg.transform = tf_transform
             return True , tf_msg
         else:
-            rospy.loginfo(f"{self.tf_listener.frameExists(origin_frame)}, {self.tf_listener.frameExists(relative_frame)}\n")
+            rospy.loginfo(f"{origin_frame}{self.tf_listener.frameExists(origin_frame)}, {relative_frame}{self.tf_listener.frameExists(relative_frame)}\n")
             return False, tf_msg
     def time_stamp_fuse_cb(self, 
         front:Image, front_left:Image, front_right:Image, 

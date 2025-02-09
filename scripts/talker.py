@@ -150,7 +150,7 @@ class ManySyncListener:
         # message_filters Synchronizer
         self.list_filters = [message_filters.Subscriber(f"carla/ego_vehicle/rgbd_{n}/image", Image) for n in topics_list]
         self.tf_listener = TransformListener()
-        self.ts = message_filters.TimeSynchronizer(self.list_filters, 10)
+        self.ts = message_filters.TimeSynchronizer(self.list_filters, 100)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
 
         # Publisher

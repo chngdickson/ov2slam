@@ -180,7 +180,7 @@ class ManySyncListener:
                 # 2. TODO: Test pointcloud visualization 
                 lidar_np, depth_np = self.depth_to_lidar(self.ros_depth_img2numpy(depth),w=cam_info.width, h=cam_info.height, K=np.array(cam_info.K).reshape((3,3)))
                 rx,ry,rz,rw = quat
-                lidar_rotate = np.dot(lidar_np, [[rw**2 + rx**2 - ry**2 - rz**2, 2*rx*ry - 2*rw*rz, 2*rx*rz + 2*rw*ry],
+                lidar_rotate = np.dot(lidar_np.T, [[rw**2 + rx**2 - ry**2 - rz**2, 2*rx*ry - 2*rw*rz, 2*rx*rz + 2*rw*ry],
                                                 [2*rx*ry + 2*rw*rz, rw**2 - rx**2 + ry**2 - rz**2, 2*ry*rz - 2*rw*rx],
                                                 [2*rx*rz - 2*rw*ry, 2*ry*rz + 2*rw*rx, rw**2 - rx**2 - ry**2 + rz**2]])
                 lidar_rotate[:, 1] *= -1

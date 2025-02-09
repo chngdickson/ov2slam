@@ -154,12 +154,12 @@ class ManySyncListener:
         self.ts.registerCallback(self.time_stamp_fuse_cb)
 
         # Publisher
-        self.tf_pub = rospy.Publisher("mytf", TransformStamped, 10)
+        self.tf_pub = rospy.Publisher("mytf", TransformStamped, queue_size=10)
         self.pc2_pub = rospy.Publisher("ego_vehicle_pcd",PointCloud2, queue_size=10)
     
     def check_tf_exists(self, origin_frame, relative_frame, timestamp):
         tf_msg = TransformStamped()
-        if self.tf_listener.frameExists(origin_frame) and self.tf_listener.frameExists(relative_frame):
+        if self.tf_listener.frameExists(relative_frame):
             t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
             position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
             
@@ -173,7 +173,7 @@ class ManySyncListener:
             tf_msg.transform = tf_transform
             return True , tf_msg
         else:
-            rospy.loginfo(f"{self.tf_listener.frameExists(origin_frame)}, {self.tf_listener.frameExists(relative_frame)}")
+            rospy.loginfo(f"{self.tf_listener.frameExists(origin_frame)}, {self.tf_listener.frameExists(relative_frame)}\n")
             return False, tf_msg
     def time_stamp_fuse_cb(self, 
         front:Image, front_left:Image, front_right:Image, 

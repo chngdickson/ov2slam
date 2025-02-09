@@ -23,7 +23,7 @@ from std_msgs.msg import Header
 from sensor_msgs import point_cloud2 
 from sensor_msgs.msg import Image, CameraInfo
 from sensor_msgs.msg import PointCloud2, PointField
-
+from geometry_msgs.msg import TransformStamped, Transform
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 _DATATYPES = {}
@@ -149,17 +149,35 @@ class ManySyncListener:
         
         # message_filters Synchronizer
         self.list_filters = [message_filters.Subscriber(f"carla/ego_vehicle/rgbd_{n}/image", Image) for n in topics_list]
+        self.tf_listener = TransformListener()
         self.ts = message_filters.TimeSynchronizer(self.list_filters, 10)
         self.ts.registerCallback(self.time_stamp_fuse_cb)
 
         # Publisher
+        self.tf_pub = rospy.Publisher("mytf", TransformStamped, 10)
         self.pc2_pub = rospy.Publisher("ego_vehicle_pcd",PointCloud2, queue_size=10)
-        
+    
+    def check_tf_exists(self, origin_frame, relative_frame, timestamp):
+        tf_msg = TransformStamped()
+        if self.tf_listener.frameExists(origin_frame) and self.tf_listener.frameExists(relative_frame):
+            t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
+            position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
+            
+            head = Header()
+            head.stamp = timestamp
+            head.frame_id = "map"
+            tf_msg.child_frame_id = relative_frame
+            tf_transform = Transform()
+            tf_transform.translation.x, tf_transform.translation.y, tf_transform.translation.z = position[0], position[1],position[2]
+            tf_transform.rotation.x,tf_transform.rotation.y, tf_transform.rotation.z, tf_transform.rotation.w = quaternion[0], quaternion[1], quaternion[2],quaternion[3]
+            tf_msg.transform = tf_transform
+            return True , tf_msg
+        else:
+            return False, tf_msg
     def time_stamp_fuse_cb(self, 
         front:Image, front_left:Image, front_right:Image, 
         back:Image, back_left:Image, back_right:Image
         ):
-        rospy.loginfo("message filter called")
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
         
@@ -167,15 +185,16 @@ class ManySyncListener:
             trueFalse, data = csl.timeStampExist(timestamp)
             istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
             ext_list.append(csl.extrinsic_to_origin) # type: ignore 
-        
-        if all(istrues):
+        tf_exist, tf_msg = self.check_tf_exists("map","ego_vehicle",timestamp)
+        if all(istrues) and tf_exist:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
             xyzrgb = np.hstack(xyzrgb_list)
             self.publish_pcd(xyzrgb, timestamp)
+            self.tf_pub(tf_msg)
             rospy.loginfo("message filter called, all infos exists")
-    
+
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu().numpy()

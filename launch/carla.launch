@@ -5,7 +5,7 @@
   <arg name="param_file" default="$(find ov2slam)/parameters_files/accurate/carla/carla_mono.yaml"/>
   <arg name="rate" default="0.05"/>
   <!-- RUN bag file-->
-  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -r $(arg rate) $(arg bag_file)"/>
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -r $(arg rate) /tf:=/tf_old $(arg bag_file)"/>
   <!-- <node name="player" pkg="rosbag" type="play" args="$(arg bag_file)" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/> -->
 
   <!--Nodelet launch-->
@@ -16,7 +16,12 @@
     <remap from="depth_registered/image_rect" to="/carla/ego_vehicle/depth_back2/image"/>
     <remap from="depth_registered/points" to="/pcd_back/points"/>
   </node> -->
-
+  <node pkg="tf" type="tf_remap" name="tf_remapper" output="screen">
+    <rosparam param="mappings">
+      - {old: "/map",
+          new: "/world"}
+    </rosparam>
+  </node>
   <!-- <node name="publisher_node" pkg="ov2slam" type="my_publisher" output="screen"/> -->
   <node name="test" pkg="ov2slam" type="talker.py" output="screen"/>
   <!-- <node name="player" pkg="rosbag" type="play" output="screen" args="-r 1.0 clock $(arg bag_file)" if="$(arg play_bag)"/> -->

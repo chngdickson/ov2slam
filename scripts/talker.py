@@ -171,7 +171,7 @@ class ManySyncListener:
         if all(istrues):
             pool = multiprocessing.Pool(6)
             jobs = []
-            for (rgb, cam_info, depth),(ext2_Origin,) in zip(rgb_Rgbinfo_Depths, ext_list):
+            for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 jobs.append(pool.apply_async(self.process_depthRgbc, (rgb, depth, cam_info, ext2_Origin)))
                 
             xyzrgb_list = [job.get() for job in jobs]

@@ -170,22 +170,16 @@ class ManySyncListener:
             for (rgb, cam_info, depth),(ext2_Origin, quat) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # 1. TODO: Test Depth to pcd
                 # 2. TODO: Test pointcloud visualization 
-                # lidar_np, depth_np = self.depth_to_lidar(self.ros_depth_img2numpy(depth),w=cam_info.width, h=cam_info.height, K=np.array(cam_info.K).reshape((3,3)))
-                # rx,ry,rz,rw = quat
-                # lidar_rotate = np.dot(lidar_np.T, [[rw**2 + rx**2 - ry**2 - rz**2, 2*rx*ry - 2*rw*rz, 2*rx*rz + 2*rw*ry],
-                #                                 [2*rx*ry + 2*rw*rz, rw**2 - rx**2 + ry**2 - rz**2, 2*ry*rz - 2*rw*rx],
-                #                                 [2*rx*rz - 2*rw*ry, 2*ry*rz + 2*rw*rx, rw**2 - rx**2 - ry**2 + rz**2]])
-                # lidar_rotate[:, 1] *= -1
-                # depth2pc_msg1 = create_cloud(header=depth.header, fields=fields, points=lidar_rotate.tolist())
-                # self.pc2_pub.publish(depth2pc_msg1)
                 xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
             xyzrgb = np.hstack(xyzrgb_list)
-            print("ori", xyzrgb_list[0].shape,"new",xyzrgb.shape)
             self.publish_pcd(xyzrgb, timestamp)
             rospy.loginfo("message filter called, all infos exists")
     
     
     def publish_pcd(self, arr, stamp):
+        """
+        Assumes an array has 3, N elements
+        """
         header = Header()
         header.frame_id = "ego_vehicle"
         header.stamp = stamp
@@ -293,53 +287,12 @@ class ManySyncListener:
              torch.ones_like(u_coord)]
             ).to(dtype)
         p3d = ( (pixel2WorldProjection @ p3d)[:3,:]).reshape(3, h, w)
+        p3d[0] *= -1
         p3d[1] *= -1
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d
 
-    # Additional
-    def depth_to_lidar(self, normalized_depth, w:int=400, h:int=70, K=[[200, 0, 200], [0, 200,35], [0, 0, 1]] , max_depth=0.9):
-        """
-        Convert an image containing CARLA encoded depth-map to a 2D array containing
-        the 3D position (relative to the camera) of each pixel and its corresponding
-        RGB color of an array.
-        "max_depth" is used to omit the points that are far enough.
-        """
-        far = 1000.0  # max depth in meters.
-        w,h,K = int(w), int(h), np.array(K)
-        pixel_length = w*h
-        u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
-                        h, 1).reshape(pixel_length)
-        v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
-                        1, w).reshape(pixel_length)
-        normalized_depth = np.reshape(normalized_depth, pixel_length)
-        # Search for pixels where the depth is greater than max_depth to
-        # Make them = 0 to preserve the shape
-        max_depth_indexes = np.where(normalized_depth > max_depth)
-        normalized_depth[max_depth_indexes] = 0
-        u_coord[max_depth_indexes] = 0
-        v_coord[max_depth_indexes] = 0
-        depth_np_1d = normalized_depth *far
-
-        # p2d = [u,v,1]
-        p2d = np.array([u_coord, v_coord, np.ones_like(u_coord)])
-
-        # P = [X,Y,Z] # Pixel Space to Camera space
-        p3d = np.dot(np.linalg.inv(K), p2d)
-        p3d *= depth_np_1d
-
-        lidar_np_3d = np.transpose(p3d) 
-        py,pz,px = lidar_np_3d[:, 0], lidar_np_3d[:, 1], lidar_np_3d[:, 2]
-
-        lidar_np_3d = np.vstack((px,py,pz))
-        
-        depth_np_1d = np.reshape(depth_np_1d, (h, w))
-        
-        # header = laspy.LasHeader(point_format=0, version="1.2")
-        # las = laspy.LasData(header)
-        # las.x, las.y, las.z = px, py, pz
-        return lidar_np_3d, depth_np_1d
 
 
 if __name__ == '__main__':

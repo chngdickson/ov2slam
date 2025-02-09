@@ -188,20 +188,19 @@ class ManySyncListener:
             PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
             PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
             PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-            # PointField(name='r',offset=12, datatype=PointField.FLOAT32, count=1),
-            # PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
-            # PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
+            PointField(name='r',offset=12, datatype=PointField.FLOAT32, count=1),
+            PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
+            PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
         ]
 
-        arr = arr.reshape(3,-1).T # (307200, 3)
+        arr = arr.reshape(6,-1).T # (307200, 3)
         pc2 = create_cloud(header, fields, arr)
         self.pc2_pub.publish(pc2)
 
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
-        # rgb = self.ros_rgb_img2numpy(rgbImg)
-        a = np.vstack((pcd_np_3d)).reshape(3,-1)
+        a = np.vstack((pcd_np_3d, self.ros_rgb_img2numpy(rgbImg))).reshape(6,-1)
         return a
 
     def ros_rgb_img2numpy(self, rgb_img: Image):

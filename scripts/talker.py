@@ -178,7 +178,7 @@ class ManySyncListener:
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
-        rgb = self.ros_rgb_img2numpy(rgbImg)
+        rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
         print(rgb.shape, pcd_np_3d.shape)
         a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
         return a
@@ -286,7 +286,7 @@ class ManySyncListener:
              torch.ones_like(u_coord)*normalized_depth, 
              torch.ones_like(u_coord)]
             ).to(dtype)
-        p3d = ( (pixel2WorldProjection @ p3d)[:3,:]).reshape(3, h, w)
+        p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
         p3d[0] *= -1
         p3d[1] *= -1
         

@@ -184,6 +184,7 @@ class ManySyncListener:
                                                 [2*rx*ry + 2*rw*rz, rw**2 - rx**2 + ry**2 - rz**2, 2*ry*rz - 2*rw*rx],
                                                 [2*rx*rz - 2*rw*ry, 2*ry*rz + 2*rw*rx, rw**2 - rx**2 - ry**2 + rz**2]])
                 lidar_rotate[:, 1] *= -1
+                print(lidar_rotate.shape)
                 depth2pc_msg1 = create_cloud(header=depth.header, fields=fields, points=lidar_rotate.tolist())
                 self.pc2_pub.publish(depth2pc_msg1)
             #     xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
@@ -207,7 +208,7 @@ class ManySyncListener:
         ]
 
         arr = arr.reshape(3,-1).T
-        pc2 = point_cloud2.create_cloud(header, fields, arr)
+        pc2 = create_cloud(header, fields, arr.tolist())
         self.pc2_pub.publish(pc2)
 
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):

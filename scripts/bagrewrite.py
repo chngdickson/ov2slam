@@ -9,8 +9,6 @@ import sys
 if __name__=="__main__":
     if len(sys.argv) < 3:
         print("usage: my_node.py input.bag output.bag")
-    else:
-        my_node(sys.argv[1], sys.argv[2])
     
     bagInName = str(sys.argv[1])
     bagIn = rosbag.Bag(bagInName)

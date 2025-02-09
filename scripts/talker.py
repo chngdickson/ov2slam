@@ -19,7 +19,7 @@ import rospy
 import message_filters
 from tf import TransformListener, transformations
 from std_msgs.msg import Header
-import sensor_msgs.point_cloud2 as pc2
+from sensor_msgs import point_cloud2 
 from sensor_msgs.msg import Image, CameraInfo
 from sensor_msgs.msg import PointCloud2, PointField
 
@@ -200,8 +200,8 @@ class ManySyncListener:
         ]
 
         arr = arr.reshape(6,-1).T # (307200, 3)
-        pc2 = pc2.create_cloud(header, fields, arr)
-        self.pc2_pub.publish(pc2)
+        # pc2 = pc2.create_cloud(header, fields, arr)
+        self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr))
 
     def ros_rgb_img2numpy(self, rgb_img: Image):
         im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)

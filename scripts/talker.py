@@ -3,7 +3,7 @@
 # Python 
 import threading
 import multiprocessing
-from typing import Dict, List, Optional
+from typing import Dict
 from collections import OrderedDict
 import sys
 import ctypes
@@ -117,13 +117,13 @@ class CarlaSyncListener:
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
     
-    def timeStampExist(self, timestamp)-> List[bool, list]:
+    def timeStampExist(self, timestamp):
         if timestamp in self.timestampedInfo:
             data = self.timestampedInfo.get(timestamp)
             self.timestampedInfo.pop(timestamp)
-            return [True, data]
+            return (True, data)
         else:
-            return [False, None]
+            return (False, None)
 
     def wait_tf_cb(self, event):
         if self.tf_rel_frame is None or self.tf_rel_frame2 is None:
@@ -165,18 +165,14 @@ class ManySyncListener:
         
         for csl in self.listenerDict.values():
             trueFalse, data = csl.timeStampExist(timestamp)
-            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data.append(csl.extrinsic_to_origin))
-            # ext_list.append(csl.extrinsic_to_origin) # type: ignore 
+            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
+            ext_list.append(csl.extrinsic_to_origin) # type: ignore 
         
         if all(istrues):
             xyzrgb_list = []
-            pool = multiprocessing.Pool()
-            with pool as p:
-                results = []
-                for (rgb, cam_info, depth ,ext2_Origin) in rgb_Rgbinfo_Depths:
-                    results.append(pool.starmap(self.process_depthRgbc, (rgb, depth, cam_info, ext2_Origin)))
-                    # xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-            xyzrgb = np.hstack([result.get() for result in results])
+            for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
+                xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+            xyzrgb = np.hstack(xyzrgb_list)
             self.publish_pcd(xyzrgb, timestamp)
             rospy.loginfo("message filter called, all infos exists")
     

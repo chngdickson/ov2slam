@@ -19,7 +19,7 @@ import rospy
 import message_filters
 from tf import TransformListener, transformations
 from std_msgs.msg import Header
-from sensor_msgs import point_cloud2
+import sensor_msgs.point_cloud2 as pc2
 from sensor_msgs.msg import Image, CameraInfo
 from sensor_msgs.msg import PointCloud2, PointField
 
@@ -161,20 +161,27 @@ class ManySyncListener:
         rospy.loginfo("message filter called")
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
+        
         for csl in self.listenerDict.values():
             trueFalse, data = csl.timeStampExist(timestamp)
             istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
             ext_list.append((csl.extrinsic_to_origin, csl.quat)) # type: ignore 
+        
         if all(istrues):
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin, quat) in zip(rgb_Rgbinfo_Depths, ext_list):
-                # 1. TODO: Test Depth to pcd
-                # 2. TODO: Test pointcloud visualization 
                 xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
             xyzrgb = np.hstack(xyzrgb_list)
             self.publish_pcd(xyzrgb, timestamp)
             rospy.loginfo("message filter called, all infos exists")
     
+    def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
+        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
+        pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
+        rgb = self.ros_rgb_img2numpy(rgbImg)
+        print(rgb.shape, pcd_np_3d.shape)
+        a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
+        return a
     
     def publish_pcd(self, arr, stamp):
         """
@@ -197,17 +204,11 @@ class ManySyncListener:
         pc2 = create_cloud(header, fields, arr)
         self.pc2_pub.publish(pc2)
 
-    def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
-        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
-        pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
-        a = np.vstack((pcd_np_3d, self.ros_rgb_img2numpy(rgbImg))).reshape(6,-1)
-        return a
-
     def ros_rgb_img2numpy(self, rgb_img: Image):
-        im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(-1, rgb_img.height, rgb_img.width)
+        im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
         # BGRA to RGB
-        im = im[:3,:,:]
-        im = im[::-1,:,:]
+        im = im[:,:,:3]
+        im = im[:,:,::-1]
         return im
     
     def ros_depth_img2numpy(self, ros_img: Image) -> np.ndarray:

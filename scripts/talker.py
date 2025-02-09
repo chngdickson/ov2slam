@@ -193,6 +193,7 @@ class ManySyncListener:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
             # xyzrgb = np.hstack(xyzrgb_list)
+                print(rgb.header.frame_id)
                 self.publish_pcd(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin), timestamp, rgb.header.frame_id)
             self.tf_pub.publish(tf_msg)
             rospy.loginfo("message filter called, all infos exists")

@@ -25,7 +25,9 @@ if __name__=="__main__":
                     if m.child_frame_id == "/map":
                         m.child_frame_id = "/world"
                         new_msg.transforms[i] = m
-
+                    if m.header.frame_id == "map":
+                        m.header.frame_id = "world"
+                        new_msg.transforms[i] = m
                 outbag.write(topic, new_msg, t)
             else:
                 outbag.write(topic, msg, t)

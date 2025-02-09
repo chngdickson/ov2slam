@@ -5,7 +5,7 @@
   <arg name="param_file" default="$(find ov2slam)/parameters_files/accurate/carla/carla_mono.yaml"/>
   <arg name="rate" default="0.05"/>
   <!-- RUN bag file-->
-  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock --rate $(arg rate) $(arg bag_file).bag"/>
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -r $(arg rate) $(arg bag_file).bag"/>
   <!-- <node name="player" pkg="rosbag" type="play" args="$(arg bag_file)" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/> -->
 
   <!--Nodelet launch-->

@@ -195,7 +195,7 @@ class ManySyncListener:
                 xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
             xyzrgb = np.hstack(xyzrgb_list)
             self.publish_pcd(xyzrgb, timestamp)
-            self.tf_pub(tf_msg)
+            self.tf_pub.publish(tf_msg)
             rospy.loginfo("message filter called, all infos exists")
 
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):

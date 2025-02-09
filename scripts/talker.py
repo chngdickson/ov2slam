@@ -4,6 +4,9 @@
 import threading
 from typing import Dict
 from collections import OrderedDict
+import sys
+import ctypes
+import struct
 
 # Other libs
 import torch, gc
@@ -22,6 +25,68 @@ from sensor_msgs.msg import PointCloud2, PointField
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+_DATATYPES = {}
+_DATATYPES[PointField.INT8] = ('b', 1)
+_DATATYPES[PointField.UINT8] = ('B', 1)
+_DATATYPES[PointField.INT16] = ('h', 2)
+_DATATYPES[PointField.UINT16] = ('H', 2)
+_DATATYPES[PointField.INT32] = ('i', 4)
+_DATATYPES[PointField.UINT32] = ('I', 4)
+_DATATYPES[PointField.FLOAT32] = ('f', 4)
+_DATATYPES[PointField.FLOAT64] = ('d', 8)
+
+def _get_struct_fmt(is_bigendian, fields, field_names=None):
+    fmt = '>' if is_bigendian else '<'
+
+    offset = 0
+    for field in (f for f in sorted(fields, key=lambda f: f.offset)
+                  if field_names is None or f.name in field_names):
+        if offset < field.offset:
+            fmt += 'x' * (field.offset - offset)
+            offset = field.offset
+        if field.datatype not in _DATATYPES:
+            print('Skipping unknown PointField datatype [{}]' % field.datatype, file=sys.stderr)
+        else:
+            datatype_fmt, datatype_length = _DATATYPES[field.datatype]
+            fmt += field.count * datatype_fmt
+            offset += field.count * datatype_length
+
+    return fmt
+def create_cloud(header, fields, points):
+    """
+    Create a L{sensor_msgs.msg.PointCloud2} message.
+    @param header: The point cloud header.
+    @type  header: L{std_msgs.msg.Header}
+    @param fields: The point cloud fields.
+    @type  fields: iterable of L{sensor_msgs.msg.PointField}
+    @param points: The point cloud points.
+    @type  points: list of iterables, i.e. one iterable for each point, with the
+                   elements of each iterable being the values of the fields for
+                   that point (in the same order as the fields parameter)
+    @return: The point cloud.
+    @rtype:  L{sensor_msgs.msg.PointCloud2}
+    """
+
+    cloud_struct = struct.Struct(_get_struct_fmt(False, fields))
+
+    buff = ctypes.create_string_buffer(cloud_struct.size * len(points))
+
+    point_step, pack_into = cloud_struct.size, cloud_struct.pack_into
+    offset = 0
+    for p in points:
+        pack_into(buff, offset, *p)
+        offset += point_step
+
+    return PointCloud2(header=header,
+                       height=1,
+                       width=len(points),
+                       is_dense=False,
+                       is_bigendian=False,
+                       fields=fields,
+                       point_step=cloud_struct.size,
+                       row_step=cloud_struct.size * len(points),
+                       data=buff.raw)
+    
 class CarlaSyncListener:
     def __init__(self, topic_pose, tf_origin_frame="ego_vehicle"):
         self.topic_pose = topic_pose
@@ -40,6 +105,7 @@ class CarlaSyncListener:
         
         # Private vars
         self.extrinsic_to_origin = None
+        self.quat = None
         
     def callback(self, rgb_img:Image, camera_info:CameraInfo, depth_img:Image):
         if not self.tf_received:
@@ -70,6 +136,7 @@ class CarlaSyncListener:
             position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
             quat = transformations.quaternion_matrix(quaternion)
             quat[0:3,3] = position
+            self.quat = quaternion
             self.tf_received, self.extrinsic_to_origin = True, quat
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
@@ -96,15 +163,32 @@ class ManySyncListener:
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
         for csl in self.listenerDict.values():
             trueFalse, data = csl.timeStampExist(timestamp)
-            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data), ext_list.append(csl.extrinsic_to_origin) # type: ignore 
+            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
+            ext_list.append((csl.extrinsic_to_origin, csl.quat)) # type: ignore 
         if all(istrues):
             xyzrgb_list = []
-            for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
+            fields = [
+                PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
+                PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
+                PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
+                # PointField(name='r',offset=12, datatype=PointField.FLOAT32, count=1),
+                # PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
+                # PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
+            ]
+            for (rgb, cam_info, depth),(ext2_Origin, quat) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # 1. TODO: Test Depth to pcd
                 # 2. TODO: Test pointcloud visualization 
-                xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-            xyzrgb = np.dstack(xyzrgb_list)
-            self.publish_pcd(xyzrgb, timestamp)
+                lidar_np, depth_np = self.depth_to_lidar(self.ros_depth_img2numpy(depth),w=cam_info.width, h=cam_info.height, K=np.array(cam_info.k).reshape((3,3)))
+                rx,ry,rz,rw = quat
+                lidar_rotate = np.dot(lidar_np, [[rw**2 + rx**2 - ry**2 - rz**2, 2*rx*ry - 2*rw*rz, 2*rx*rz + 2*rw*ry],
+                                                [2*rx*ry + 2*rw*rz, rw**2 - rx**2 + ry**2 - rz**2, 2*ry*rz - 2*rw*rx],
+                                                [2*rx*rz - 2*rw*ry, 2*ry*rz + 2*rw*rx, rw**2 - rx**2 - ry**2 + rz**2]])
+                lidar_rotate[:, 1] *= -1
+                depth2pc_msg1 = create_cloud(header=depth.header, fields=fields, points=lidar_rotate.tolist())
+                self.pc2_pub.publish(depth2pc_msg1)
+            #     xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+            # xyzrgb = np.dstack(xyzrgb_list)
+            # self.publish_pcd(xyzrgb, timestamp)
             rospy.loginfo("message filter called, all infos exists")
     
     
@@ -219,6 +303,50 @@ class ManySyncListener:
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d
+
+    # Additional
+    def depth_to_lidar(self, normalized_depth, w:int=400, h:int=70, K=[[200, 0, 200], [0, 200,35], [0, 0, 1]] , max_depth=0.9):
+        """
+        Convert an image containing CARLA encoded depth-map to a 2D array containing
+        the 3D position (relative to the camera) of each pixel and its corresponding
+        RGB color of an array.
+        "max_depth" is used to omit the points that are far enough.
+        """
+        far = 1000.0  # max depth in meters.
+        w,h,K = int(w), int(h), np.array(K)
+        pixel_length = w*h
+        u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
+                        h, 1).reshape(pixel_length)
+        v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
+                        1, w).reshape(pixel_length)
+        normalized_depth = np.reshape(normalized_depth, pixel_length)
+        # Search for pixels where the depth is greater than max_depth to
+        # Make them = 0 to preserve the shape
+        max_depth_indexes = np.where(normalized_depth > max_depth)
+        normalized_depth[max_depth_indexes] = 0
+        u_coord[max_depth_indexes] = 0
+        v_coord[max_depth_indexes] = 0
+        depth_np_1d = normalized_depth *far
+
+        # p2d = [u,v,1]
+        p2d = np.array([u_coord, v_coord, np.ones_like(u_coord)])
+
+        # P = [X,Y,Z] # Pixel Space to Camera space
+        p3d = np.dot(np.linalg.inv(K), p2d)
+        p3d *= depth_np_1d
+
+        lidar_np_3d = np.transpose(p3d) 
+        py,pz,px = lidar_np_3d[:, 0], lidar_np_3d[:, 1], lidar_np_3d[:, 2]
+
+        lidar_np_3d = np.vstack((px,py,pz))
+        
+        depth_np_1d = np.reshape(depth_np_1d, (h, w))
+        
+        # header = laspy.LasHeader(point_format=0, version="1.2")
+        # las = laspy.LasData(header)
+        # las.x, las.y, las.z = px, py, pz
+        return lidar_np_3d, depth_np_1d
+
 
 if __name__ == '__main__':
     rospy.init_node("sample_message_filters", anonymous=True)

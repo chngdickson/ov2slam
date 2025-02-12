@@ -213,7 +213,8 @@ class ManySyncListener:
         header = Header()
         header.frame_id = frame_id
         header.stamp = stamp
-
+        BIT_MOVE_16 = 2**16
+        BIT_MOVE_8 = 2**8
         fields = [
             PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
             PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
@@ -224,9 +225,12 @@ class ManySyncListener:
         ]
 
         arr = arr.reshape(6,-1).T # (307200, 3)
-        arr = list(map(list,zip(arr[:,0], arr[:,1],arr[:,2], arr[:,3:].astype(np.uint8))))
+        xyz = arr[:,:3]
+        colors = arr[:,3:].astype(np.uint8)
+        colors = colors[:,0] * BIT_MOVE_16 +colors[:,1] * BIT_MOVE_8 + colors[:,2]
+        cloud_data=np.c_[xyz, colors]
         # arr = np.rec.fromarrays((arr[0],arr[1],arr[2],arr[3].astype(np.uint8),arr[4].astype(np.uint8),arr[5].astype(np.uint8)))
-        self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr))
+        self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, cloud_data))
 
     def ros_rgb_img2numpy(self, rgb_img: Image):
         im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)

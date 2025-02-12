@@ -94,7 +94,7 @@ class CarlaSyncListener:
 
 class ManySyncListener:
     def __init__(self):
-        topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]
+        topics_list = ["front", "back",]
         self.listenerDict:Dict[str,CarlaSyncListener] = {n:CarlaSyncListener(n) for n in topics_list}
         
         # message_filters Synchronizer
@@ -109,8 +109,8 @@ class ManySyncListener:
     
 
     def time_stamp_fuse_cb(self, 
-        front:Image, front_left:Image, front_right:Image, 
-        back:Image, back_left:Image, back_right:Image
+        front:Image,
+        back:Image
         ):
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
@@ -248,7 +248,6 @@ class ManySyncListener:
              torch.ones_like(u_coord)]
             ).to(dtype)
         p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
-        p3d[1] *=-1
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d

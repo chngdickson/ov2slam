@@ -107,8 +107,9 @@ class ROS_ImgTool:
         p3d = torch.stack(
             [u_coord*normalized_depth,
              v_coord*normalized_depth,
-             torch.ones_like(u_coord)*normalized_depth, 
-             torch.ones_like(u_coord)]
+             torch.ones_like(u_coord)*normalized_depth,
+             torch.ones_like(u_coord)],
+            dim=1
             ).to(dtype)
         print(p3d.shape)
         p3d = ( (torch.mm(pixel2WorldProjection ,p3d))[:3,:])

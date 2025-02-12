@@ -201,7 +201,7 @@ class CarlaSyncListener:
             PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
             PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
         ]
-        print(arr.shape)
+        rospy.loginfo("Parked")
         arr = arr.reshape(6,-1).T # (307200, 3)
         self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr))
             

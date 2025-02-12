@@ -194,10 +194,11 @@ class ManySyncListener:
         if all(istrues) and tf_exist:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
-            # xyzrgb = np.hstack(xyzrgb_list)
-                print(rgb.header.frame_id)
-                self.publish_pcd(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin), timestamp, depth.header.frame_id)
-                self.tf_pub.publish(tf_msg)
+                
+                xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+                # self.tf_pub.publish(tf_msg)
+            xyzrgb = np.hstack(xyzrgb_list)
+            self.publish_pcd(xyzrgb, timestamp, depth.header.frame_id)
             rospy.loginfo("message filter called, all infos exists")
 
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
@@ -223,14 +224,11 @@ class ManySyncListener:
             PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)
             ]
         arr = arr.reshape(6,-1).T # (N, 6)
-        xyz = arr[:,:3]
-        colors = arr[:,3:].astype(np.uint32)
-        colors = colors[:,0] * BIT_MOVE_16 +colors[:,1] * BIT_MOVE_8 + colors[:,2]
         df = pd.DataFrame({
-            "x":xyz[:,0],
-            "y":xyz[:,1],
-            "z":xyz[:,2],
-            "rgb":colors
+            "x":arr[:,0],
+            "y":arr[:,1],
+            "z":arr[:,2],
+            "rgb": arr[:,3] * BIT_MOVE_16 +arr[:,4] * BIT_MOVE_8 + arr[:,5]
         })
         df["x"] = df["x"].astype("float32")
         df["y"] = df["y"].astype("float32")

@@ -77,7 +77,7 @@ class CarlaSyncListener:
             t = self.tf_listener.getLatestCommonTime(relative_frame, origin_frame)
             transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
             rospy.loginfo(f"{transformStamped}")
-            position, quat = transformStamped
+            position, quaternion = transformStamped
             quat = transformations.quaternion_matrix(quaternion)
             quat[0:3,3] = position
             self.quat = quaternion

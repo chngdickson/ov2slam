@@ -230,7 +230,7 @@ class ManySyncListener:
         colors = colors[:,0] * BIT_MOVE_16 +colors[:,1] * BIT_MOVE_8 + colors[:,2]
         cloud_data = np.vstack([xyz.T, colors.T]).T
         cloud_data = cloud_data.astype(dtype_L1)
-        # arr = np.rec.fromarrays((arr[0],arr[1],arr[2],arr[3].astype(np.uint8),arr[4].astype(np.uint8),arr[5].astype(np.uint8)))
+        print(cloud_data.shape)
         self.pc2_pub.publish(point_cloud2.create_cloud(header, FIELDS_XYZRGB, cloud_data))
 
     def ros_rgb_img2numpy(self, rgb_img: Image):

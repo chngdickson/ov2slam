@@ -101,6 +101,7 @@ class ROS_ImgTool:
             ExtCam2Ego = torch.tensor(ExtCam2Ego).to(device=device, dtype=dtype)
             pixel2WorldProjection = torch.pinverse(torch.mm(torch.mm(K4x4 , M_Basis_Cam2W) , ExtCam2Ego))
         else:
+            print(K4x4.shape, M_Basis_Cam2W.shape)
             pixel2WorldProjection = torch.pinverse(torch.mm(K4x4 , M_Basis_Cam2W))
             
         p3d = torch.stack(

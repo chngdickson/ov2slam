@@ -228,7 +228,7 @@ class ManySyncListener:
         xyz = arr[:,:3]
         colors = arr[:,3:].astype(np.uint32)
         colors = colors[:,0] * BIT_MOVE_16 +colors[:,1] * BIT_MOVE_8 + colors[:,2]
-        cloud_data = np.vstack([xyz.T, colors.T]).T
+        cloud_data = np.vstack([xyz.T, colors.T])
         cloud_data = cloud_data.astype(dtype_L1)
         print(cloud_data.shape)
         self.pc2_pub.publish(point_cloud2.create_cloud(header, FIELDS_XYZRGB, cloud_data.tolist()))

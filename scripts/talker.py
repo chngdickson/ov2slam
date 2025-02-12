@@ -50,7 +50,7 @@ class CarlaSyncListener:
         self.quat = None
         
     def callback(self, rgb_img:Image, camera_info:CameraInfo, depth_img:Image):
-        rospy.loginfo(f"{camera_info.p}")
+        rospy.loginfo(f"{camera_info.P}")
         if not self.tf_received:
             self.tf_rel_frame = rgb_img.header.frame_id
             self.tf_rel_frame2 = depth_img.header.frame_id

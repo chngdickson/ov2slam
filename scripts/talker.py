@@ -175,7 +175,7 @@ class CarlaSyncListener:
             quat[0:3,3] = position
             self.quat = quaternion
             self.tf_received, self.extrinsic_to_origin = True, quat
-            rospy.loginfo(f"{self.topic_pose}")
+            rospy.loginfo("{}".format(self.topic_pose))
             self.timer.shutdown()
     
     def process_depthRgbc(self, rgbImg, conf, depthImg, camExt2WorldRH=None):

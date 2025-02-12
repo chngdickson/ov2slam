@@ -107,8 +107,8 @@ class ROS_ImgTool:
         p3d = torch.stack(
             [u_coord*normalized_depth,
              v_coord*normalized_depth,
-             torch.ones_like(u_coord)*normalized_depth,
-             torch.ones_like(u_coord)],
+             torch.ones_like(u_coord).to(dtype)*normalized_depth,
+             torch.ones_like(u_coord).to(dtype)],
             dim=1
             ).to(dtype)
         print(p3d.shape)

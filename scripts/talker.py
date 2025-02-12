@@ -14,6 +14,7 @@ import torch, gc
 import cv2
 import numpy as np
 import numpy.matlib as npm
+from numpy.lib import recfunctions as rfn
 
 # ROS
 import rospy
@@ -222,8 +223,9 @@ class ManySyncListener:
             PointField(name='b',offset=20, datatype=PointField.UINT8, count=1),
         ]
 
-        arr = arr.reshape(6,-1).T # (307200, 3)
-        self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr))
+        arr = arr.reshape(6,-1) # (307200, 3)
+        arr = np.rec.fromarrays((arr[0],arr[1],arr[2],arr[3].astype(np.uint8),arr[4].astype(np.uint8),arr[5].astype(np.uint8)))
+        self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr.tolist()))
 
     def ros_rgb_img2numpy(self, rgb_img: Image):
         im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)

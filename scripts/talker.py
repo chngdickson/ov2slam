@@ -85,7 +85,7 @@ class ROS_ImgTool:
                             [ 0, 1, 0, 0],
                             [ 0, 0, 1, 0],
                             [ 1, 0, 0, 0],
-                            [ 0, 0, 0, 1]], dtype=dtype, device=device)
+                            [ 0, 0, 0, 1]]).to(dtype=dtype, device=device)
         
         u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)

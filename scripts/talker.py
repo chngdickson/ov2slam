@@ -104,12 +104,13 @@ class ROS_ImgTool:
         else:
             pixel2WorldProjection = torch.pinverse(torch.mm(K4x4 , M_Basis_Cam2W))
             
-        p3d = torch.vstack(
+        p3d = torch.stack(
             [u_coord*normalized_depth,
              v_coord*normalized_depth,
              torch.ones_like(u_coord)*normalized_depth, 
              torch.ones_like(u_coord)]
             ).to(dtype)
+        print(p3d.shape)
         p3d = ( (torch.mm(pixel2WorldProjection ,p3d))[:3,:])
         p3d[0] *= -1
         p3d[1] *= -1

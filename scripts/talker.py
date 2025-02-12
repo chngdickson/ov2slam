@@ -215,21 +215,21 @@ class ManySyncListener:
         header.stamp = stamp
         BIT_MOVE_16 = 2**16
         BIT_MOVE_8 = 2**8
-        FIELDS_XYZ = [
+        FIELDS_XYZRGB = [
             PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
             PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
             PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-        ]
-        FIELDS_XYZRGB = FIELDS_XYZ + \
-            [PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)]
+            PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)
+            ]
         dtype_L1 = np.dtype({'names': ['x', 'y', 'z','rgb'], 
                'formats': [np.float32, np.float32, np.float32, np.uint32]})
         arr = arr.reshape(6,-1).T # (N, 6)
         xyz = arr[:,:3]
         colors = arr[:,3:].astype(np.uint32)
         colors = colors[:,0] * BIT_MOVE_16 +colors[:,1] * BIT_MOVE_8 + colors[:,2]
-        cloud_data = np.vstack([xyz.T, colors.T])
+        cloud_data = np.vstack([xyz.T, colors.T]).T
         cloud_data = cloud_data.astype(dtype_L1)
+        print(cloud_data[0][0].dtype, cloud_data[0][1].dtype, cloud_data[0][1].dtype, cloud_data[0][2].dtype)
         print(cloud_data.shape)
         self.pc2_pub.publish(point_cloud2.create_cloud(header, FIELDS_XYZRGB, cloud_data.tolist()))
 

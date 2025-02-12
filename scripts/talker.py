@@ -237,7 +237,7 @@ class ManySyncListener:
         df["z"] = df["z"].astype("float32")
         df["rgb"] = df["rgb"].astype("uint32")
 
-        self.pc2_pub.publish(point_cloud2.create_cloud(header, FIELDS_XYZRGB, df.values.tolist()))
+        self.pc2_pub.publish(point_cloud2.create_cloud(header, FIELDS_XYZRGB, df.to_records(index=False).tolist()))
 
     def ros_rgb_img2numpy(self, rgb_img: Image):
         im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)

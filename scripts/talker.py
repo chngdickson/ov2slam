@@ -217,9 +217,9 @@ class ManySyncListener:
             PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
             PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
             PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-            PointField(name='r',offset=12, datatype=PointField.FLOAT32, count=1),
-            PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
-            PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
+            PointField(name='r',offset=12, datatype=PointField.UINT8, count=1),
+            PointField(name='g',offset=16, datatype=PointField.UINT8, count=1),
+            PointField(name='b',offset=20, datatype=PointField.UINT8, count=1),
         ]
 
         arr = arr.reshape(6,-1).T # (307200, 3)

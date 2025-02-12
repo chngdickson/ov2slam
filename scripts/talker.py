@@ -112,6 +112,7 @@ class ROS_ImgTool:
              ],
             dim=0
             ).to(dtype)
+        print(p3d.shape, pixel2WorldProjection.shape)
         p3d = ( (torch.mm(pixel2WorldProjection ,p3d))[:3,:])
         p3d[0] *= -1
         p3d[1] *= -1

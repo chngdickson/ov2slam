@@ -111,7 +111,7 @@ class ROS_ImgTool:
              torch.ones_like(u_coord)*normalized_depth, 
              torch.ones_like(u_coord)]
             ).to(dtype)
-        p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
+        p3d = ( (torch.mm(pixel2WorldProjection ,p3d))[:3,:])
         p3d[0] *= -1
         p3d[1] *= -1
         

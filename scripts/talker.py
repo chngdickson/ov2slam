@@ -104,7 +104,6 @@ class ManySyncListener:
         self.ts.registerCallback(self.time_stamp_fuse_cb)
 
         # Publisher
-        self.tf_pub = rospy.Publisher("mytf", TransformStamped, queue_size=10)
         self.pc2_pub = rospy.Publisher("ego_vehicle_pcd",PointCloud2, queue_size=10)
     
 
@@ -219,9 +218,9 @@ class ManySyncListener:
         K4x4 = self.K3x3to4x4(torch.tensor(K_ros).reshape((3,3))).to(device=device, dtype=dtype)
         
         M_Basis_Cam2W = torch.tensor([
-                            [ 0, 1, 0, 0],
-                            [ 0, 0, 1, 0],
                             [ 1, 0, 0, 0],
+                            [ 0, -1, 0, 0],
+                            [ 0, 0, 1, 0],
                             [ 0, 0, 0, 1]], dtype=dtype, device=device)
         
         

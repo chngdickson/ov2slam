@@ -74,8 +74,8 @@ class CarlaSyncListener:
 
     def check_tf_exists(self, origin_frame, relative_frame):
         if self.tf_listener.frameExists(relative_frame):
-            t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
-            position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
+            t = self.tf_listener.getLatestCommonTime(relative_frame, origin_frame)
+            position, quaternion = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
             quat = transformations.quaternion_matrix(quaternion)
             quat[0:3,3] = position
             self.quat = quaternion

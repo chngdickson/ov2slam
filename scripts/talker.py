@@ -219,10 +219,11 @@ class ManySyncListener:
         K4x4 = self.K3x3to4x4(torch.tensor(K_ros).reshape((3,3))).to(device=device, dtype=dtype)
         
         M_Basis_Cam2W = torch.tensor([
-                            [ 0, 1, 0, 0],
-                            [ 0, 0, 1, 0],
                             [ 1, 0, 0, 0],
+                            [ 0, -1, 0, 0],
+                            [ 1, 0, -1, 0],
                             [ 0, 0, 0, 1]], dtype=dtype, device=device)
+
         
         u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
@@ -247,7 +248,6 @@ class ManySyncListener:
              torch.ones_like(u_coord)]
             ).to(dtype)
         p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
-        p3d[1] *=-1
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d

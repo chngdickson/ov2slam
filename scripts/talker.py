@@ -28,67 +28,6 @@ from sensor_msgs.msg import PointCloud2, PointField
 from geometry_msgs.msg import TransformStamped, Transform
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-_DATATYPES = {}
-_DATATYPES[PointField.INT8] = ('b', 1)
-_DATATYPES[PointField.UINT8] = ('B', 1)
-_DATATYPES[PointField.INT16] = ('h', 2)
-_DATATYPES[PointField.UINT16] = ('H', 2)
-_DATATYPES[PointField.INT32] = ('i', 4)
-_DATATYPES[PointField.UINT32] = ('I', 4)
-_DATATYPES[PointField.FLOAT32] = ('f', 4)
-_DATATYPES[PointField.FLOAT64] = ('d', 8)
-
-def _get_struct_fmt(is_bigendian, fields, field_names=None):
-    fmt = '>' if is_bigendian else '<'
-
-    offset = 0
-    for field in (f for f in sorted(fields, key=lambda f: f.offset)
-                  if field_names is None or f.name in field_names):
-        if offset < field.offset:
-            fmt += 'x' * (field.offset - offset)
-            offset = field.offset
-        if field.datatype not in _DATATYPES:
-            print('Skipping unknown PointField datatype [{}]' % field.datatype, file=sys.stderr)
-        else:
-            datatype_fmt, datatype_length = _DATATYPES[field.datatype]
-            fmt += field.count * datatype_fmt
-            offset += field.count * datatype_length
-
-    return fmt
-def create_cloud(header, fields, points):
-    """
-    Create a L{sensor_msgs.msg.PointCloud2} message.
-    @param header: The point cloud header.
-    @type  header: L{std_msgs.msg.Header}
-    @param fields: The point cloud fields.
-    @type  fields: iterable of L{sensor_msgs.msg.PointField}
-    @param points: The point cloud points.
-    @type  points: list of iterables, i.e. one iterable for each point, with the
-                   elements of each iterable being the values of the fields for
-                   that point (in the same order as the fields parameter)
-    @return: The point cloud.
-    @rtype:  L{sensor_msgs.msg.PointCloud2}
-    """
-
-    cloud_struct = struct.Struct(_get_struct_fmt(False, fields))
-
-    buff = ctypes.create_string_buffer(cloud_struct.size * len(points))
-
-    point_step, pack_into = cloud_struct.size, cloud_struct.pack_into
-    offset = 0
-    for p in points:
-        pack_into(buff, offset, *p)
-        offset += point_step
-
-    return PointCloud2(header=header,
-                       height=1,
-                       width=len(points),
-                       is_dense=False,
-                       is_bigendian=False,
-                       fields=fields,
-                       point_step=cloud_struct.size,
-                       row_step=cloud_struct.size * len(points),
-                       data=buff.raw)
     
 class CarlaSyncListener:
     def __init__(self, topic_pose, tf_origin_frame="ego_vehicle"):
@@ -140,6 +79,7 @@ class CarlaSyncListener:
             quat = transformations.quaternion_matrix(quaternion)
             quat[0:3,3] = position
             self.quat = quaternion
+            print(quat)
             self.tf_received, self.extrinsic_to_origin = True, quat
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
@@ -318,7 +258,6 @@ class ManySyncListener:
              torch.ones_like(u_coord)]
             ).to(dtype)
         p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
-        p3d[1] *=-1
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d

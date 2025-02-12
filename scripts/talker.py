@@ -143,6 +143,7 @@ class CarlaSyncListener:
         self.quat = None
         
     def callback(self, rgb_img, camera_info, depth_img):
+        rospy.loginfo("{}".format(self.topic_pose))
         self.publish_pcd(self.process_depthRgbc(rgb_img, camera_info, depth_img), rgb_img.header.stamp, depth_img.header.frame_id)
         # if not self.tf_received:
         #     self.tf_rel_frame = rgb_img.header.frame_id

@@ -50,6 +50,7 @@ class ROS_ImgTool:
         Returns:
             torch.Tensor: _description_
         """
+        print(K.shape)
         if len(K.shape) == 3:
             B = K.shape[0]
             K4x4 = torch.zeros(B, 4, 4, dtype=K.dtype, device=K.device)
@@ -65,7 +66,7 @@ class ROS_ImgTool:
             K4x4[:3,:3] = K
             K4x4[-1,-1] = 1.0
         else:
-            raise ValueError(f"K3x3to4x4: Invalid shape of K: {K.shape}")
+            raise ValueError("K3x3to4x4: Invalid shape of K{}".format(K.shape))
         return K4x4
     
     def depthImg2Pcd(self, normalized_depth, w, h, K_ros, max_depth=0.9, ExtCam2Ego=None):

@@ -49,7 +49,6 @@ class ROS_ImgTool:
         Returns:
             torch.Tensor: _description_
         """
-        print(K.shape)
         if len(K.shape) == 3:
             B = K.shape[0]
             K4x4 = torch.zeros(B, 4, 4, dtype=K.dtype, device=K.device)
@@ -105,13 +104,14 @@ class ROS_ImgTool:
             pixel2WorldProjection = torch.pinverse(torch.mm(K4x4 , M_Basis_Cam2W))
             
         p3d = torch.stack(
-            [u_coord*normalized_depth,
-             v_coord*normalized_depth,
-             torch.ones_like(u_coord).to(dtype)*normalized_depth,
-             torch.ones_like(u_coord).to(dtype)],
+            [
+                u_coord*normalized_depth,
+                v_coord*normalized_depth,
+                torch.ones_like(u_coord).to(dtype)*normalized_depth,
+                torch.ones_like(u_coord).to(dtype)
+             ],
             dim=0
             ).to(dtype)
-        print(p3d.shape)
         p3d = ( (torch.mm(pixel2WorldProjection ,p3d))[:3,:])
         p3d[0] *= -1
         p3d[1] *= -1

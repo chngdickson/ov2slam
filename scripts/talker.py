@@ -23,7 +23,7 @@ from sensor_msgs import point_cloud2
 from sensor_msgs.msg import Image, CameraInfo
 from sensor_msgs.msg import PointCloud2, PointField
 from geometry_msgs.msg import TransformStamped, Transform
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 
 class ROS_ImgTool:
     def __init__(self):
@@ -101,7 +101,6 @@ class ROS_ImgTool:
             ExtCam2Ego = torch.tensor(ExtCam2Ego).to(device=device, dtype=dtype)
             pixel2WorldProjection = torch.pinverse(torch.mm(torch.mm(K4x4 , M_Basis_Cam2W) , ExtCam2Ego))
         else:
-            print(K4x4.shape, M_Basis_Cam2W.shape)
             pixel2WorldProjection = torch.pinverse(torch.mm(K4x4 , M_Basis_Cam2W))
             
         p3d = torch.stack(
@@ -113,7 +112,6 @@ class ROS_ImgTool:
              ],
             dim=0
             ).to(dtype)
-        print(p3d.shape, pixel2WorldProjection.shape)
         p3d = ( (torch.mm(pixel2WorldProjection ,p3d))[:3,:])
         p3d[0] *= -1
         p3d[1] *= -1

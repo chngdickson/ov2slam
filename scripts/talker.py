@@ -218,12 +218,12 @@ class ManySyncListener:
         K4x4 = self.K3x3to4x4(torch.tensor(K_ros).reshape((3,3))).to(device=device, dtype=dtype)
         
         M_Basis_Cam2W = torch.tensor([
-                            [ 0, 1, 0, 0],
                             [ 1, 0, 0, 0],
+                            [ 0, -1, 0, 0],
                             [ 0, 0, -1, 0],
                             [ 0, 0, 0, 1]], dtype=dtype, device=device)
         
-        
+        # [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
         u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
         
@@ -236,7 +236,7 @@ class ManySyncListener:
         # p2d = [u,v,1]
         if ExtCam2Ego is not None:
             ExtCam2Ego = torch.tensor(ExtCam2Ego).to(device=device, dtype=dtype)
-            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ torch.linalg.inv(ExtCam2Ego))
+            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ ExtCam2Ego)
         else:
             pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W)
             

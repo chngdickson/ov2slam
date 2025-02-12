@@ -12,6 +12,7 @@ import struct
 # Other libs
 import torch, gc
 import cv2
+import pandas as pd
 import numpy as np
 import numpy.matlib as npm
 from numpy.lib import recfunctions as rfn
@@ -221,17 +222,22 @@ class ManySyncListener:
             PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
             PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)
             ]
-        dtype_L1 = np.dtype({'names': ['x', 'y', 'z','rgb'], 
-               'formats': [np.float32, np.float32, np.float32, np.uint32]})
         arr = arr.reshape(6,-1).T # (N, 6)
         xyz = arr[:,:3]
         colors = arr[:,3:].astype(np.uint32)
         colors = colors[:,0] * BIT_MOVE_16 +colors[:,1] * BIT_MOVE_8 + colors[:,2]
-        cloud_data = np.vstack([xyz.T, colors.T]).T
-        cloud_data = cloud_data.astype(dtype_L1)
-        print(cloud_data[0][0].dtype, cloud_data[0][1].dtype, cloud_data[0][1].dtype, cloud_data[0][2].dtype)
-        print(cloud_data.shape)
-        self.pc2_pub.publish(point_cloud2.create_cloud(header, FIELDS_XYZRGB, cloud_data.tolist()))
+        df = pd.DataFrame({
+            "x":xyz[:,0],
+            "y":xyz[:,1],
+            "z":xyz[:,2],
+            "rgb":colors
+        })
+        df["x"] = df["x"].astype("float32")
+        df["y"] = df["y"].astype("float32")
+        df["z"] = df["z"].astype("float32")
+        df["rgb"] = df["rgb"].astype("uint32")
+
+        self.pc2_pub.publish(point_cloud2.create_cloud(header, FIELDS_XYZRGB, df.values.tolist()))
 
     def ros_rgb_img2numpy(self, rgb_img: Image):
         im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)

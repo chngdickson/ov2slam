@@ -73,8 +73,8 @@ class CarlaSyncListener:
 
     def check_tf_exists(self, origin_frame, relative_frame):
         if self.tf_listener.frameExists(relative_frame):
-            t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
-            transformStamped = self.tf_listener.lookupTransform(origin_frame,relative_frame, t)
+            t = self.tf_listener.getLatestCommonTime(relative_frame, origin_frame)
+            transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
             position, quaternion = transformStamped
             self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, quaternion)
             rospy.loginfo(f"{self.topic_pose}")
@@ -94,7 +94,7 @@ class CarlaSyncListener:
 
 class ManySyncListener:
     def __init__(self):
-        topics_list = ["front", "back"]
+        topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]
         self.listenerDict:Dict[str,CarlaSyncListener] = {n:CarlaSyncListener(n) for n in topics_list}
         
         # message_filters Synchronizer
@@ -109,8 +109,8 @@ class ManySyncListener:
     
 
     def time_stamp_fuse_cb(self, 
-        front:Image, 
-        back:Image
+        front:Image, front_left:Image, front_right:Image, 
+        back:Image, back_left:Image, back_right:Image
         ):
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
@@ -219,11 +219,11 @@ class ManySyncListener:
         K4x4 = self.K3x3to4x4(torch.tensor(K_ros).reshape((3,3))).to(device=device, dtype=dtype)
         
         M_Basis_Cam2W = torch.tensor([
+                            [ 0, 1, 0, 0],
+                            [ 0, 0, 1, 0],
                             [ 1, 0, 0, 0],
-                            [ 0, -1, 0, 0],
-                            [ 1, 0, -1, 0],
                             [ 0, 0, 0, 1]], dtype=dtype, device=device)
-
+        
         
         u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
@@ -248,6 +248,7 @@ class ManySyncListener:
              torch.ones_like(u_coord)]
             ).to(dtype)
         p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
+        p3d[1] *=-1
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d

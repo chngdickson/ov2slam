@@ -50,7 +50,6 @@ class CarlaSyncListener:
         self.quat = None
         
     def callback(self, rgb_img:Image, camera_info:CameraInfo, depth_img:Image):
-        rospy.loginfo(f"{camera_info.P}")
         if not self.tf_received:
             self.tf_rel_frame = rgb_img.header.frame_id
             self.tf_rel_frame2 = depth_img.header.frame_id
@@ -76,11 +75,12 @@ class CarlaSyncListener:
     def check_tf_exists(self, origin_frame, relative_frame):
         if self.tf_listener.frameExists(relative_frame):
             t = self.tf_listener.getLatestCommonTime(relative_frame, origin_frame)
-            position, quaternion = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
+            transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
+            rospy.loginfo(f"{transformStamped}")
+            position, quat = transformStamped
             quat = transformations.quaternion_matrix(quaternion)
             quat[0:3,3] = position
             self.quat = quaternion
-            print(quat)
             self.tf_received, self.extrinsic_to_origin = True, quat
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()

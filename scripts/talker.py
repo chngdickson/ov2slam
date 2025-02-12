@@ -222,12 +222,14 @@ class ManySyncListener:
         ]
         FIELDS_XYZRGB = FIELDS_XYZ + \
             [PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)]
-
+        dtype_L1 = np.dtype({'names': ['x', 'y', 'z','rgb'], 
+               'formats': [np.float32, np.float32, np.float32, np.uint32]})
         arr = arr.reshape(6,-1).T # (N, 6)
         xyz = arr[:,:3]
         colors = arr[:,3:].astype(np.uint32)
         colors = colors[:,0] * BIT_MOVE_16 +colors[:,1] * BIT_MOVE_8 + colors[:,2]
-        cloud_data=rfn.merge_arrays(xyz,colors.astype(np.uint32))
+        cloud_data = np.c_[xyz, colors]
+        cloud_data = cloud_data.astype(dtype_L1)
         # arr = np.rec.fromarrays((arr[0],arr[1],arr[2],arr[3].astype(np.uint8),arr[4].astype(np.uint8),arr[5].astype(np.uint8)))
         self.pc2_pub.publish(point_cloud2.create_cloud(header, FIELDS_XYZRGB, cloud_data))
 

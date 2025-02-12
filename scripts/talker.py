@@ -23,7 +23,7 @@ from sensor_msgs import point_cloud2
 from sensor_msgs.msg import Image, CameraInfo
 from sensor_msgs.msg import PointCloud2, PointField
 from geometry_msgs.msg import TransformStamped, Transform
-device = torch.device('cpu')
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ROS_ImgTool:
     def __init__(self):

@@ -25,6 +25,7 @@ from sensor_msgs.msg import Image, CameraInfo
 from sensor_msgs.msg import PointCloud2, PointField
 from geometry_msgs.msg import TransformStamped, Transform
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device("cpu")
 
 _DATATYPES = {}
 _DATATYPES[PointField.INT8] = ('b', 1)

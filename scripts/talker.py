@@ -47,7 +47,6 @@ class CarlaSyncListener:
         
         # Private vars
         self.extrinsic_to_origin = None
-        self.quat = None
         
     def callback(self, rgb_img:Image, camera_info:CameraInfo, depth_img:Image):
         if not self.tf_received:
@@ -78,13 +77,21 @@ class CarlaSyncListener:
             transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
             rospy.loginfo(f"{transformStamped}")
             position, quaternion = transformStamped
-            quat = transformations.quaternion_matrix(quaternion)
-            quat[0:3,3] = position
-            self.quat = quaternion
-            self.tf_received, self.extrinsic_to_origin = True, quat
+            self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, quaternion)
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
-            
+    
+    def fromTranslationRotation(self, translation, rotation):
+        """
+        :param translation: translation expressed as a tuple (x,y,z)
+        :param rotation: rotation quaternion expressed as a tuple (x,y,z,w)
+        :return: a :class:`numpy.matrix` 4x4 representation of the transform
+        :raises: any of the exceptions that :meth:`~tf.Transformer.lookupTransform` can raise
+        
+        Converts a transformation from :class:`tf.Transformer` into a representation as a 4x4 matrix.
+        """
+
+        return np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
 class ManySyncListener:
     def __init__(self):
         topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]

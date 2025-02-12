@@ -208,7 +208,7 @@ class CarlaSyncListener:
 class ManySyncListener:
     def __init__(self):
         topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]
-        self.listenerDict:Dict[str,CarlaSyncListener] = {n:CarlaSyncListener(n) for n in topics_list}
+        self.listenerDict = {n:CarlaSyncListener(n) for n in topics_list}
         
         # message_filters Synchronizer
         # self.list_filters = [message_filters.Subscriber("carla/ego_vehicle/rgbd_{}/image".format(n), Image) for n in topics_list]

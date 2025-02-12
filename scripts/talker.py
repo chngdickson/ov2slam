@@ -75,7 +75,6 @@ class CarlaSyncListener:
         if self.tf_listener.frameExists(relative_frame):
             t = self.tf_listener.getLatestCommonTime(relative_frame, origin_frame)
             transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
-            rospy.loginfo(f"{transformStamped}")
             position, quaternion = transformStamped
             self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, quaternion)
             rospy.loginfo(f"{self.topic_pose}")
@@ -92,6 +91,7 @@ class CarlaSyncListener:
         """
 
         return np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
+
 class ManySyncListener:
     def __init__(self):
         topics_list = ["front", "front_left", "front_right", "back", "back_left","back_right"]
@@ -107,39 +107,20 @@ class ManySyncListener:
         self.tf_pub = rospy.Publisher("mytf", TransformStamped, queue_size=10)
         self.pc2_pub = rospy.Publisher("ego_vehicle_pcd",PointCloud2, queue_size=10)
     
-    def check_tf_exists(self, origin_frame, relative_frame, timestamp):
-        tf_msg = TransformStamped()
-        if self.tf_listener.frameExists(relative_frame):
-            t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
-            position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
-            
-            head = Header()
-            head.stamp = timestamp
-            head.frame_id = "world"
-            tf_msg.child_frame_id = relative_frame
-            tf_transform = Transform()
-            tf_transform.translation.x, tf_transform.translation.y, tf_transform.translation.z = position[0], position[1],position[2]
-            tf_transform.rotation.x,tf_transform.rotation.y, tf_transform.rotation.z, tf_transform.rotation.w = quaternion[0], quaternion[1], quaternion[2],quaternion[3]
-            tf_msg.transform = tf_transform
-            return True , tf_msg
-        else:
-            rospy.loginfo(f"{origin_frame}{self.tf_listener.frameExists(origin_frame)}, {relative_frame}{self.tf_listener.frameExists(relative_frame)}\n")
-            return False, tf_msg
+
     def time_stamp_fuse_cb(self, 
         front:Image, front_left:Image, front_right:Image, 
         back:Image, back_left:Image, back_right:Image
         ):
         timestamp = front.header.stamp
-        tf_exist, tf_msg = self.check_tf_exists("world","ego_vehicle",timestamp)
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
-        
         
         for csl in self.listenerDict.values():
             trueFalse, data = csl.timeStampExist(timestamp)
             istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
             ext_list.append(csl.extrinsic_to_origin) # type: ignore 
         
-        if all(istrues) and tf_exist:
+        if all(istrues):
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
@@ -266,6 +247,7 @@ class ManySyncListener:
              torch.ones_like(u_coord)]
             ).to(dtype)
         p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
+        p3d[1] *=-1
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d

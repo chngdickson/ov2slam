@@ -248,7 +248,7 @@ class ManySyncListener:
         # p2d = [u,v,1]
         if ExtCam2Ego is not None:
             ExtCam2Ego = torch.tensor(ExtCam2Ego).to(device=device, dtype=dtype)
-            pixel2WorldProjection = torch.linalg.inv(K4x4  @ExtCam2Ego)
+            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ torch.linalg.inv(ExtCam2Ego))
         else:
             pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W)
             
@@ -259,6 +259,7 @@ class ManySyncListener:
              torch.ones_like(u_coord)]
             ).to(dtype)
         p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
+        p3d[1], p3d[0] = p3d[0], p3d[1]
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
         torch.cuda.empty_cache()
         return p3d

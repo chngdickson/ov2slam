@@ -203,7 +203,7 @@ class ManySyncListener:
             raise ValueError(f"K3x3to4x4: Invalid shape of K: {K.shape}")
         return K4x4
     
-    def depthImg2Pcd(self, normalized_depth, w, h, K_ros, max_depth=0.9, ExtCam2Ego=None):
+    def depthImg2Pcd(self, normalized_depth, w, h, K_ros, max_depth=0.9, ExtCam2World=None):
         """
         Convert an image containing CARLA encoded depth-map to a 2D array containing
         the 3D position (relative to the camera) of each pixel and its corresponding
@@ -234,9 +234,9 @@ class ManySyncListener:
         normalized_depth = normalized_depth * far
 
         # p2d = [u,v,1]
-        if ExtCam2Ego is not None:
-            ExtCam2Ego = torch.tensor(ExtCam2Ego).to(device=device, dtype=dtype)
-            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ ExtCam2Ego)
+        if ExtCam2World is not None:
+            ExtCam2World = torch.tensor(ExtCam2World).to(device=device, dtype=dtype)
+            pixel2WorldProjection = torch.linalg.inv(torch.linalg.inv(K4x4) @ M_Basis_Cam2W @ ExtCam2World)
         else:
             pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W)
             
@@ -247,7 +247,7 @@ class ManySyncListener:
              torch.ones_like(u_coord)]
             ).to(dtype)
         p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
-        del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
+        del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2World, K4x4
         torch.cuda.empty_cache()
         return p3d
 

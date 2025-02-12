@@ -145,8 +145,8 @@ class CarlaSyncListener:
         self.quat = None
         
     def callback(self, rgb_img, camera_info, depth_img):
-        rospy.loginfo("{}".format(self.topic_pose))
-        self.publish_pcd(self.process_depthRgbc(rgb_img, camera_info, depth_img), rgb_img.header.stamp, depth_img.header.frame_id)
+        if self.tf_received:
+            self.publish_pcd(self.process_depthRgbc(rgb_img, camera_info, depth_img, self.extrinsic_to_origin), rgb_img.header.stamp, depth_img.header.frame_id)
         # if not self.tf_received:
         #     self.tf_rel_frame = rgb_img.header.frame_id
         #     self.tf_rel_frame2 = depth_img.header.frame_id
@@ -199,11 +199,10 @@ class CarlaSyncListener:
             PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
             PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
             PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-            PointField(name='r',offset=12, datatype=PointField.FLOAT32, count=1),
-            PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
-            PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
+            PointField(name='r',offset=12, datatype=PointField.UINT8, count=1),
+            PointField(name='g',offset=16, datatype=PointField.UINT8, count=1),
+            PointField(name='b',offset=20, datatype=PointField.UINT8, count=1),
         ]
-        rospy.loginfo("Parked")
         arr = arr.reshape(6,-1).T # (307200, 3)
         self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr))
             

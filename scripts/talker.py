@@ -220,163 +220,163 @@ class ManySyncListener:
         # self.tf_pub = rospy.Publisher("mytf", TransformStamped, queue_size=10)
         # self.pc2_pub = rospy.Publisher("ego_vehicle_pcd",PointCloud2, queue_size=10)
     
-    def check_tf_exists(self, origin_frame, relative_frame, timestamp):
-        tf_msg = TransformStamped()
-        if self.tf_listener.frameExists(relative_frame):
-            t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
-            position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
+    # def check_tf_exists(self, origin_frame, relative_frame, timestamp):
+    #     tf_msg = TransformStamped()
+    #     if self.tf_listener.frameExists(relative_frame):
+    #         t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
+    #         position, quaternion = self.tf_listener.lookupTransform(origin_frame, relative_frame, t)
             
-            head = Header()
-            head.stamp = timestamp
-            head.frame_id = "world"
-            tf_msg.child_frame_id = relative_frame
-            tf_transform = Transform()
-            tf_transform.translation.x, tf_transform.translation.y, tf_transform.translation.z = position[0], position[1],position[2]
-            tf_transform.rotation.x,tf_transform.rotation.y, tf_transform.rotation.z, tf_transform.rotation.w = quaternion[0], quaternion[1], quaternion[2],quaternion[3]
-            tf_msg.transform = tf_transform
-            return True , tf_msg
-        else:
-            rospy.loginfo(f"{origin_frame}{self.tf_listener.frameExists(origin_frame)}, {relative_frame}{self.tf_listener.frameExists(relative_frame)}\n")
-            return False, tf_msg
-    def time_stamp_fuse_cb(self, 
-        front:Image, front_left:Image, front_right:Image, 
-        back:Image, back_left:Image, back_right:Image
-        ):
-        timestamp = front.header.stamp
-        tf_exist, tf_msg = self.check_tf_exists("world","ego_vehicle",timestamp)
-        istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
+    #         head = Header()
+    #         head.stamp = timestamp
+    #         head.frame_id = "world"
+    #         tf_msg.child_frame_id = relative_frame
+    #         tf_transform = Transform()
+    #         tf_transform.translation.x, tf_transform.translation.y, tf_transform.translation.z = position[0], position[1],position[2]
+    #         tf_transform.rotation.x,tf_transform.rotation.y, tf_transform.rotation.z, tf_transform.rotation.w = quaternion[0], quaternion[1], quaternion[2],quaternion[3]
+    #         tf_msg.transform = tf_transform
+    #         return True , tf_msg
+    #     else:
+    #         rospy.loginfo(f"{origin_frame}{self.tf_listener.frameExists(origin_frame)}, {relative_frame}{self.tf_listener.frameExists(relative_frame)}\n")
+    #         return False, tf_msg
+    # def time_stamp_fuse_cb(self, 
+    #     front:Image, front_left:Image, front_right:Image, 
+    #     back:Image, back_left:Image, back_right:Image
+    #     ):
+    #     timestamp = front.header.stamp
+    #     tf_exist, tf_msg = self.check_tf_exists("world","ego_vehicle",timestamp)
+    #     istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
         
         
-        for csl in self.listenerDict.values():
-            trueFalse, data = csl.timeStampExist(timestamp)
-            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
-            ext_list.append(csl.extrinsic_to_origin) # type: ignore 
+    #     for csl in self.listenerDict.values():
+    #         trueFalse, data = csl.timeStampExist(timestamp)
+    #         istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
+    #         ext_list.append(csl.extrinsic_to_origin) # type: ignore 
         
-        if all(istrues) and tf_exist:
-            xyzrgb_list = []
-            for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
-            # xyzrgb = np.hstack(xyzrgb_list)
-                print(rgb.header.frame_id)
-                self.publish_pcd(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin), timestamp, depth.header.frame_id)
-                self.tf_pub.publish(tf_msg)
-            rospy.loginfo("message filter called, all infos exists")
+    #     if all(istrues) and tf_exist:
+    #         xyzrgb_list = []
+    #         for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
+    #         # xyzrgb = np.hstack(xyzrgb_list)
+    #             print(rgb.header.frame_id)
+    #             self.publish_pcd(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin), timestamp, depth.header.frame_id)
+    #             self.tf_pub.publish(tf_msg)
+    #         rospy.loginfo("message filter called, all infos exists")
 
-    def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
-        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
-        pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
-        rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
-        a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
-        return a
+    # def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
+    #     pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
+    #     pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
+    #     rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
+    #     a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
+    #     return a
     
-    def publish_pcd(self, arr, stamp, frame_id):
-        """
-        Assumes an array has 3, N elements
-        """
-        header = Header()
-        header.frame_id = frame_id
-        header.stamp = stamp
+    # def publish_pcd(self, arr, stamp, frame_id):
+    #     """
+    #     Assumes an array has 3, N elements
+    #     """
+    #     header = Header()
+    #     header.frame_id = frame_id
+    #     header.stamp = stamp
 
-        fields = [
-            PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
-            PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
-            PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-            PointField(name='r',offset=12, datatype=PointField.FLOAT32, count=1),
-            PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
-            PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
-        ]
+    #     fields = [
+    #         PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
+    #         PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
+    #         PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
+    #         PointField(name='r',offset=12, datatype=PointField.FLOAT32, count=1),
+    #         PointField(name='g',offset=16, datatype=PointField.FLOAT32, count=1),
+    #         PointField(name='b',offset=20, datatype=PointField.FLOAT32, count=1),
+    #     ]
 
-        arr = arr.reshape(6,-1).T # (307200, 3)
-        self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr))
+    #     arr = arr.reshape(6,-1).T # (307200, 3)
+    #     self.pc2_pub.publish(point_cloud2.create_cloud(header, fields, arr))
 
-    def ros_rgb_img2numpy(self, rgb_img):
-        im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
-        # BGRA to RGB
-        im = im[:,:,:3]
-        im = im[:,:,::-1]
-        return im
+    # def ros_rgb_img2numpy(self, rgb_img):
+    #     im = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
+    #     # BGRA to RGB
+    #     im = im[:,:,:3]
+    #     im = im[:,:,::-1]
+    #     return im
     
-    def ros_depth_img2numpy(self, ros_img):
-        array = np.frombuffer(ros_img.data, dtype=np.float32)
-        array = np.reshape(array, (ros_img.height, ros_img.width))
-        array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
-        return array
+    # def ros_depth_img2numpy(self, ros_img):
+    #     array = np.frombuffer(ros_img.data, dtype=np.float32)
+    #     array = np.reshape(array, (ros_img.height, ros_img.width))
+    #     array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
+    #     return array
 
-    def K3x3to4x4(self,K):
-        """Change the shape of K to 4x4 for easier matrix multiplication
+    # def K3x3to4x4(self,K):
+    #     """Change the shape of K to 4x4 for easier matrix multiplication
 
-        Args:
-            K (torch.Tensor): _description_
+    #     Args:
+    #         K (torch.Tensor): _description_
 
-        Returns:
-            torch.Tensor: _description_
-        """
-        if len(K.shape) == 3:
-            B = K.shape[0]
-            K4x4 = torch.zeros(B, 4, 4, dtype=K.dtype, device=K.device)
-            K4x4[:,:3,:3] = K
-            K4x4[:,-1,-1] = 1.0
-        elif len(K.shape) == 4:
-            B, NCams, _, _ = K.shape
-            K4x4 = torch.zeros(B, NCams, 4, 4, dtype=K.dtype, device=K.device)
-            K4x4[:,:, :3,:3] = K
-            K4x4[:,:,-1,-1] = 1.0
-        elif len(K.shape) == 2:
-            K4x4 = torch.zeros(4, 4, dtype=K.dtype, device=K.device)
-            K4x4[:3,:3] = K
-            K4x4[-1,-1] = 1.0
-        else:
-            raise ValueError(f"K3x3to4x4: Invalid shape of K: {K.shape}")
-        return K4x4
+    #     Returns:
+    #         torch.Tensor: _description_
+    #     """
+    #     if len(K.shape) == 3:
+    #         B = K.shape[0]
+    #         K4x4 = torch.zeros(B, 4, 4, dtype=K.dtype, device=K.device)
+    #         K4x4[:,:3,:3] = K
+    #         K4x4[:,-1,-1] = 1.0
+    #     elif len(K.shape) == 4:
+    #         B, NCams, _, _ = K.shape
+    #         K4x4 = torch.zeros(B, NCams, 4, 4, dtype=K.dtype, device=K.device)
+    #         K4x4[:,:, :3,:3] = K
+    #         K4x4[:,:,-1,-1] = 1.0
+    #     elif len(K.shape) == 2:
+    #         K4x4 = torch.zeros(4, 4, dtype=K.dtype, device=K.device)
+    #         K4x4[:3,:3] = K
+    #         K4x4[-1,-1] = 1.0
+    #     else:
+    #         raise ValueError(f"K3x3to4x4: Invalid shape of K: {K.shape}")
+    #     return K4x4
     
-    def depthImg2Pcd(self, normalized_depth, w, h, K_ros, max_depth=0.9, ExtCam2Ego=None):
-        """
-        Convert an image containing CARLA encoded depth-map to a 2D array containing
-        the 3D position (relative to the camera) of each pixel and its corresponding
-        RGB color of an array.
-        "max_depth" is used to omit the points that are far enough.
-        """
-        far = 1000.0  # max depth in meters.
-        w,h = int(w), int(h)
-        pixel_length = w*h
-        normalized_depth = torch.tensor(normalized_depth).to(device).reshape(pixel_length)
-        dtype = normalized_depth.dtype
-        K4x4 = self.K3x3to4x4(torch.tensor(K_ros).reshape((3,3))).to(device=device, dtype=dtype)
+    # def depthImg2Pcd(self, normalized_depth, w, h, K_ros, max_depth=0.9, ExtCam2Ego=None):
+    #     """
+    #     Convert an image containing CARLA encoded depth-map to a 2D array containing
+    #     the 3D position (relative to the camera) of each pixel and its corresponding
+    #     RGB color of an array.
+    #     "max_depth" is used to omit the points that are far enough.
+    #     """
+    #     far = 1000.0  # max depth in meters.
+    #     w,h = int(w), int(h)
+    #     pixel_length = w*h
+    #     normalized_depth = torch.tensor(normalized_depth).to(device).reshape(pixel_length)
+    #     dtype = normalized_depth.dtype
+    #     K4x4 = self.K3x3to4x4(torch.tensor(K_ros).reshape((3,3))).to(device=device, dtype=dtype)
         
-        M_Basis_Cam2W = torch.tensor([
-                            [ 0, 1, 0, 0],
-                            [ 0, 0, 1, 0],
-                            [ 1, 0, 0, 0],
-                            [ 0, 0, 0, 1]], dtype=dtype, device=device)
+    #     M_Basis_Cam2W = torch.tensor([
+    #                         [ 0, 1, 0, 0],
+    #                         [ 0, 0, 1, 0],
+    #                         [ 1, 0, 0, 0],
+    #                         [ 0, 0, 0, 1]], dtype=dtype, device=device)
         
-        u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
-        v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
+    #     u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
+    #     v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
         
-        # Search for pixels where the depth is greater than max_depth 
-        # Make them = 0 to preserve the shape
-        max_depth_indexes = torch.where(normalized_depth > max_depth)
-        normalized_depth[max_depth_indexes], u_coord[max_depth_indexes], v_coord[max_depth_indexes] = 0,0,0
-        normalized_depth = normalized_depth * far
+    #     # Search for pixels where the depth is greater than max_depth 
+    #     # Make them = 0 to preserve the shape
+    #     max_depth_indexes = torch.where(normalized_depth > max_depth)
+    #     normalized_depth[max_depth_indexes], u_coord[max_depth_indexes], v_coord[max_depth_indexes] = 0,0,0
+    #     normalized_depth = normalized_depth * far
 
-        # p2d = [u,v,1]
-        if ExtCam2Ego is not None:
-            ExtCam2Ego = torch.tensor(ExtCam2Ego).to(device=device, dtype=dtype)
-            pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W @ ExtCam2Ego)
-        else:
-            pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W)
+    #     # p2d = [u,v,1]
+    #     if ExtCam2Ego is not None:
+    #         ExtCam2Ego = torch.tensor(ExtCam2Ego).to(device=device, dtype=dtype)
+    #         pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W @ ExtCam2Ego)
+    #     else:
+    #         pixel2WorldProjection = torch.pinverse(K4x4 @ M_Basis_Cam2W)
             
-        p3d = torch.vstack(
-            [u_coord*normalized_depth,
-             v_coord*normalized_depth,
-             torch.ones_like(u_coord)*normalized_depth, 
-             torch.ones_like(u_coord)]
-            ).to(dtype)
-        p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
-        p3d[0] *= -1
-        p3d[1] *= -1
+    #     p3d = torch.vstack(
+    #         [u_coord*normalized_depth,
+    #          v_coord*normalized_depth,
+    #          torch.ones_like(u_coord)*normalized_depth, 
+    #          torch.ones_like(u_coord)]
+    #         ).to(dtype)
+    #     p3d = ( (pixel2WorldProjection @ p3d)[:3,:])
+    #     p3d[0] *= -1
+    #     p3d[1] *= -1
         
-        del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
-        torch.cuda.empty_cache()
-        return p3d
+    #     del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2Ego, K4x4
+    #     torch.cuda.empty_cache()
+    #     return p3d
 
 
 

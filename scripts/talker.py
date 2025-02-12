@@ -128,7 +128,7 @@ class ManySyncListener:
             rospy.loginfo("message filter called, all infos exists")
 
     def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
-        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2Ego=camExt2WorldRH)
+        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2World=camExt2WorldRH)
         pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
         rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
         a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)

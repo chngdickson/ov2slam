@@ -137,6 +137,7 @@ def create_open3d_point_cloud_from_rgbd(
         color=open3d.geometry.Image(cv2.cvtColor(color_img, cv2.COLOR_BGR2RGB)),
         depth=open3d.geometry.Image(depth_img),
         depth_scale=1.0/depth_unit,
+        depth_trunc=depth_trunc
         convert_rgb_to_intensity=False)
 
     # Convert camera info to `class open3d.camera.PinholeCameraIntrinsic`.

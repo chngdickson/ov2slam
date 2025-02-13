@@ -227,7 +227,7 @@ class CarlaSyncListener:
         if self.cam_info is not None and self.extrinsic_to_origin is not None:
             rgb_arr = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
             depth_array = np.reshape(np.frombuffer(depth_img.data, dtype=np.float32), (depth_img.height, depth_img.width))
-            o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info, None)
+            o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info, np.eye(4))
             self.pcd_pub.publish(convertCloudFromOpen3dtoROS(o3d_cloud, depth_img.header.frame_id, timestamp=rgb_img.header.stamp))
             
     def timeStampExist(self, timestamp):

@@ -3,7 +3,7 @@
   <arg name="node_start_delay" default="2.0"/>
   <arg name="bag_file" default="/root/bags/carla_bag_ros1/loop_onceupdate.bag"/>
   <arg name="param_file" default="$(find ov2slam)/parameters_files/accurate/carla/carla_mono.yaml"/>
-  <arg name="rate" default="0.3"/>
+  <arg name="rate" default="0.01"/>
   <!-- RUN bag file-->
   <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -r $(arg rate) $(arg bag_file)"/>
   <!-- <node name="player" pkg="rosbag" type="play" args="$(arg bag_file)" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/> -->
@@ -33,11 +33,11 @@
     <param name="voxel_carving_enabled" value="true" />
     <param name="color_mode" value="color" />
     <param name="use_tf_transforms" value="true" />
-    <param name="update_mesh_every_n_sec" value="1.0" />
+    <param name="update_mesh_every_n_sec" value="3.0" />
     <param name="min_time_between_msgs_sec" value="0.0" />
     <param name="method" value="fast" />
     <param name="use_const_weight" value="false" />
-    <param name="allow_clear" value="true" />
+    <param name="allow_clear" value="false" />
     <param name="verbose" value="true" />
     <remap from="transform" to="/tf" />
     <rosparam file="$(find ov2slam)/cfg/carla.yaml"/>

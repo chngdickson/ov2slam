@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # from lib_rgbd import *
-from lib_rgbd import MyCameraInfo, create_open3d_point_cloud_from_rgbd
+from scripts.lib_rgbd import MyCameraInfo, create_open3d_point_cloud_from_rgbd
 # Python 
 import threading
 import multiprocessing

@@ -171,7 +171,7 @@ target_link_libraries(${PROJECT_NAME}
       Ceres::ceres
 )
 
-catkin_install_python(PROGRAMS scripts/talker.py scripts/bagrewrite.py scripts/lib_rgbd.py
+catkin_install_python(PROGRAMS talker.py scripts/bagrewrite.py scripts/lib_rgbd.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 # Add optional dependencies if they are found

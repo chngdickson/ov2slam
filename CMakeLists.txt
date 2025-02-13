@@ -151,9 +151,6 @@ add_library(${PROJECT_NAME}
   # src/my_publisher.cpp
 )
 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
 # Add mandatory dependencies
 target_include_directories(${PROJECT_NAME}
   PUBLIC
@@ -173,7 +170,11 @@ target_link_libraries(${PROJECT_NAME}
       Ceres::ceres
 )
 
-catkin_install_python(PROGRAMS talker.py scripts/bagrewrite.py scripts/lib_rgbd.py
+file(GLOB python_scripts_DIR
+    "scripts/*.py"
+)
+
+catkin_install_python(PROGRAMS ${python_scripts_DIR}
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 # Add optional dependencies if they are found
@@ -225,3 +226,4 @@ target_link_libraries(
     PRIVATE
       ${PROJECT_NAME}
 )
+catkin_python_setup()

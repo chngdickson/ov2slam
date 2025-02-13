@@ -22,7 +22,7 @@
   <!-- <node name="player" pkg="rosbag" type="play" output="screen" args="-r 1.0 clock $(arg bag_file)" if="$(arg play_bag)"/> -->
   
   <arg name="voxel_size" default="0.05"/>
-  <arg name="dist" default="10.0"/>
+  <arg name="dist" default="5.0"/>
   <arg name="ply_save_file" default="/root/bags/cow_eth_data/output.ply"/>
 
   <node name="voxblox_node" pkg="voxblox_ros" type="tsdf_server" output="screen" args="-alsologtostderr" clear_params="true">
@@ -32,34 +32,31 @@
     <param name="pointcloud_queue_size" value="10"/>
     <param name="color_mode" value="color" />
     <param name="use_tf_transforms" value="true" />
-    <rosparam file="$(find ov2slam)/cfg/carla.yaml"/>
 
-    <!--Voxel sizes-->
     <param name="use_freespace_pointcloud" value="false" />
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
     <param name="tsdf_voxels_per_side" value="16" />
-    <param name="voxel_carving_enabled" value="true" />
+    <param name="voxel_carving_enabled" value="false" />
     <param name="update_mesh_every_n_sec" value="4.0" />
     
-    <param name="min_time_between_msgs_sec" value="0.00" />
-    <param name="max_ray_length_m" value="20.0"/>
-    <param name="min_ray_length_m" value="1.5"/>
+    <param name="min_time_between_msgs_sec" value="0.02" />
+    <param name="max_ray_length_m" value="40.0"/>
+    <param name="min_ray_length_m" value="0.5"/>
     
     <param name="use_const_weight" value="false" />
-    <param name="allow_clear" value="true" />
+    <param name="allow_clear" value="false" />
     <param name="verbose" value="true" />
-    
+    <rosparam file="$(find ov2slam)/cfg/carla.yaml"/>
 
     <!--General Params-->
-    <param name="method" value="simple" />
+    <param name="method" value="merged" />
     <param name="max_consecutive_ray_collisions" value="2"/>
     <param name="start_voxel_subsampling_factor" value="2"/>
-
     <!--ESDF Parameters-->
     <param name="esdf_max_distance_m" value="$(arg dist)"/>
     <param name="esdf_default_distance_m" value="$(arg dist)"/>
     <param name="clear_sphere_radius" value="$(arg dist)"/>
-    <param name="occupied_sphere_radius" value="$(eval 2.*arg('dist'))"/>
+    <param name="occupied_sphere_radius" value="15.0"/>
 
     <!--Outputs-->
     <param name="output_mesh_as_pointcloud" value="false"/>

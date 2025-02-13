@@ -3,7 +3,7 @@
   <arg name="node_start_delay" default="2.0"/>
   <arg name="bag_file" default="/root/bags/carla_bag_ros1/loop_onceupdate.bag"/>
   <arg name="param_file" default="$(find ov2slam)/parameters_files/accurate/carla/carla_mono.yaml"/>
-  <arg name="rate" default="0.01"/>
+  <arg name="rate" default="0.03"/>
   <!-- RUN bag file-->
   <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -r $(arg rate) $(arg bag_file)"/>
   <!-- <node name="player" pkg="rosbag" type="play" args="$(arg bag_file)" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/> -->
@@ -33,17 +33,22 @@
     <param name="voxel_carving_enabled" value="true" />
     <param name="color_mode" value="color" />
     <param name="use_tf_transforms" value="true" />
-    <param name="update_mesh_every_n_sec" value="3.0" />
+    <param name="update_mesh_every_n_sec" value="4.0" />
     <param name="min_time_between_msgs_sec" value="0.0" />
-    <param name="method" value="merged" />
+    <param name="method" value="simple" />
     <param name="use_const_weight" value="false" />
     <param name="allow_clear" value="false" />
     <param name="verbose" value="true" />
     <remap from="transform" to="/tf" />
     <rosparam file="$(find ov2slam)/cfg/carla.yaml"/>
 
+    <!--General Params-->
+    <param name="pointcloud_queue_size" value="10"/>
+    
+    <!--ESDF Parameters-->
     <!--Outputs-->
-    <param name="output_mesh_as_pointcloud" value="true"/>
+    <param name="output_mesh_as_pointcloud" value="false"/>
+    <param name="slice_level" value="2.0"/>
     <param name="mesh_filename" value="$(arg ply_save_file)" />
   </node>
   <!-- <node name="ov2slam_node" pkg="ov2slam" type="ov2slam_node" output="screen" args="$(arg param_file)"/> -->

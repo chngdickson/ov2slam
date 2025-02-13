@@ -50,7 +50,9 @@
 
     <!--General Params-->
     <param name="method" value="fast" />
-    
+    <param name="max_consecutive_ray_collisions" value="5"/>
+    <param name="start_voxel_subsampling_factor" value="5"/>
+
     <!--ESDF Parameters-->
     <param name="esdf_max_distance_m" value="$(arg dist)"/>
     <param name="esdf_default_distance_m" value="$(arg dist)"/>

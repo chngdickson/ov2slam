@@ -151,7 +151,9 @@ add_library(${PROJECT_NAME}
   # src/my_publisher.cpp
 )
 
-
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
 # Add mandatory dependencies
 target_include_directories(${PROJECT_NAME}
   PUBLIC

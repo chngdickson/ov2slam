@@ -156,7 +156,9 @@ def create_open3d_point_cloud_from_rgbd(
             (points[:,0]<-0.5) &
             (points[:,1]>0.5) &
             (points[:,1]<-0.5)
-            )[0])
+            )[0]
+        ,
+        invert=True)
     return open3d_point_cloud
 
 

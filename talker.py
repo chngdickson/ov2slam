@@ -112,7 +112,7 @@ def create_open3d_point_cloud_from_rgbd(
         color_img, depth_img,
         cam_info,
         extrinsic,
-        depth_unit=0.001,
+        depth_unit=1.0,
         depth_trunc=3.0):
     ''' Create pointcreate_open3dpoint_cloud_from_rgbd cloud of open3d format, given opencv rgbd images and camera info.
     Arguments:
@@ -189,6 +189,7 @@ def convertCloudFromOpen3dtoROS(open3d_cloud, frame_id, timestamp):
     df["z"] = df["z"].astype("float32")
     df["rgb"] = df["rgb"].astype("uint32")
     return point_cloud2.create_cloud(header, FIELDS_XYZRGB, df.to_records(index=False).tolist())
+
 class CarlaSyncListener:
     def __init__(self, topic_pose, tf_origin_frame="ego_vehicle"):
         self.topic_pose = topic_pose

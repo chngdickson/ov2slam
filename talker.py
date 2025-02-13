@@ -220,14 +220,16 @@ class CarlaSyncListener:
         self.timestampedInfo[rgb_img.header.stamp] = [rgb_img, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
-        
-        self.cam_info = MyCameraInfo(ros_camera_info=camera_info)
+        if self.cam_info is None:
+            self.cam_info = MyCameraInfo(ros_camera_info=camera_info)
+            
         # Additional code
         if self.cam_info is not None and self.extrinsic_to_origin is not None:
             rgb_arr = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
             depth_array = np.reshape(np.frombuffer(depth_img.data, dtype=np.float32), (depth_img.height, depth_img.width))
             o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info, self.extrinsic_to_origin)
             self.pcd_pub.publish(convertCloudFromOpen3dtoROS(o3d_cloud, depth_img.header.frame_id, timestamp=rgb_img.header.stamp))
+            
     def timeStampExist(self, timestamp):
         if timestamp in self.timestampedInfo:
             data = self.timestampedInfo.get(timestamp)
@@ -244,8 +246,8 @@ class CarlaSyncListener:
 
     def check_tf_exists(self, origin_frame, relative_frame):
         if self.tf_listener.frameExists(relative_frame):
-            t = self.tf_listener.getLatestCommonTime(relative_frame, origin_frame)
-            transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
+            t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
+            transformStamped = self.tf_listener.lookupTransform(origin_frame,relative_frame, t)
             position, qua = transformStamped
             self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, qua)
             rospy.loginfo(f"{self.topic_pose}")

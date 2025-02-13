@@ -126,16 +126,17 @@ class ManySyncListener:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-                # xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
-                self.publish_pcd(
-                    self.cpu_depthRgbc(
-                        rgb,
-                        depth,
-                        cam_info,
-                        ext2_Origin
-                        ), 
-                    timestamp, depth.header.frame_id)
-            # xyzrgb = np.hstack(xyzrgb_list)
+                xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
+                # self.publish_pcd(
+                #     self.cpu_depthRgbc(
+                #         rgb,
+                #         depth,
+                #         cam_info,
+                #         ext2_Origin
+                #         ), 
+                #     timestamp, depth.header.frame_id)
+            xyzrgb = np.hstack(xyzrgb_list)
+            self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
             rospy.loginfo("message filter called, all infos exists")
 
     def gpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
@@ -192,7 +193,6 @@ class ManySyncListener:
     def ros_depth_img2numpy(self, ros_img: Image) -> np.ndarray:
         array = np.frombuffer(ros_img.data, dtype=np.float32)
         array = np.reshape(array, (ros_img.height, ros_img.width))
-        print(array.max(), array.min())
         # array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
         return np.copy(array)
 

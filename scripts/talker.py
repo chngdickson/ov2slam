@@ -127,7 +127,7 @@ class ManySyncListener:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-                
+                xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
             xyzrgb = np.hstack(xyzrgb_list)
             self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
             rospy.loginfo("message filter called, all infos exists")
@@ -140,7 +140,8 @@ class ManySyncListener:
     
     def cpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d , depth_1d = self.depth_to_lidar(self.ros_depth_img2numpy(depthImg), conf.width, conf.height, conf.K)
-        
+        pcd_np_3d = np.dot(pcd_np_3d, camExt2WorldRH)
+        return pcd_np_3d
     
     def publish_pcd(self, arr, stamp, frame_id):
         """

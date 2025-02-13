@@ -278,7 +278,7 @@ class ManySyncListener:
         RGB color of an array.
         "max_depth" is used to omit the points that are far enough.
         """
-        far = 1.0  # max depth in meters.
+        far = 1000.0  # max depth in meters.
         w,h,K = int(w), int(h), np.array(K).reshape((3,3))
         pixel_length = w*h
         u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
@@ -288,11 +288,11 @@ class ManySyncListener:
         normalized_depth = np.reshape(normalized_depth, pixel_length)
         # Search for pixels where the depth is greater than max_depth to
         # Make them = 0 to preserve the shape
-        max_depth_indexes = np.where(normalized_depth > max_depth)
+        max_depth_indexes = np.where(normalized_depth > max_depth*far)
         normalized_depth[max_depth_indexes] = 0
         u_coord[max_depth_indexes] = 0
         v_coord[max_depth_indexes] = 0
-        depth_np_1d = normalized_depth *far
+        depth_np_1d = normalized_depth
 
         # p2d = [u,v,1]
         p2d = np.array([u_coord, v_coord, np.ones_like(u_coord)])

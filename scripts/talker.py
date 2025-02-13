@@ -20,6 +20,7 @@ from numpy.lib import recfunctions as rfn
 # ROS
 import rospy
 import message_filters
+from cv_bridge import CvBridge, CvBridgeError
 from tf import TransformListener, transformations
 from std_msgs.msg import Header
 from sensor_msgs import point_cloud2 
@@ -107,7 +108,7 @@ class ManySyncListener:
 
         # Publisher
         self.pc2_pub = rospy.Publisher("ego_vehicle_pcd",PointCloud2, queue_size=10)
-    
+        self.cv_bridge = CvBridge()
 
     def time_stamp_fuse_cb(self, 
         front:Image,
@@ -189,9 +190,10 @@ class ManySyncListener:
         return im
     
     def ros_depth_img2numpy(self, ros_img: Image) -> np.ndarray:
-        array = np.frombuffer(ros_img.data, dtype=np.float32)
-        array = np.reshape(array, (ros_img.height, ros_img.width))
-        array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
+        # array = np.frombuffer(ros_img.data, dtype=np.float32)
+        # array = np.reshape(array, (ros_img.height, ros_img.width))
+        # array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
+        array = self.cv_bridge.imgmsg_to_cv2(ros_img)
         return array
 
     def K3x3to4x4(self,K:torch.Tensor)->torch.Tensor:
@@ -276,13 +278,8 @@ class ManySyncListener:
         RGB color of an array.
         "max_depth" is used to omit the points that are far enough.
         """
-        K = np.array([
-            [K[0], K[3], K[6]],
-            [K[1], K[4], K[7]],
-            [K[2], K[5], K[8]]
-        ])
         far = 1000.0  # max depth in meters.
-        w,h,K = int(w), int(h), K
+        w,h,K = int(w), int(h), np.array(K).reshape((3,3))
         pixel_length = w*h
         u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
                         h, 1).reshape(pixel_length)

@@ -276,8 +276,13 @@ class ManySyncListener:
         RGB color of an array.
         "max_depth" is used to omit the points that are far enough.
         """
-        far = 1.0  # max depth in meters.
-        w,h,K = int(w), int(h), np.array(K).reshape((3,3))
+        K = np.array([
+            [K[0], K[3], K[6]],
+            [K[1], K[4], K[7]],
+            [K[2], K[5], K[8]]
+        ])
+        far = 1000.0  # max depth in meters.
+        w,h,K = int(w), int(h), K
         pixel_length = w*h
         u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
                         h, 1).reshape(pixel_length)

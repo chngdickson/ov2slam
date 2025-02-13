@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from lib_rgbd import *
+# from lib_rgbd import *
+import lib_rgbd as librgbd
 # Python 
 import threading
 import multiprocessing
@@ -82,12 +83,12 @@ class CarlaSyncListener:
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
         
-        self.cam_info = MyCameraInfo(ros_camera_info=camera_info)
+        self.cam_info = librgbd.MyCameraInfo(ros_camera_info=camera_info)
         # Additional code
         if self.cam_info is not None and self.extrinsic_to_origin is not None:
             rgb_arr = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
             depth_array = np.reshape(np.frombuffer(depth_img.data, dtype=np.float32), (depth_img.height, depth_img.width))
-            o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info, self.extrinsic_to_origin)
+            o3d_cloud = librgbd.create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info, self.extrinsic_to_origin)
             self.pcd_pub(convertCloudFromOpen3dtoROS(o3d_cloud, depth_img.header.frame_id))
     def timeStampExist(self, timestamp):
         if timestamp in self.timestampedInfo:

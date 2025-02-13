@@ -77,12 +77,6 @@ class CarlaSyncListener:
             transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
             position, qua = transformStamped
             self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, qua)
-            q = Transform().rotation
-            q.x,q.y,q.z,q.w = qua[0], qua[1],qua[2],qua[3]
-            rot = np.array([[q.w**2 + q.x**2 - q.y**2 - q.z**2, 2*q.x*q.y - 2*q.w*q.z, 2*q.x*q.z + 2*q.w*q.y],
-                               [2*q.x*q.y + 2*q.w*q.z, q.w**2 - q.x**2 + q.y**2 - q.z**2, 2*q.y*q.z - 2*q.w*q.x],
-                                [2*q.x*q.z - 2*q.w*q.y, 2*q.y*q.z + 2*q.w*q.x, q.w**2 - q.x**2 - q.y**2 + q.z**2]])
-            assert rot == transformations.quaternion_matrix(qua),f"rotation kasya {rot} != rot {transformations.quaternion_matrix(q)}"
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
     
@@ -95,7 +89,6 @@ class CarlaSyncListener:
         
         Converts a transformation from :class:`tf.Transformer` into a representation as a 4x4 matrix.
         """
-
         return np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
 
 class ManySyncListener:
@@ -142,7 +135,11 @@ class ManySyncListener:
     
     def cpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d , depth_1d = self.depth_to_lidar(self.ros_depth_img2numpy(depthImg), conf.width, conf.height, conf.K)
+        pcd_np_3d = pcd_np_3d.T
         pcd_np_3d = np.dot(pcd_np_3d, camExt2WorldRH)
+        
+        print(pcd_np_3d.shape)
+        # pcd_np_3d = np.dot(pcd_np_3d, camExt2WorldRH)
         return pcd_np_3d
     
     def publish_pcd(self, arr, stamp, frame_id):
@@ -299,9 +296,6 @@ class ManySyncListener:
         
         depth_np_1d = np.reshape(depth_np_1d, (h, w))
         
-        # header = laspy.LasHeader(point_format=0, version="1.2")
-        # las = laspy.LasData(header)
-        # las.x, las.y, las.z = px, py, pz
         return lidar_np_3d, depth_np_1d
 
 if __name__ == '__main__':

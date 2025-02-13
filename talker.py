@@ -149,10 +149,11 @@ def create_open3d_point_cloud_from_rgbd(
         image=rgbd_image,
         intrinsic=pinhole_camera_intrinsic,
         extrinsic= extrinsic)
+    points = np.asarray(open3d_point_cloud.points)
     open3d_point_cloud = open3d_point_cloud.select_by_index(
         np.where(
-            (open3d_point_cloud.points[:,1]>0.3) &
-            (open3d_point_cloud.points[:,0]>0.3)
+            ((points[:,1])>0.3) &
+            (points[:,0]>0.3)
             )[0])
     return open3d_point_cloud
 
@@ -204,7 +205,7 @@ class CarlaSyncListener:
         self.ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub, self.depth_sub], 10)
         self.ts.registerCallback(self.callback)
         self.timestampedInfo = OrderedDict() #Timestamp:combined pointcloud
-        self.pcd_pub = rospy.Publisher(f"ego_vehicle_pcd/{topic_pose}",PointCloud2, queue_size=10)
+        # self.pcd_pub = rospy.Publisher(f"ego_vehicle_pcd/{topic_pose}",PointCloud2, queue_size=10)
         
         # TF's
         self.tf_received = False

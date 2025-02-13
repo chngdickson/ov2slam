@@ -73,8 +73,8 @@ class CarlaSyncListener:
 
     def check_tf_exists(self, origin_frame, relative_frame):
         if self.tf_listener.frameExists(relative_frame):
-            t = self.tf_listener.getLatestCommonTime(relative_frame, origin_frame)
-            transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
+            t = self.tf_listener.getLatestCommonTime(origin_frame, relative_frame)
+            transformStamped = self.tf_listener.lookupTransform(origin_frame,relative_frame, t)
             position, qua = transformStamped
             self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, qua)
             rospy.loginfo(f"{self.topic_pose}")

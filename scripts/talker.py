@@ -89,7 +89,7 @@ class CarlaSyncListener:
         
         Converts a transformation from :class:`tf.Transformer` into a representation as a 4x4 matrix.
         """
-        return np.dot(transformations.translation_matrix(translation), -transformations.quaternion_matrix(rotation))
+        return np.dot(-transformations.translation_matrix(translation), -transformations.quaternion_matrix(rotation))
 
 class ManySyncListener:
     def __init__(self):
@@ -225,7 +225,7 @@ class ManySyncListener:
         # Ori      [[ 0, 1, 0, 0],[ 0, 0, 1, 0],[ 1, 0, 0, 0],[ 0, 0, 0, 1]]
         # From web [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
         # Safe try [[ 0, 0, 1, 0],[ 1, 0, 0, 0],[ 0, -1, 0, 0],[ 0, 0, 0, 1]]
-        M_Basis_Cam2W = torch.tensor([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]], dtype=dtype, device=device)
+        M_Basis_Cam2W = torch.tensor([[ 0, 1, 0, 0],[ 0, 0, 1, 0],[ 1, 0, 0, 0],[ 0, 0, 0, 1]], dtype=dtype, device=device)
 
         u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)

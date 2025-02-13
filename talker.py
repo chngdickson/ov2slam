@@ -180,9 +180,9 @@ def convertCloudFromOpen3dtoROS(open3d_cloud, frame_id, timestamp):
     xyz = np.asarray(open3d_cloud.points)
     colors = np.floor(np.asarray(open3d_cloud.colors)*255) 
     df = pd.DataFrame({
-        "x"  : xyz[:,0],
+        "x"  : xyz[:,2],
         "y"  : xyz[:,1],
-        "z"  : xyz[:,2],
+        "z"  : xyz[:,0],
         "rgb": colors[:,0]*BIT_MOVE_16 + colors[:,1]*BIT_MOVE_8 + colors[:,2]
     })
     df["x"] = df["x"].astype("float32")

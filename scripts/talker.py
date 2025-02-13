@@ -131,17 +131,17 @@ class ManySyncListener:
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2World=camExt2WorldRH).detach().cpu().numpy()
         rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
         a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
-        return 
+        return a
     
     def cpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d , depth_1d = self.depth_to_lidar(self.ros_depth_img2numpy(depthImg), conf.width, conf.height, conf.K)
         pcd_np_3d = pcd_np_3d.T
-        print(pcd_np_3d.shape)
         pcd_np_3d = np.dot(np.hstack((pcd_np_3d, np.ones((pcd_np_3d.shape[0],1)).astype(np.float64))), camExt2WorldRH)[:,:3]
-        pcd_np_3d[:, 1] *=-1
-        print(pcd_np_3d.shape)
+        pcd_np_3d[:, 1] *=-1 # N,3
+        rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
+        a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
         # pcd_np_3d = np.dot(pcd_np_3d, camExt2WorldRH)
-        return pcd_np_3d.T
+        return a
     
     def publish_pcd(self, arr, stamp, frame_id):
         """

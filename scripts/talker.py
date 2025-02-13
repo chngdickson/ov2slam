@@ -82,6 +82,7 @@ class CarlaSyncListener:
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
         
+        self.cam_info = MyCameraInfo()
         # Additional code
         if self.cam_info is not None and self.extrinsic_to_origin is not None:
             self.cam_info = MyCameraInfo()

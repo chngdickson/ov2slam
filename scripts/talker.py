@@ -75,12 +75,14 @@ class CarlaSyncListener:
         if self.tf_listener.frameExists(relative_frame):
             t = self.tf_listener.getLatestCommonTime(relative_frame, origin_frame)
             transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
-            position, q = transformStamped
-            self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, q)
+            position, qua = transformStamped
+            self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, qua)
+            q = Transform().rotation
+            q.x,q.y,q.z,q.w = qua[0], qua[1],qua[2],qua[3]
             rot = np.array([[q.w**2 + q.x**2 - q.y**2 - q.z**2, 2*q.x*q.y - 2*q.w*q.z, 2*q.x*q.z + 2*q.w*q.y],
                                [2*q.x*q.y + 2*q.w*q.z, q.w**2 - q.x**2 + q.y**2 - q.z**2, 2*q.y*q.z - 2*q.w*q.x],
                                 [2*q.x*q.z - 2*q.w*q.y, 2*q.y*q.z + 2*q.w*q.x, q.w**2 - q.x**2 - q.y**2 + q.z**2]])
-            assert rot == transformations.quaternion_matrix(q),f"rotation kasya {rot} != rot {transformations.quaternion_matrix(q)}"
+            assert rot == transformations.quaternion_matrix(qua),f"rotation kasya {rot} != rot {transformations.quaternion_matrix(q)}"
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
     

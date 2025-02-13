@@ -172,10 +172,10 @@ FIELDS_XYZRGB = [
     PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
     PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)
     ]
-def convertCloudFromOpen3dtoROS(open3d_cloud, frame_id="base"):
+def convertCloudFromOpen3dtoROS(open3d_cloud, frame_id, timestamp):
     header = Header()
     header.frame_id = frame_id
-    header.stamp = rospy.Time.now()
+    header.stamp = timestamp
     xyz = np.asarray(open3d_cloud.points)
     colors = np.asarray(open3d_cloud.colors)
     df = pd.DataFrame({
@@ -225,7 +225,7 @@ class CarlaSyncListener:
             rgb_arr = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
             depth_array = np.reshape(np.frombuffer(depth_img.data, dtype=np.float32), (depth_img.height, depth_img.width))
             o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info, self.extrinsic_to_origin)
-            self.pcd_pub.publish(convertCloudFromOpen3dtoROS(o3d_cloud, depth_img.header.frame_id))
+            self.pcd_pub.publish(convertCloudFromOpen3dtoROS(o3d_cloud, depth_img.header.frame_id, timestamp=rgb_img.header.stamp))
     def timeStampExist(self, timestamp):
         if timestamp in self.timestampedInfo:
             data = self.timestampedInfo.get(timestamp)

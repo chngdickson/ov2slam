@@ -150,13 +150,12 @@ def create_open3d_point_cloud_from_rgbd(
         intrinsic=pinhole_camera_intrinsic,
         extrinsic= extrinsic)
     points = np.asarray(open3d_point_cloud.points)
-    max_val = 0.5
-    open3d_point_cloud = open3d_point_cloud.select_by_index(
-        np.where(
-            np.logical_not(points[:,0]>-max_val, points[:,0]<max_val) &
-            np.logical_not(points[:,1]>-max_val, points[:,1]<max_val)
-            )[0]
-        )
+    center = np.array([0, 0, 0])
+    radius = 0.5
+
+    # Calculate distances to center, set new points
+    distances = np.linalg.norm(points - center, axis=1)
+    open3d_point_cloud.points = open3d.utility.Vector3dVector(points[distances >= radius])
     return open3d_point_cloud
 
 

@@ -16,7 +16,7 @@ import pandas as pd
 import numpy as np
 import numpy.matlib as npm
 from numpy.lib import recfunctions as rfn
-
+import open3d as o3d
 # ROS
 import rospy
 import message_filters
@@ -256,6 +256,7 @@ class ManySyncListener:
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2World, K4x4
         torch.cuda.empty_cache()
         return p3d
+
     
     def depth_to_lidar(self, normalized_depth, w, h, K, max_depth=0.9):
         """

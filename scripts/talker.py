@@ -27,7 +27,31 @@ from sensor_msgs.msg import PointCloud2, PointField
 from geometry_msgs.msg import TransformStamped, Transform
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    
+BIT_MOVE_16 = 2**16
+BIT_MOVE_8 = 2**8
+FIELDS_XYZRGB = [
+    PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
+    PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
+    PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
+    PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)
+    ]
+def convertCloudFromOpen3dtoROS(open3d_cloud, frame_id="base"):
+    header = Header()
+    header.frame_id = frame_id
+    header.stamp = rospy.Time.now()
+    xyz = np.asarray(open3d_cloud.points)
+    colors = np.asarray(open3d_cloud.colors)
+    df = pd.DataFrame({
+        "x"  : xyz[:,0],
+        "y"  : xyz[:,1],
+        "z"  : xyz[:,2],
+        "rgb": colors[:,3]*BIT_MOVE_16 + colors[:,4]*BIT_MOVE_8 + colors[:,5]
+    })
+    df["x"] = df["x"].astype("float32")
+    df["y"] = df["y"].astype("float32")
+    df["z"] = df["z"].astype("float32")
+    df["rgb"] = df["rgb"].astype("uint32")
+    return point_cloud2.create_cloud(header, FIELDS_XYZRGB, df.to_records(index=False).tolist())
 class CarlaSyncListener:
     def __init__(self, topic_pose, tf_origin_frame="ego_vehicle"):
         self.topic_pose = topic_pose
@@ -37,6 +61,7 @@ class CarlaSyncListener:
         self.ts = message_filters.TimeSynchronizer([self.image_sub, self.info_sub, self.depth_sub], 10)
         self.ts.registerCallback(self.callback)
         self.timestampedInfo = OrderedDict() #Timestamp:combined pointcloud
+        self.pcd_pub = rospy.Publisher(f"ego_vehicle_pcd/{topic_pose}",PointCloud2, queue_size=10)
         
         # TF's
         self.tf_received = False
@@ -53,15 +78,17 @@ class CarlaSyncListener:
             self.tf_rel_frame = rgb_img.header.frame_id
             self.tf_rel_frame2 = depth_img.header.frame_id
             return
-        if self.cam_info is not None:
-            self.cam_info = MyCameraInfo()
-            rgb_arr = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
-            depth_array = np.reshape(np.frombuffer(depth_img.data, dtype=np.float32), (depth_img.height, depth_img.width))
-            create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info)
         self.timestampedInfo[rgb_img.header.stamp] = [rgb_img, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
-    
+        
+        # Additional code
+        if self.cam_info is not None and self.extrinsic_to_origin is not None:
+            self.cam_info = MyCameraInfo()
+            rgb_arr = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
+            depth_array = np.reshape(np.frombuffer(depth_img.data, dtype=np.float32), (depth_img.height, depth_img.width))
+            o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info, self.extrinsic_to_origin)
+            self.pcd_pub(convertCloudFromOpen3dtoROS(o3d_cloud, depth_img.header.frame_id))
     def timeStampExist(self, timestamp):
         if timestamp in self.timestampedInfo:
             data = self.timestampedInfo.get(timestamp)
@@ -118,18 +145,18 @@ class ManySyncListener:
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
         
-        for csl in self.listenerDict.values():
-            trueFalse, data = csl.timeStampExist(timestamp)
-            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
-            ext_list.append(csl.extrinsic_to_origin) # type: ignore 
+        # for csl in self.listenerDict.values():
+        #     trueFalse, data = csl.timeStampExist(timestamp)
+        #     istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
+        #     ext_list.append(csl.extrinsic_to_origin) # type: ignore 
         
-        if all(istrues):
-            xyzrgb_list = []
-            for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
-                xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-            xyzrgb = np.hstack(xyzrgb_list)
-            self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
-            rospy.loginfo("message filter called, all infos exists")
+        # if all(istrues):
+        #     xyzrgb_list = []
+        #     for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
+        #         xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+        #     xyzrgb = np.hstack(xyzrgb_list)
+        #     self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
+        #     rospy.loginfo("message filter called, all infos exists")
 
     def gpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2World=camExt2WorldRH).detach().cpu().numpy()
@@ -152,14 +179,6 @@ class ManySyncListener:
         header = Header()
         header.frame_id = frame_id
         header.stamp = stamp
-        BIT_MOVE_16 = 2**16
-        BIT_MOVE_8 = 2**8
-        FIELDS_XYZRGB = [
-            PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
-            PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
-            PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
-            PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)
-            ]
         arr = arr.reshape(6,-1).T # (N, 6)
         df = pd.DataFrame({
             "x"  : arr[:,0],

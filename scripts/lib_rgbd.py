@@ -82,6 +82,7 @@ class MyCameraInfo():
 def create_open3d_point_cloud_from_rgbd(
         color_img, depth_img,
         cam_info,
+        extrinsic,
         depth_unit=0.001,
         depth_trunc=3.0):
     ''' Create pointcreate_open3dpoint_cloud_from_rgbd cloud of open3d format, given opencv rgbd images and camera info.
@@ -116,7 +117,8 @@ def create_open3d_point_cloud_from_rgbd(
     # Output type: `class open3d.geometry.PointCloud`.
     open3d_point_cloud = open3d.geometry.PointCloud.create_from_rgbd_image(
         image=rgbd_image,
-        intrinsic=pinhole_camera_intrinsic)
+        intrinsic=pinhole_camera_intrinsic,
+        extrinsic= extrinsic)
 
     return open3d_point_cloud
 

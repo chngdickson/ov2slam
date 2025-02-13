@@ -93,7 +93,7 @@ class CarlaSyncListener:
 
 class ManySyncListener:
     def __init__(self):
-        topics_list = ["front", "back","front_left","front_right","back_left","back_right"]
+        topics_list = ["front", "back","front_left"]
         self.listenerDict:Dict[str,CarlaSyncListener] = {n:CarlaSyncListener(n) for n in topics_list}
         
         # message_filters Synchronizer
@@ -108,7 +108,7 @@ class ManySyncListener:
 
     def time_stamp_fuse_cb(self, 
         front:Image,
-        back:Image, a1,a2,a3,a4
+        back:Image, a1
         ):
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
@@ -122,15 +122,6 @@ class ManySyncListener:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-                # xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
-                # self.publish_pcd(
-                #     self.cpu_depthRgbc(
-                #         rgb,
-                #         depth,
-                #         cam_info,
-                #         ext2_Origin
-                #         ), 
-                #     timestamp, depth.header.frame_id)
             xyzrgb = np.hstack(xyzrgb_list)
             self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
             rospy.loginfo("message filter called, all infos exists")

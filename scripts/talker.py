@@ -122,15 +122,6 @@ class ManySyncListener:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-                # xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
-                # self.publish_pcd(
-                #     self.cpu_depthRgbc(
-                #         rgb,
-                #         depth,
-                #         cam_info,
-                #         ext2_Origin
-                #         ), 
-                #     timestamp, depth.header.frame_id)
             xyzrgb = np.hstack(xyzrgb_list)
             self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
             rospy.loginfo("message filter called, all infos exists")
@@ -238,7 +229,6 @@ class ManySyncListener:
                             [ 1, 0, 0, 0],
                             [ 0, 0, 0, 1]], dtype=dtype, device=device)
         
-        # [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
         u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
         
@@ -250,7 +240,7 @@ class ManySyncListener:
         # p2d = [u,v,1]
         if ExtCam2World is not None:
             ExtCam2World = torch.tensor(ExtCam2World).to(device=device, dtype=dtype)
-            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ ExtCam2World)
+            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ torch.linalg.inv(ExtCam2World))
         else:
             pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W)
             

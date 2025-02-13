@@ -190,10 +190,10 @@ class ManySyncListener:
         return im
     
     def ros_depth_img2numpy(self, ros_img: Image) -> np.ndarray:
-        # array = np.frombuffer(ros_img.data, dtype=np.float32)
-        # array = np.reshape(array, (ros_img.height, ros_img.width))
+        array = np.frombuffer(ros_img.data, dtype=np.float32)
+        array = np.reshape(array, (ros_img.height, ros_img.width))
         # array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
-        array = self.cv_bridge.imgmsg_to_cv2(ros_img, desired_encoding=cv2.CV_32F)
+        # array = self.cv_bridge.imgmsg_to_cv2(ros_img, desired_encoding=
         return array
 
     def K3x3to4x4(self,K:torch.Tensor)->torch.Tensor:

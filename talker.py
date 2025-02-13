@@ -150,8 +150,8 @@ def create_open3d_point_cloud_from_rgbd(
         intrinsic=pinhole_camera_intrinsic,
         extrinsic= extrinsic)
     points = np.asarray(open3d_point_cloud.points)
-    center = np.array([0, 0, 0])
-    radius = 0.5
+    center = np.array([0, 0, 1.0])
+    radius = 1.0
 
     # Calculate distances to center, set new points
     distances = np.linalg.norm(points - center, axis=1)

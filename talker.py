@@ -149,7 +149,11 @@ def create_open3d_point_cloud_from_rgbd(
         image=rgbd_image,
         intrinsic=pinhole_camera_intrinsic,
         extrinsic= extrinsic)
-
+    open3d_point_cloud = open3d_point_cloud.select_by_index(
+        np.where(
+            (open3d_point_cloud.points[:,1]>0.3) &
+            (open3d_point_cloud.points[:,0]>0.3)
+            )[0])
     return open3d_point_cloud
 
 

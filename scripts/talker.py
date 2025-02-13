@@ -141,7 +141,7 @@ class ManySyncListener:
         pcd_np_3d[:, 1] *=-1
         print(pcd_np_3d.shape)
         # pcd_np_3d = np.dot(pcd_np_3d, camExt2WorldRH)
-        return pcd_np_3d
+        return pcd_np_3d.T
     
     def publish_pcd(self, arr, stamp, frame_id):
         """

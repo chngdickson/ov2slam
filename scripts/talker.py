@@ -89,8 +89,6 @@ class CarlaSyncListener:
         
         Converts a transformation from :class:`tf.Transformer` into a representation as a 4x4 matrix.
         """
-        print(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
-        print(np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation)))
         R = transformations.quaternion_matrix(rotation)
         c = transformations.translation_matrix(translation)
         return -R@c
@@ -278,7 +276,7 @@ class ManySyncListener:
         RGB color of an array.
         "max_depth" is used to omit the points that are far enough.
         """
-        far = 1000.0  # max depth in meters.
+        far = 1.0  # max depth in meters.
         w,h,K = int(w), int(h), np.array(K).reshape((3,3))
         pixel_length = w*h
         u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],

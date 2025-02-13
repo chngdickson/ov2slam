@@ -137,7 +137,7 @@ class ManySyncListener:
         pcd_np_3d , depth_1d = self.depth_to_lidar(self.ros_depth_img2numpy(depthImg), conf.width, conf.height, conf.K)
         pcd_np_3d = pcd_np_3d.T
         print(pcd_np_3d.shape)
-        pcd_np_3d = np.dot(np.hstack((pcd_np_3d, np.ones((pcd_np_3d.shape[0],1)))), camExt2WorldRH)[:,:3]
+        pcd_np_3d = np.dot(np.hstack((pcd_np_3d, np.ones((pcd_np_3d.shape[0],1), dtype=np.float64))), camExt2WorldRH)[:,:3]
         pcd_np_3d[:, 1] *=-1
         print(pcd_np_3d.shape)
         # pcd_np_3d = np.dot(pcd_np_3d, camExt2WorldRH)

@@ -89,7 +89,7 @@ class CarlaSyncListener:
         
         Converts a transformation from :class:`tf.Transformer` into a representation as a 4x4 matrix.
         """
-        return np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
+        return np.dot(transformations.translation_matrix(translation), -transformations.quaternion_matrix(rotation))
 
 class ManySyncListener:
     def __init__(self):

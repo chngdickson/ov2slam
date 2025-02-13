@@ -223,8 +223,8 @@ class ManySyncListener:
         
         # [[ 0, 1, 0, 0],[ 0, 0, 1, 0],[ 1, 0, 0, 0],[ 0, 0, 0, 1]]
         M_Basis_Cam2W = torch.tensor(
-                            [[ 1, 0, 0, 0],
-                            [ 0, 1, 0, 0],
+                            [[ 0, 1, 0, 0],
+                            [ 1, 0, 0, 0],
                             [ 0, 0, 1, 0],
                             [ 0, 0, 0, 1]], dtype=dtype, device=device)
         

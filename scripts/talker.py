@@ -271,7 +271,9 @@ class ManySyncListener:
         "max_depth" is used to omit the points that are far enough.
         """
         far = 1000.0  # max depth in meters.
+        print("Kprior",K)
         w,h,K = int(w), int(h), np.array(K).reshape((3,3))
+        print(K)
         pixel_length = w*h
         u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
                         h, 1).reshape(pixel_length)

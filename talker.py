@@ -155,7 +155,7 @@ def create_open3d_point_cloud_from_rgbd(
 
     # Calculate distances to center, set new points
     distances = np.linalg.norm(points - center, axis=1)
-    open3d_point_cloud = open3d_point_cloud.select_by_index(np.where(points[distances >= radius]))
+    open3d_point_cloud = open3d_point_cloud.select_by_index(np.where(distances >= radius))
     return open3d_point_cloud
 
 

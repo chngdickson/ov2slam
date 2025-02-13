@@ -113,7 +113,7 @@ def create_open3d_point_cloud_from_rgbd(
         cam_info,
         extrinsic,
         depth_unit=1.0,
-        depth_trunc=1000.0):
+        depth_trunc=1001.0):
     ''' Create pointcreate_open3dpoint_cloud_from_rgbd cloud of open3d format, given opencv rgbd images and camera info.
     Arguments:
         color_img {np.ndarry, np.uint8}:

@@ -239,7 +239,8 @@ class ManySyncListener:
         u_coord = ((torch.arange(w-1, -1, -1).to(device).unsqueeze(0)).repeat(h,1)).reshape(pixel_length)
         v_coord = ((torch.arange(h-1, -1, -1).to(device).unsqueeze(1)).repeat(1,w)).reshape(pixel_length)
         
-        # Search for pixels where the depth is greater than max_depth 
+        # Search for pixels where the depth is greater than max_depth fewfwe
+        
         # Make them = 0 to preserve the shape
         max_depth_indexes = torch.where(normalized_depth > (max_depth*far))
         normalized_depth[max_depth_indexes], u_coord[max_depth_indexes], v_coord[max_depth_indexes] = 0,0,0
@@ -247,7 +248,7 @@ class ManySyncListener:
         # p2d = [u,v,1]
         if ExtCam2World is not None:
             ExtCam2World = torch.tensor(ExtCam2World).to(device=device, dtype=dtype)
-            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ ExtCam2World)
+            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ torch.linalg.inv(ExtCam2World))
         else:
             pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W)
             

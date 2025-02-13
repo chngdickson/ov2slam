@@ -151,9 +151,9 @@ def create_open3d_point_cloud_from_rgbd(
         extrinsic= extrinsic)
     points = np.asarray(open3d_point_cloud.points)
     open3d_point_cloud = open3d_point_cloud.select_by_index(
-        np.where(
-            ((points[:,1])>0.3) &
-            (points[:,0]>0.3)
+        np.where((
+            (points[:,1])>0.1) &
+            (points[:,0]>0.1)
             )[0])
     return open3d_point_cloud
 

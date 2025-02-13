@@ -125,7 +125,14 @@ class ManySyncListener:
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
                 # xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
-                self.publish_pcd(self.cpu_depthRgbc(rgb,depth,cam_info,np.eye(4)), timestamp, depth.header.frame_id)
+                self.publish_pcd(
+                    self.cpu_depthRgbc(
+                        rgb,
+                        depth,
+                        cam_info,
+                        np.eye(4)
+                        ), 
+                    timestamp, depth.header.frame_id)
             # xyzrgb = np.hstack(xyzrgb_list)
             rospy.loginfo("message filter called, all infos exists")
 
@@ -138,9 +145,7 @@ class ManySyncListener:
     def cpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d , depth_1d = self.depth_to_lidar(self.ros_depth_img2numpy(depthImg), conf.width, conf.height, conf.K)
         pcd_np_3d = pcd_np_3d.T
-        pcd_np_3d = np.dot(np.hstack((pcd_np_3d, np.ones((pcd_np_3d.shape[0],1)).astype(np.float64))), camExt2WorldRH)[:,:3]
-        pcd_np_3d[:, 1] *=-1 # N,3
-        
+        pcd_np_3d = np.dot(np.hstack((pcd_np_3d, np.ones((pcd_np_3d.shape[0],1)).astype(np.float64))), camExt2WorldRH)[:,:3]        
         rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
         a = np.vstack((pcd_np_3d.T, rgb)).reshape(6,-1)
         # pcd_np_3d = np.dot(pcd_np_3d, camExt2WorldRH)
@@ -271,9 +276,7 @@ class ManySyncListener:
         "max_depth" is used to omit the points that are far enough.
         """
         far = 1000.0  # max depth in meters.
-        print("Kprior",K)
         w,h,K = int(w), int(h), np.array(K).reshape((3,3))
-        print(K)
         pixel_length = w*h
         u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
                         h, 1).reshape(pixel_length)

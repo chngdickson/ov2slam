@@ -192,6 +192,7 @@ class ManySyncListener:
     def ros_depth_img2numpy(self, ros_img: Image) -> np.ndarray:
         array = np.frombuffer(ros_img.data, dtype=np.float32)
         array = np.reshape(array, (ros_img.height, ros_img.width))
+        print(array.max(), array.min())
         # array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
         return np.copy(array)
 

@@ -75,8 +75,12 @@ class CarlaSyncListener:
         if self.tf_listener.frameExists(relative_frame):
             t = self.tf_listener.getLatestCommonTime(relative_frame, origin_frame)
             transformStamped = self.tf_listener.lookupTransform(relative_frame,origin_frame, t)
-            position, quaternion = transformStamped
-            self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, quaternion)
+            position, q = transformStamped
+            self.tf_received, self.extrinsic_to_origin = True, self.fromTranslationRotation(position, q)
+            rot = np.array([[q.w**2 + q.x**2 - q.y**2 - q.z**2, 2*q.x*q.y - 2*q.w*q.z, 2*q.x*q.z + 2*q.w*q.y],
+                               [2*q.x*q.y + 2*q.w*q.z, q.w**2 - q.x**2 + q.y**2 - q.z**2, 2*q.y*q.z - 2*q.w*q.x],
+                                [2*q.x*q.z - 2*q.w*q.y, 2*q.y*q.z + 2*q.w*q.x, q.w**2 - q.x**2 - q.y**2 + q.z**2]])
+            assert rot == transformations.quaternion_matrix(q),f"rotation kasya {rot} != rot {transformations.quaternion_matrix(q)}"
             rospy.loginfo(f"{self.topic_pose}")
             self.timer.shutdown()
     
@@ -122,17 +126,21 @@ class ManySyncListener:
         if all(istrues):
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
-                xyzrgb_list.append(self.process_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+                # xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+                
             xyzrgb = np.hstack(xyzrgb_list)
             self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
             rospy.loginfo("message filter called, all infos exists")
 
-    def process_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
-        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2World=camExt2WorldRH)
-        pcd_np_3d = pcd_np_3d.detach().cpu().numpy()
+    def gpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
+        pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2World=camExt2WorldRH).detach().cpu().numpy()
         rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
         a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
-        return a
+        return 
+    
+    def cpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
+        pcd_np_3d , depth_1d = self.depth_to_lidar(self.ros_depth_img2numpy(depthImg), conf.width, conf.height, conf.K)
+        
     
     def publish_pcd(self, arr, stamp, frame_id):
         """
@@ -250,8 +258,48 @@ class ManySyncListener:
         del v_coord, u_coord, normalized_depth, max_depth_indexes, ExtCam2World, K4x4
         torch.cuda.empty_cache()
         return p3d
+    
+    def depth_to_lidar(self, normalized_depth, w:int=400, h:int=70, K=[[200, 0, 200], [0, 200,35], [0, 0, 1]] , max_depth=0.9):
+        """
+        Convert an image containing CARLA encoded depth-map to a 2D array containing
+        the 3D position (relative to the camera) of each pixel and its corresponding
+        RGB color of an array.
+        "max_depth" is used to omit the points that are far enough.
+        """
+        far = 1000.0  # max depth in meters.
+        w,h,K = int(w), int(h), np.array(K).reshape((3,3))
+        pixel_length = w*h
+        u_coord = np.matlib.repmat(np.r_[w-1:-1:-1],
+                        h, 1).reshape(pixel_length)
+        v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
+                        1, w).reshape(pixel_length)
+        normalized_depth = np.reshape(normalized_depth, pixel_length)
+        # Search for pixels where the depth is greater than max_depth to
+        # Make them = 0 to preserve the shape
+        max_depth_indexes = np.where(normalized_depth > max_depth)
+        normalized_depth[max_depth_indexes] = 0
+        u_coord[max_depth_indexes] = 0
+        v_coord[max_depth_indexes] = 0
+        depth_np_1d = normalized_depth *far
 
+        # p2d = [u,v,1]
+        p2d = np.array([u_coord, v_coord, np.ones_like(u_coord)])
 
+        # P = [X,Y,Z] # Pixel Space to Camera space
+        p3d = np.dot(np.linalg.inv(K), p2d)
+        p3d *= depth_np_1d
+
+        lidar_np_3d = np.transpose(p3d) 
+        py,pz,px = lidar_np_3d[:, 0], lidar_np_3d[:, 1], lidar_np_3d[:, 2]
+
+        lidar_np_3d = np.vstack((px,py,pz))
+        
+        depth_np_1d = np.reshape(depth_np_1d, (h, w))
+        
+        # header = laspy.LasHeader(point_format=0, version="1.2")
+        # las = laspy.LasData(header)
+        # las.x, las.y, las.z = px, py, pz
+        return lidar_np_3d, depth_np_1d
 
 if __name__ == '__main__':
     rospy.init_node("sample_message_filters", anonymous=True)

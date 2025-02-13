@@ -21,7 +21,7 @@
   <node name="test" pkg="ov2slam" type="talker.py" output="screen"/>
   <!-- <node name="player" pkg="rosbag" type="play" output="screen" args="-r 1.0 clock $(arg bag_file)" if="$(arg play_bag)"/> -->
   
-  <arg name="voxel_size" default="0.1"/>
+  <arg name="voxel_size" default="0.05"/>
   <arg name="dist" default="5.0"/>
   <arg name="ply_save_file" default="/root/bags/cow_eth_data/output.ply"/>
 
@@ -36,7 +36,7 @@
     <param name="use_tf_transforms" value="true" />
     <param name="update_mesh_every_n_sec" value="4.0" />
     <param name="min_time_between_msgs_sec" value="0.02" />
-    <param name="max_ray_length_m" value="10.0"/>
+    <param name="max_ray_length_m" value="40.0"/>
     <param name="min_ray_length_m" value="0.5"/>
     <param name="method" value="merged" />
     <param name="use_const_weight" value="false" />

@@ -93,7 +93,7 @@ class CarlaSyncListener:
 
 class ManySyncListener:
     def __init__(self):
-        topics_list = ["front", "back","front_left"]
+        topics_list = ["front"]
         self.listenerDict:Dict[str,CarlaSyncListener] = {n:CarlaSyncListener(n) for n in topics_list}
         
         # message_filters Synchronizer
@@ -107,8 +107,7 @@ class ManySyncListener:
     
 
     def time_stamp_fuse_cb(self, 
-        front:Image,
-        back:Image, a1
+        front:Image
         ):
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
@@ -240,7 +239,7 @@ class ManySyncListener:
         # p2d = [u,v,1]
         if ExtCam2World is not None:
             ExtCam2World = torch.tensor(ExtCam2World).to(device=device, dtype=dtype)
-            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ ExtCam2World)
+            pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W @ torch.linalg.inv(ExtCam2World))
         else:
             pixel2WorldProjection = torch.linalg.inv(K4x4 @ M_Basis_Cam2W)
             

@@ -151,7 +151,7 @@ def create_open3d_point_cloud_from_rgbd(
         extrinsic= extrinsic)
     points = np.asarray(open3d_point_cloud.points)
     center = np.array([0, 0, 0.5])
-    radius = 1.5
+    radius = 1.7
 
     # Calculate distances to center, set new points
     distances = np.linalg.norm(points - center, axis=1)

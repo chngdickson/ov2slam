@@ -286,6 +286,7 @@ class ManySyncListener:
                         h, 1).reshape(pixel_length)
         v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
                         1, w).reshape(pixel_length)
+        normalized_depth = np.array(normalized_depth)
         normalized_depth = np.reshape(normalized_depth, pixel_length)
         # Search for pixels where the depth is greater than max_depth to
         # Make them = 0 to preserve the shape

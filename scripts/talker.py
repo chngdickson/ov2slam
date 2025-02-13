@@ -20,7 +20,6 @@ from numpy.lib import recfunctions as rfn
 # ROS
 import rospy
 import message_filters
-from cv_bridge import CvBridge, CvBridgeError
 from tf import TransformListener, transformations
 from std_msgs.msg import Header
 from sensor_msgs import point_cloud2 
@@ -90,9 +89,10 @@ class CarlaSyncListener:
         
         Converts a transformation from :class:`tf.Transformer` into a representation as a 4x4 matrix.
         """
-        R = transformations.quaternion_matrix(rotation)
-        c = transformations.translation_matrix(translation)
-        return -R@c
+        # print(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
+        # print(np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation)))
+        # R = transformations.quaternion_matrix(rotation)
+        # c = transformations.translation_matrix(translation)
         return np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
 
 class ManySyncListener:
@@ -108,7 +108,7 @@ class ManySyncListener:
 
         # Publisher
         self.pc2_pub = rospy.Publisher("ego_vehicle_pcd",PointCloud2, queue_size=10)
-        self.cv_bridge = CvBridge()
+    
 
     def time_stamp_fuse_cb(self, 
         front:Image,
@@ -132,7 +132,7 @@ class ManySyncListener:
                         rgb,
                         depth,
                         cam_info,
-                        ext2_Origin
+                        np.eye(4)
                         ), 
                     timestamp, depth.header.frame_id)
             # xyzrgb = np.hstack(xyzrgb_list)
@@ -193,7 +193,6 @@ class ManySyncListener:
         array = np.frombuffer(ros_img.data, dtype=np.float32)
         array = np.reshape(array, (ros_img.height, ros_img.width))
         # array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
-        # array = self.cv_bridge.imgmsg_to_cv2(ros_img, desired_encoding=
         return array
 
     def K3x3to4x4(self,K:torch.Tensor)->torch.Tensor:
@@ -285,7 +284,6 @@ class ManySyncListener:
                         h, 1).reshape(pixel_length)
         v_coord = np.matlib.repmat(np.c_[h-1:-1:-1],
                         1, w).reshape(pixel_length)
-        normalized_depth = np.array(normalized_depth)
         normalized_depth = np.reshape(normalized_depth, pixel_length)
         # Search for pixels where the depth is greater than max_depth to
         # Make them = 0 to preserve the shape

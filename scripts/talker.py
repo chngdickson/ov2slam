@@ -91,6 +91,9 @@ class CarlaSyncListener:
         """
         print(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
         print(np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation)))
+        R = transformations.quaternion_matrix(rotation)
+        c = transformations.translation_matrix(translation)
+        return -R@c
         return np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
 
 class ManySyncListener:
@@ -130,7 +133,7 @@ class ManySyncListener:
                         rgb,
                         depth,
                         cam_info,
-                        np.eye(4)
+                        ext2_Origin
                         ), 
                     timestamp, depth.header.frame_id)
             # xyzrgb = np.hstack(xyzrgb_list)
@@ -268,7 +271,7 @@ class ManySyncListener:
         torch.cuda.empty_cache()
         return p3d
     
-    def depth_to_lidar(self, normalized_depth, w:int=400, h:int=70, K=[[200, 0, 200], [0, 200,35], [0, 0, 1]] , max_depth=0.9):
+    def depth_to_lidar(self, normalized_depth, w, h, K, max_depth=0.9):
         """
         Convert an image containing CARLA encoded depth-map to a 2D array containing
         the 3D position (relative to the camera) of each pixel and its corresponding

@@ -233,9 +233,9 @@ class ManySyncListener:
         K4x4 = self.K3x3to4x4(torch.tensor(K_ros).reshape((3,3))).to(device=device, dtype=dtype)
         
         M_Basis_Cam2W = torch.tensor([
+                            [ 0, 1, 0, 0],
+                            [ 0, 0, 1, 0],
                             [ 1, 0, 0, 0],
-                            [ 0, -1, 0, 0],
-                            [ 0, 0, -1, 0],
                             [ 0, 0, 0, 1]], dtype=dtype, device=device)
         
         # [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
@@ -244,9 +244,8 @@ class ManySyncListener:
         
         # Search for pixels where the depth is greater than max_depth 
         # Make them = 0 to preserve the shape
-        max_depth_indexes = torch.where(normalized_depth > max_depth*far)
+        max_depth_indexes = torch.where(normalized_depth > (max_depth*far))
         normalized_depth[max_depth_indexes], u_coord[max_depth_indexes], v_coord[max_depth_indexes] = 0,0,0
-        normalized_depth = normalized_depth 
 
         # p2d = [u,v,1]
         if ExtCam2World is not None:

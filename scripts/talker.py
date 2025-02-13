@@ -122,9 +122,9 @@ class ManySyncListener:
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
                 # xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-                xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
-            xyzrgb = np.hstack(xyzrgb_list)
-            self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
+                # xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
+                self.publish_pcd(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin), timestamp, depth.header.frame_id)
+            # xyzrgb = np.hstack(xyzrgb_list)
             rospy.loginfo("message filter called, all infos exists")
 
     def gpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):

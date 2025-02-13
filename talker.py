@@ -46,7 +46,7 @@ def convertCloudFromOpen3dtoROS(open3d_cloud, frame_id="base"):
         "x"  : xyz[:,0],
         "y"  : xyz[:,1],
         "z"  : xyz[:,2],
-        "rgb": colors[:,3]*BIT_MOVE_16 + colors[:,4]*BIT_MOVE_8 + colors[:,5]
+        "rgb": colors[:,0]*BIT_MOVE_16 + colors[:,1]*BIT_MOVE_8 + colors[:,2]
     })
     df["x"] = df["x"].astype("float32")
     df["y"] = df["y"].astype("float32")

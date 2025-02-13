@@ -89,10 +89,6 @@ class CarlaSyncListener:
         
         Converts a transformation from :class:`tf.Transformer` into a representation as a 4x4 matrix.
         """
-        # print(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
-        # print(np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation)))
-        # R = transformations.quaternion_matrix(rotation)
-        # c = transformations.translation_matrix(translation)
         return np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
 
 class ManySyncListener:
@@ -125,8 +121,8 @@ class ManySyncListener:
         if all(istrues):
             xyzrgb_list = []
             for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
-                # xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-                xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
+                xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+                # xyzrgb_list.append(self.cpu_depthRgbc(rgb,depth,cam_info,ext2_Origin))
                 # self.publish_pcd(
                 #     self.cpu_depthRgbc(
                 #         rgb,
@@ -151,7 +147,6 @@ class ManySyncListener:
         pcd_np_3d = np.dot(np.hstack((pcd_np_3d, np.ones((pcd_np_3d.shape[0],1)).astype(np.float64))), camExt2WorldRH)[:,:3]        
         rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
         a = np.vstack((pcd_np_3d.T, rgb)).reshape(6,-1)
-        # pcd_np_3d = np.dot(pcd_np_3d, camExt2WorldRH)
         return a
     
     def publish_pcd(self, arr, stamp, frame_id):
@@ -171,10 +166,10 @@ class ManySyncListener:
             ]
         arr = arr.reshape(6,-1).T # (N, 6)
         df = pd.DataFrame({
-            "x":arr[:,0],
-            "y":arr[:,1],
-            "z":arr[:,2],
-            "rgb": arr[:,3] * BIT_MOVE_16 +arr[:,4] * BIT_MOVE_8 + arr[:,5]
+            "x"  : arr[:,0],
+            "y"  : arr[:,1],
+            "z"  : arr[:,2],
+            "rgb": arr[:,3]*BIT_MOVE_16 + arr[:,4]*BIT_MOVE_8 + arr[:,5]
         })
         df["x"] = df["x"].astype("float32")
         df["y"] = df["y"].astype("float32")
@@ -193,7 +188,7 @@ class ManySyncListener:
     def ros_depth_img2numpy(self, ros_img: Image) -> np.ndarray:
         array = np.frombuffer(ros_img.data, dtype=np.float32)
         array = np.reshape(array, (ros_img.height, ros_img.width))
-        # array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
+        # array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX) # NEVER DO DIS
         return np.copy(array)
 
     def K3x3to4x4(self,K:torch.Tensor)->torch.Tensor:
@@ -249,9 +244,9 @@ class ManySyncListener:
         
         # Search for pixels where the depth is greater than max_depth 
         # Make them = 0 to preserve the shape
-        max_depth_indexes = torch.where(normalized_depth > max_depth)
+        max_depth_indexes = torch.where(normalized_depth > max_depth*far)
         normalized_depth[max_depth_indexes], u_coord[max_depth_indexes], v_coord[max_depth_indexes] = 0,0,0
-        normalized_depth = normalized_depth * far
+        normalized_depth = normalized_depth 
 
         # p2d = [u,v,1]
         if ExtCam2World is not None:

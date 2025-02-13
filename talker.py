@@ -148,7 +148,7 @@ def create_open3d_point_cloud_from_rgbd(
     open3d_point_cloud = open3d.geometry.PointCloud.create_from_rgbd_image(
         image=rgbd_image,
         intrinsic=pinhole_camera_intrinsic,
-        extrinsic= extrinsic)
+        extrinsic= None)
 
     return open3d_point_cloud
 

@@ -138,8 +138,9 @@ class ManySyncListener:
         pcd_np_3d = pcd_np_3d.T
         pcd_np_3d = np.dot(np.hstack((pcd_np_3d, np.ones((pcd_np_3d.shape[0],1)).astype(np.float64))), camExt2WorldRH)[:,:3]
         pcd_np_3d[:, 1] *=-1 # N,3
+        
         rgb = self.ros_rgb_img2numpy(rgbImg).reshape(-1, 3).T
-        a = np.vstack((pcd_np_3d, rgb)).reshape(6,-1)
+        a = np.vstack((pcd_np_3d.T, rgb)).reshape(6,-1)
         # pcd_np_3d = np.dot(pcd_np_3d, camExt2WorldRH)
         return a
     

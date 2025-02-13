@@ -113,7 +113,7 @@ def create_open3d_point_cloud_from_rgbd(
         cam_info,
         extrinsic,
         depth_unit=1.0,
-        depth_trunc=1001.0):
+        depth_trunc=900.0):
     ''' Create pointcreate_open3dpoint_cloud_from_rgbd cloud of open3d format, given opencv rgbd images and camera info.
     Arguments:
         color_img {np.ndarry, np.uint8}:
@@ -150,15 +150,11 @@ def create_open3d_point_cloud_from_rgbd(
         intrinsic=pinhole_camera_intrinsic,
         extrinsic= extrinsic)
     points = np.asarray(open3d_point_cloud.points)
-    # open3d_point_cloud = open3d_point_cloud.select_by_index(
-    #     np.where(
-    #         np.logical_and()
-    #         (points[:,0]>900.0) &
-    #         (points[:,0]<-900.0) &
-    #         (points[:,1]>900.0) &
-    #         (points[:,1]<-900.0)
-    #         )[0]
-    #     )
+    open3d_point_cloud = open3d_point_cloud.select_by_index(
+        np.where(
+            np.logical_or(points[:,0]>0.5, points[:,0]<-0.5)
+            )[0]
+        )
     return open3d_point_cloud
 
 

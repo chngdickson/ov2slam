@@ -298,9 +298,9 @@ class ManySyncListener:
                 rgb_arr = np.frombuffer(rgb.data, dtype=np.uint8).reshape(rgb.height, rgb.width,-1)
                 depth_array = np.reshape(np.frombuffer(depth.data, dtype=np.float32), (depth.height, depth.width))
                 if o3d_cloud is None:
-                    o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, MyCameraInfo(ros_camera_info=cam_info), ext2_Origin)
+                    o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, MyCameraInfo(ros_camera_info=cam_info), np.linalg.inv(ext2_Origin))
                 else:
-                    o3d_cloud = o3d_cloud+ create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, MyCameraInfo(ros_camera_info=cam_info), ext2_Origin)
+                    o3d_cloud = o3d_cloud+ create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, MyCameraInfo(ros_camera_info=cam_info), np.linalg.inv(ext2_Origin))
                 # xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
             # xyzrgb = np.hstack(xyzrgb_list)
             # self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")

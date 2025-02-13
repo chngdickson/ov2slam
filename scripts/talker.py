@@ -193,7 +193,7 @@ class ManySyncListener:
         array = np.frombuffer(ros_img.data, dtype=np.float32)
         array = np.reshape(array, (ros_img.height, ros_img.width))
         # array = cv2.normalize(array, None, 0, 1, cv2.NORM_MINMAX)
-        return array
+        return np.copy(array)
 
     def K3x3to4x4(self,K:torch.Tensor)->torch.Tensor:
         """Change the shape of K to 4x4 for easier matrix multiplication

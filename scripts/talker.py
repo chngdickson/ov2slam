@@ -132,7 +132,7 @@ class ManySyncListener:
                         rgb,
                         depth,
                         cam_info,
-                        np.eye(4)
+                        ext2_Origin
                         ), 
                     timestamp, depth.header.frame_id)
             # xyzrgb = np.hstack(xyzrgb_list)

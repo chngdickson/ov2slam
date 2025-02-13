@@ -55,6 +55,9 @@ class CarlaSyncListener:
             return
         if self.cam_info is not None:
             self.cam_info = MyCameraInfo()
+            rgb_arr = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
+            depth_array = np.reshape(np.frombuffer(depth_img.data, dtype=np.float32), (depth_img.height, depth_img.width))
+            create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info)
         self.timestampedInfo[rgb_img.header.stamp] = [rgb_img, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)
@@ -91,7 +94,7 @@ class CarlaSyncListener:
         
         Converts a transformation from :class:`tf.Transformer` into a representation as a 4x4 matrix.
         """
-        return np.dot(-transformations.translation_matrix(translation), -transformations.quaternion_matrix(rotation))
+        return np.dot(transformations.translation_matrix(translation), transformations.quaternion_matrix(rotation))
 
 class ManySyncListener:
     def __init__(self):

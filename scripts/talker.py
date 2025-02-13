@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from lib_rgbd import MyCameraInfo, create_open3d_point_cloud_from_rgbd
 # Python 
 import threading
 import multiprocessing
@@ -11,12 +11,11 @@ import struct
 
 # Other libs
 import torch, gc
-import cv2
 import pandas as pd
 import numpy as np
 import numpy.matlib as npm
 from numpy.lib import recfunctions as rfn
-import open3d as o3d
+
 # ROS
 import rospy
 import message_filters
@@ -44,6 +43,7 @@ class CarlaSyncListener:
         self.tf_listener = TransformListener()
         self.tf_origin_frame, self.tf_rel_frame, self.tf_rel_frame2 = tf_origin_frame, None, None
         self.timer = rospy.Timer(rospy.Duration(0.01), self.wait_tf_cb)
+        self.cam_info = None
         
         # Private vars
         self.extrinsic_to_origin = None
@@ -53,6 +53,8 @@ class CarlaSyncListener:
             self.tf_rel_frame = rgb_img.header.frame_id
             self.tf_rel_frame2 = depth_img.header.frame_id
             return
+        if self.cam_info is not None:
+            self.cam_info = MyCameraInfo()
         self.timestampedInfo[rgb_img.header.stamp] = [rgb_img, camera_info, depth_img]
         if len(self.timestampedInfo) >= 5:
             self.timestampedInfo.popitem(False)

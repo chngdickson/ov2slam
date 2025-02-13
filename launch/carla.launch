@@ -46,12 +46,12 @@
     <param name="min_ray_length_m" value="1.5"/>
     
     <param name="use_const_weight" value="false" />
-    <param name="allow_clear" value="false" />
+    <param name="allow_clear" value="true" />
     <param name="verbose" value="true" />
     
 
     <!--General Params-->
-    <param name="method" value="fast" />
+    <param name="method" value="simple" />
     <param name="max_consecutive_ray_collisions" value="2"/>
     <param name="start_voxel_subsampling_factor" value="2"/>
 

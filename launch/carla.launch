@@ -59,7 +59,7 @@
     <param name="esdf_max_distance_m" value="$(arg dist)"/>
     <param name="esdf_default_distance_m" value="$(arg dist)"/>
     <param name="clear_sphere_radius" value="$(arg dist)"/>
-    <param name="occupied_sphere_radius" value="$(eval 2. *$(arg dist))"/>
+    <param name="occupied_sphere_radius" value="$(eval 2.*arg('dist'))"/>
 
     <!--Outputs-->
     <param name="output_mesh_as_pointcloud" value="false"/>

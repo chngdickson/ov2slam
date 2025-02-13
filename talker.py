@@ -224,11 +224,11 @@ class CarlaSyncListener:
             self.cam_info = MyCameraInfo(ros_camera_info=camera_info)
             
         # Additional code
-        if self.cam_info is not None and self.extrinsic_to_origin is not None:
-            rgb_arr = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
-            depth_array = np.reshape(np.frombuffer(depth_img.data, dtype=np.float32), (depth_img.height, depth_img.width))
-            o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info, np.eye(4))
-            self.pcd_pub.publish(convertCloudFromOpen3dtoROS(o3d_cloud, depth_img.header.frame_id, timestamp=rgb_img.header.stamp))
+        # if self.cam_info is not None and self.extrinsic_to_origin is not None:
+        #     rgb_arr = np.frombuffer(rgb_img.data, dtype=np.uint8).reshape(rgb_img.height, rgb_img.width,-1)
+        #     depth_array = np.reshape(np.frombuffer(depth_img.data, dtype=np.float32), (depth_img.height, depth_img.width))
+        #     o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, self.cam_info, np.eye(4))
+        #     self.pcd_pub.publish(convertCloudFromOpen3dtoROS(o3d_cloud, depth_img.header.frame_id, timestamp=rgb_img.header.stamp))
             
     def timeStampExist(self, timestamp):
         if timestamp in self.timestampedInfo:
@@ -285,19 +285,29 @@ class ManySyncListener:
         ):
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]
+
+        for csl in self.listenerDict.values():
+            trueFalse, data = csl.timeStampExist(timestamp)
+            istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
+            ext_list.append(csl.extrinsic_to_origin) # type: ignore 
         
-        # for csl in self.listenerDict.values():
-        #     trueFalse, data = csl.timeStampExist(timestamp)
-        #     istrues.append(trueFalse), rgb_Rgbinfo_Depths.append(data)
-        #     ext_list.append(csl.extrinsic_to_origin) # type: ignore 
-        
-        # if all(istrues):
-        #     xyzrgb_list = []
-        #     for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
-        #         xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
-        #     xyzrgb = np.hstack(xyzrgb_list)
-        #     self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
-        #     rospy.loginfo("message filter called, all infos exists")
+        if all(istrues):
+            xyzrgb_list = []
+            o3d_cloud = None
+            for (rgb, cam_info, depth),(ext2_Origin) in zip(rgb_Rgbinfo_Depths, ext_list):
+                rgb_arr = np.frombuffer(rgb.data, dtype=np.uint8).reshape(rgb.height, rgb.width,-1)
+                depth_array = np.reshape(np.frombuffer(depth.data, dtype=np.float32), (depth.height, depth.width))
+                if o3d_cloud is None:
+                    o3d_cloud = create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, MyCameraInfo(ros_camera_info=cam_info), np.eye(4))
+                else:
+                    o3d_cloud = o3d_cloud+ create_open3d_point_cloud_from_rgbd(rgb_arr, depth_array, MyCameraInfo(ros_camera_info=cam_info), np.eye(4))
+                xyzrgb_list.append(o3d_cloud)
+                # xyzrgb_list.append(self.gpu_depthRgbc(rgb, depth, cam_info, ext2_Origin))
+            # xyzrgb = np.hstack(xyzrgb_list)
+            
+            # self.publish_pcd(xyzrgb, timestamp, "ego_vehicle")
+            self.pc2_pub.publish(convertCloudFromOpen3dtoROS(o3d_cloud, "ego_vehicle", timestamp=timestamp))
+            rospy.loginfo("message filter called, all infos exists")
 
     def gpu_depthRgbc(self, rgbImg, depthImg, conf:CameraInfo, camExt2WorldRH):
         pcd_np_3d = self.depthImg2Pcd(self.ros_depth_img2numpy(depthImg), w=conf.width, h=conf.height, K_ros=conf.K, ExtCam2World=camExt2WorldRH).detach().cpu().numpy()

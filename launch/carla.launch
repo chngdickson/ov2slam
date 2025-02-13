@@ -36,7 +36,7 @@
     <param name="use_freespace_pointcloud" value="false" />
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
     <param name="tsdf_voxels_per_side" value="16" />
-    <param name="voxel_carving_enabled" value="false" />
+    <param name="voxel_carving_enabled" value="true" />
     <param name="update_mesh_every_n_sec" value="4.0" />
     
     <param name="min_time_between_msgs_sec" value="0.01" />

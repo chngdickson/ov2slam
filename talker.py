@@ -148,7 +148,7 @@ def create_open3d_point_cloud_from_rgbd(
     open3d_point_cloud = open3d.geometry.PointCloud.create_from_rgbd_image(
         image=rgbd_image,
         intrinsic=pinhole_camera_intrinsic,
-        extrinsic= None)
+        extrinsic= extrinsic)
 
     return open3d_point_cloud
 
@@ -180,8 +180,8 @@ def convertCloudFromOpen3dtoROS(open3d_cloud, frame_id, timestamp):
     xyz = np.asarray(open3d_cloud.points)
     colors = np.floor(np.asarray(open3d_cloud.colors)*255) 
     df = pd.DataFrame({
-        "x"  : xyz[:,1],
-        "y"  : xyz[:,0],
+        "x"  : xyz[:,0],
+        "y"  : xyz[:,1],
         "z"  : xyz[:,2],
         "rgb": colors[:,0]*BIT_MOVE_16 + colors[:,1]*BIT_MOVE_8 + colors[:,2]
     })

@@ -266,7 +266,7 @@ class CarlaSyncListener:
 
 class ManySyncListener:
     def __init__(self):
-        topics_list = ["front", "back","front_left"]
+        topics_list = ["front", "back","front_left","front_right","back_left","back_right"]
         self.listenerDict:Dict[str,CarlaSyncListener] = {n:CarlaSyncListener(n) for n in topics_list}
         
         # message_filters Synchronizer
@@ -281,7 +281,7 @@ class ManySyncListener:
 
     def time_stamp_fuse_cb(self, 
         front:Image,
-        back: Image,a1
+        back: Image,a1,a2,a3,a4
         ):
         timestamp = front.header.stamp
         istrues, rgb_Rgbinfo_Depths, ext_list = [],[],[]

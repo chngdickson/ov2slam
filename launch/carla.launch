@@ -41,7 +41,7 @@
     <!--TSDF General Params-->
     <param name="max_ray_length_m" value="40.0"/>
     <param name="min_ray_length_m" value="0.5"/>
-    <param name="truncation_distance" value="1.5" />
+    <param name="truncation_distance" value="0.5" />
     <param name="use_const_weight" value="false" />
     <param name="allow_clear" value="false" />
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />

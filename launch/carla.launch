@@ -38,6 +38,7 @@
     <param name="verbose" value="true" />
     <rosparam file="$(find ov2slam)/cfg/carla.yaml"/>
     <param name="min_time_between_msgs_sec" value="0.02" />
+    
     <!--TSDF General Params-->
     <param name="max_ray_length_m" value="40.0"/>
     <param name="min_ray_length_m" value="0.5"/>
@@ -47,7 +48,10 @@
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
     <param name="tsdf_voxels_per_side" value="16" />
     <param name="voxel_carving_enabled" value="false" />
-
+    
+    <!--ICP-->
+    <param name="enable_icp" value="true"/>
+    
     <!--General Params-->
     <param name="method" value="merged" />
     <param name="max_consecutive_ray_collisions" value="2"/>

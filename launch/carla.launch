@@ -32,6 +32,7 @@
     <param name="pointcloud_queue_size" value="10"/>
     <param name="color_mode" value="color" />
     <param name="use_tf_transforms" value="true" />
+    <param name="sensor_frame" value="ego_vehicle"/>
     <param name="world_frame" value="map"/>
 
     <!--Publish?-->
@@ -56,7 +57,7 @@
     <param name="voxel_carving_enabled" value="false" />
     
     <!--ICP-->
-    <param name="enable_icp" value="true"/>
+    <!-- <param name="enable_icp" value="true"/> -->
     
     <!--General Params-->
     <param name="method" value="merged" />
